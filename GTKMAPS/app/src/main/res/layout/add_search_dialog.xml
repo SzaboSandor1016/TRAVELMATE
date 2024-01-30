@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/titleASD"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:layout_margin="5dp"
+        />
+    <EditText
+        android:id="@+id/nameASD"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="@string/search_title"
+        android:layout_margin="5dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="right">
+    <Button
+        android:id="@+id/saveASD"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="5dp"
+        android:text="@string/save"
+        android:textStyle="bold"
+        style="@android:style/Widget.Holo.Button.Borderless"
+        android:backgroundTint="#00FFFFFF"
+        android:textColor="#2A3F75"
+        />
+    </LinearLayout>
+</LinearLayout>

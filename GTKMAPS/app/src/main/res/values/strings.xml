@@ -1,0 +1,82 @@
+<resources>
+    <string name="app_name">GTK-MAPS</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+
+    <string name="ok">Ok</string>
+    <string name="select_all">Összes kijelölése</string>
+    <string name="church">Műemlékek, templomok</string>
+    <string name="museum">Múzeumok, kiállítások</string>
+    <string name="park">Parkok</string>
+    <string name="national_park">Nemzeti parkok</string>
+    <string name="adventure_park">Kalandparkok, vidámparkok</string>
+    <string name="castle">Várak, kastélyok</string>
+    <string name="accommodation">Szálláshelyek</string>
+    <string name="shopping">Vásárlás</string>
+    <string name="farmers_market">Termelői piacok</string>
+    <string name="beach">Strandolás</string>
+    <string name="viewpoint">Kilátó, kilátás</string>
+    <string name="hiking">Túrázás, túra útvonalak</string>
+    <string name="bicycle">Kerékpározás, kerékpárutak</string>
+    <string name="sailing">Hajózás, vitorlázás</string>
+    <string name="aquatics">Vízisportok</string>
+    <string name="hotel">Vendéglátóhelyek</string>
+    <string name="nightclub">Szórakozás, szórakozóhelyek</string>
+    <string name="spa">Gyógy- és wellnessfürdők</string>
+    <string name="festival">Zenei, művészeti fesztiválok</string>
+    <string name="concert">Koncertek</string>
+    <string name="theatre">Színházak</string>
+    <string name="sport_event">Sportrendezvények, létesítmények</string>
+    <string name="other"> Egyéb</string>
+
+    <string name="scan">QR kód beolvasása</string>
+    <string name="current_location">Tartózkodási hely \n használata a kereséshez </string>
+    <string name="search_place">Kiindulási hely...</string>
+    <string name="distance">"Távolság (Perc)..."</string>
+    <string name="categories">Kategóriák</string>
+    <string name="search_button">Keresés</string>
+    <string name="add_search">Mentett keresések</string>
+    <string name="something_happened">Hiba történt az adatok lekérése során!</string>
+    <string name="there_is_no_such_place">Nem található ilyen hely!</string>
+    <string name="please_choose_distance">Válassz egy távolságot!</string>
+    <string name="please_choose_transport_mode">Válassz egy közlekedési formát!</string>
+    <string name="category_selection_error">Hiba lépett fel a kategóriák kiválasztása során!</string>
+
+    <string name="load_current_location">Tartózkodási hely megjelenítése betöltéskor</string>
+    <!--<string name="save_options">Mentse az előző keresés adatait</string>-->
+
+
+    <string name="choose_transport">Válassz közlekedési módot</string>
+    <string name="transporte_form">Közlekedési forma:</string>
+    <string name="walk">Gyalog</string>
+    <string name="car">Autó</string>
+    <string name="public_transport">Tömegközlekedés</string>
+
+    <string name="detailed">Részletes keresés</string>
+    <string name="city">Város...</string>
+    <string name="street">Utca...</string>
+    <string name="housenumber">Házszám...</string>
+
+    <string name="route">Útvonal tervezés</string>
+
+    <string name="add_toast">A keresés sikeresen mentve</string>
+    <string name="delete_message">Törli a keresést?</string>
+    <string name="positive"> Igen</string>
+    <string name="negative">Nem</string>
+    <string name="search_title">Név</string>
+    <string name="save">Mentés</string>
+    <string name="dismiss">Mégsem</string>
+    <string name="select">Kiválaszt</string>
+    <string name="delete">Törlés</string>
+    <string name="save_as">Mentés ... ként</string>
+    <string name="QR">QR kódból beolvasva</string>
+    <string name="unknown">Ismeretlen</string>
+
+    <string name="start">Kezdőpont</string>
+
+</resources>

@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
 
     private GeoPoint currentLocation;
     private EditText nameASD;
-    private TextView titleASD;
-    private Button saveASD;
+    private TextView titleASD, markerNameMD, markerCategoryMD;
+    private Button saveASD, addMD, removeMD;
     private ImageButton menuBTN, addSaveBTN, routeBTN;
     //private MyLocationListener locationListener;
     Resources resources;
@@ -405,23 +405,55 @@ public class MainActivity extends AppCompatActivity {
                 GeoPoint position = m.getPosition();
                 String positionString = String.valueOf(position.getLatitude())+"," + String.valueOf(position.getLongitude());
                 int index = splitResponseArray.indexOf(positionString);
-                if(!selectedMarkers.contains(m)) {
-                    selectedMarkers.add(m);
-                    selectedMarkersArray.add(positionString);
-                    selectedTagsArray.add(tagsResponseArray.get(index-1));
-                    selectedNamesArray.add(namesResponseArray.get(index-1));
-                    if (!selectedCategoriesArray.contains(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index-1)))) {
-                        selectedCategoriesArray.add(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index - 1)));
+
+                Dialog dialog = new Dialog(MainActivity.this);
+                dialog.setContentView(R.layout.marker_dialog);
+                dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                dialog.setCancelable(true);
+
+                markerNameMD = dialog.findViewById(R.id.markerNameMD);
+                markerCategoryMD = dialog.findViewById(R.id.markerCategoryMD);
+
+                addMD= dialog.findViewById(R.id.addMD);
+                removeMD= dialog.findViewById(R.id.removeMD);
+
+                markerNameMD.setText(namesResponseArray.get(index-1));
+                markerCategoryMD.setText(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index - 1)));
+
+                addMD.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(!selectedMarkers.contains(m)) {
+                            selectedMarkers.add(m);
+                            selectedMarkersArray.add(positionString);
+                            selectedTagsArray.add(tagsResponseArray.get(index-1));
+                            selectedNamesArray.add(namesResponseArray.get(index-1));
+                            if (!selectedCategoriesArray.contains(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index-1)))) {
+                                selectedCategoriesArray.add(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index - 1)));
+                            }
+                            m.setIcon(resources.getDrawable(R.drawable.green_route_marker));
+                        }
+                        dialog.dismiss();
                     }
-                    m.setIcon(resources.getDrawable(R.drawable.green_route_marker));
-                }else {
-                    selectedMarkers.remove(m);
-                    selectedMarkersArray.remove(positionString);
-                    selectedTagsArray.remove(tagsResponseArray.get(index-1));
-                    selectedNamesArray.remove(namesResponseArray.get(index-1));
-                    selectedCategoriesArray.remove(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index-1)));
-                    m.setIcon(categoryManager.getMarkerIcon(tagsResponseArray.get(index-1)));
-                }
+                });
+
+                removeMD.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (selectedMarkers.contains(m)){
+                            selectedMarkers.remove(m);
+                            selectedMarkersArray.remove(positionString);
+                            selectedTagsArray.remove(tagsResponseArray.get(index-1));
+                            selectedNamesArray.remove(namesResponseArray.get(index-1));
+                            selectedCategoriesArray.remove(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index-1)));
+                            m.setIcon(categoryManager.getMarkerIcon(tagsResponseArray.get(index-1)));
+                        }
+                        dialog.dismiss();
+                    }
+                });
+
+                dialog.show();
+
                 if (selectedMarkers.size()>1){
                     routeBTN.setVisibility(View.VISIBLE);
                     routeBTN.setClickable(true);

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/markerNameMD"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:textSize="24dp"
+        android:text="teszt"/>
+    <TextView
+        android:id="@+id/markerCategoryMD"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:textSize="16dp"
+        android:text="teszt"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="right">
+
+        <Button
+            android:id="@+id/removeMD"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#00FFFFFF"
+            android:text="@string/delete"
+            style="@android:style/Widget.Holo.Button.Borderless"
+            android:textColor="#2A3F75" />
+        <Button
+            android:id="@+id/addMD"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:text="@string/select"
+            style="@android:style/Widget.Holo.Button.Borderless"
+            android:backgroundTint="#00FFFFFF"
+            android:textColor="#2A3F75"
+            />
+    </LinearLayout>
+</LinearLayout>

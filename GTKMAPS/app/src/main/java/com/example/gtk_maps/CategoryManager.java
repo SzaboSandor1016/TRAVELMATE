@@ -208,7 +208,7 @@ public class CategoryManager extends AppCompatActivity {
                 return resources.getString(R.string.aquatics);
             case "restaurant":
             case "fast_food":
-                return resources.getString(R.string.hotel);
+            case "cafe":
             case "pub":
             case "bar":
                 return resources.getString(R.string.hotel);

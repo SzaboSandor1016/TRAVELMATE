@@ -543,7 +543,7 @@ public class MenuActivity extends AppCompatActivity {
                         .alpha(1.0f)
                         .scaleX(1.0f)
                         .scaleY(1.0f)
-                        .setDuration(100);
+                        .setDuration(0);
             }
         });
     }

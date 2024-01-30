@@ -36,6 +36,7 @@
 
     <string name="scan">QR kód beolvasása</string>
     <string name="current_location">Tartózkodási hely \n használata a kereséshez </string>
+    <string name="current">Tartózkodási hely</string>
     <string name="search_place">Kiindulási hely...</string>
     <string name="distance">"Távolság (Perc)..."</string>
     <string name="categories">Kategóriák</string>

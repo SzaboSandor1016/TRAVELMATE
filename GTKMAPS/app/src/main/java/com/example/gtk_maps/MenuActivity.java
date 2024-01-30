@@ -308,6 +308,34 @@ public class MenuActivity extends AppCompatActivity {
                 //----------------------------------------------------------------------------------------------------------------
                 //BEGINNING OF searching by the current location
                 //----------------------------------------------------------------------------------------------------------------
+
+                    int selectedDistanceIndex = timeSpinner.getSelectedItemPosition();
+                    if (selectedDistanceIndex!=0){
+                        saveManager.setDistance((String) timeSpinner.getSelectedItem());
+                    }
+                    if (selectedDistanceIndex == 0) {
+                        Toast.makeText(MenuActivity.this, resources.getString(R.string.please_choose_distance), Toast.LENGTH_SHORT).show();
+                        loadingGif.setVisibility(View.INVISIBLE);
+                        return;
+                    }
+
+                    if(formOfTransport.getCheckedRadioButtonId() == -1)
+                    {
+                        Toast.makeText(MenuActivity.this, resources.getString(R.string.please_choose_transport_mode), Toast.LENGTH_SHORT).show();
+                        loadingGif.setVisibility(View.INVISIBLE);
+                        return;
+                    }
+                    if(formOfTransport.getCheckedRadioButtonId() == R.id.walk)
+                    {
+                        dist = avgWalkSpeed * (Double.parseDouble(timeSpinner.getSelectedItem().toString()) / 60);
+                        saveManager.setTransportMode(resources.getString(R.string.walk));
+
+                    }else if(formOfTransport.getCheckedRadioButtonId() == R.id.car)
+                    {
+                        dist = avgCarSpeed * (Double.parseDouble(timeSpinner.getSelectedItem().toString()) / 60);
+                        saveManager.setTransportMode(resources.getString(R.string.car));
+                    }
+
                     ManipulateUrl manipulateUrl = new ManipulateUrl(categories, String.valueOf(currentLocation.getLatitude()), String.valueOf(currentLocation.getLongitude()), dist);
                     nearbyUrl = manipulateUrl.getNearbyUrl();
                     Log.d("nearbyUrl", nearbyUrl);
@@ -363,7 +391,7 @@ public class MenuActivity extends AppCompatActivity {
 
                     currentLocation = new GeoPoint(latitude, longitude);
                     Log.d("gps", longitude + " " + latitude);
-                    saveManager.setPlace(resources.getString(R.string.current_location));
+                    saveManager.setPlace(resources.getString(R.string.current));
                     locationListener.stopListener();
                 }
                 else currentLocation= null;

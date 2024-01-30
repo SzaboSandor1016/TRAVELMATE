@@ -38,6 +38,7 @@
 
     <string name="scan">Scan QR code</string>
     <string name="current_location">Use your current \n location for searching</string>
+    <string name="current">By current location</string>
     <string name="search_place">Starting location...</string>
     <string name="distance">"Distance (Minute)..."</string>
     <string name="categories">Categories</string>

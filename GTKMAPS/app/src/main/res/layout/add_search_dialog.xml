@@ -27,7 +27,6 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="5dp"
         android:text="@string/save"
-        android:textStyle="bold"
         style="@android:style/Widget.Holo.Button.Borderless"
         android:backgroundTint="#00FFFFFF"
         android:textColor="#2A3F75"

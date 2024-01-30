@@ -296,6 +296,13 @@ private String generateID(String address, String place, String transportMode, St
             removedSearchArray.append(generateSaveRecord(searchNames.get(i), searchLabels.get(i), searchCoordinates.get(i), searchCategories.get(i), searchPlaceNames.get(i))).append("::");
         }
         writeStorage("savedSearches.txt", removedSearchArray.toString());
+
+        searchNames.clear();
+        searchLabels.clear();
+        searchCoordinates.clear();
+        searchCategories.clear();
+        searchPlaceNames.clear();
+
         Log.d("savedSearches", removedSearchArray.toString());
     }
 }

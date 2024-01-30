@@ -420,19 +420,25 @@ public class MainActivity extends AppCompatActivity {
                 markerNameMD.setText(namesResponseArray.get(index-1));
                 markerCategoryMD.setText(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index - 1)));
 
+                if (selectedMarkers.contains(m)){
+                    addMD.setVisibility(View.INVISIBLE);
+                    removeMD.setVisibility(View.VISIBLE);
+                }else{
+                    addMD.setVisibility(View.VISIBLE);
+                    removeMD.setVisibility(View.INVISIBLE);
+                }
+
                 addMD.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(!selectedMarkers.contains(m)) {
-                            selectedMarkers.add(m);
-                            selectedMarkersArray.add(positionString);
-                            selectedTagsArray.add(tagsResponseArray.get(index-1));
-                            selectedNamesArray.add(namesResponseArray.get(index-1));
-                            if (!selectedCategoriesArray.contains(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index-1)))) {
-                                selectedCategoriesArray.add(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index - 1)));
-                            }
-                            m.setIcon(resources.getDrawable(R.drawable.green_route_marker));
+                        selectedMarkers.add(m);
+                        selectedMarkersArray.add(positionString);
+                        selectedTagsArray.add(tagsResponseArray.get(index-1));
+                        selectedNamesArray.add(namesResponseArray.get(index-1));
+                        if (!selectedCategoriesArray.contains(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index-1)))) {
+                            selectedCategoriesArray.add(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index - 1)));
                         }
+                        m.setIcon(resources.getDrawable(R.drawable.green_route_marker));
                         dialog.dismiss();
                     }
                 });
@@ -440,14 +446,14 @@ public class MainActivity extends AppCompatActivity {
                 removeMD.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (selectedMarkers.contains(m)){
-                            selectedMarkers.remove(m);
-                            selectedMarkersArray.remove(positionString);
-                            selectedTagsArray.remove(tagsResponseArray.get(index-1));
-                            selectedNamesArray.remove(namesResponseArray.get(index-1));
-                            selectedCategoriesArray.remove(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index-1)));
-                            m.setIcon(categoryManager.getMarkerIcon(tagsResponseArray.get(index-1)));
-                        }
+
+                        selectedMarkers.remove(m);
+                        selectedMarkersArray.remove(positionString);
+                        selectedTagsArray.remove(tagsResponseArray.get(index-1));
+                        selectedNamesArray.remove(namesResponseArray.get(index-1));
+                        selectedCategoriesArray.remove(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index-1)));
+                        m.setIcon(categoryManager.getMarkerIcon(tagsResponseArray.get(index-1)));
+
                         dialog.dismiss();
                     }
                 });
@@ -482,15 +488,21 @@ public class MainActivity extends AppCompatActivity {
     //----------------------------------------------------------------------------------------------------------------
 
     private void clearAll(){
-        tagsResponseArray.clear();
+        selectedMarkers.clear();
         splitResponseArray.clear();
-        namesResponseArray.clear();
         selectedMarkersArray.clear();
         selectedTagsArray.clear();
         selectedNamesArray.clear();
-        selectedMarkers.clear();
+        tagsResponseArray.clear();
+        namesResponseArray.clear();
+        selectedCategoriesArray.clear();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        clearAll();
+    }
     //ShowTransportationDialog
     //When the routeBTN is clicked, this dialog is shown
     //the user is able to choose a transportation mode, which are "on foot", "car", or "public transport"

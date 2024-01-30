@@ -26,13 +26,13 @@ import java.util.Arrays;
 
 public class VolleyRequests extends AppCompatActivity {
 
-    private Resources resources;
-    private RequestQueue requestQueue;
+    private final Resources resources;
+    private final RequestQueue requestQueue;
     private double startLat, startLong;
     private String startCoords;
-    private ArrayList<String> nearbyCoords, nearbyCoordsTags, nearbyCoordsNames, matchCoordinates, matchLabels;
+    private final ArrayList<String> nearbyCoords, nearbyCoordsTags, nearbyCoordsNames, matchCoordinates, matchLabels;
 
-    private CategoryManager categoryManager = new CategoryManager();
+    private final CategoryManager categoryManager = new CategoryManager();
     public VolleyRequests(RequestQueue requestQueue, Context context) {
             this.requestQueue = requestQueue;
             resources = context.getResources();
@@ -250,7 +250,12 @@ public class VolleyRequests extends AppCompatActivity {
     //END OF callbacks
     //----------------------------------------------------------------------------------------------------------------
 
-    private void resetVolleyRequests(){
+    public void clearAllVolleyrequest(){
+        nearbyCoords.clear();
+        nearbyCoordsNames.clear();
+        nearbyCoordsTags.clear();
+        matchCoordinates.clear();
+        matchLabels.clear();
     }
 }
 

@@ -31,7 +31,7 @@ public class ListActivity extends AppCompatActivity {
     private CheckBox selectAll,monumentchurch,museumexhibition,park,nationalpark,themepark,
             castlefort,accomodation,shopping,farm,beach,hiking,cycling,boat,watersport,
             food,entertainment,spa,music,concerts,theatre,sports, lookout;
-    private ArrayList<String> categoryNames = new ArrayList<>();
+    private ArrayList<String> categoryNames;
     private String url="";
     private Button returnBTN;
 
@@ -40,6 +40,8 @@ public class ListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+
+        categoryNames = new ArrayList<>();
 
         selectAll = findViewById(R.id.selectAll);
         monumentchurch = findViewById(R.id.monumentchurch);
@@ -621,6 +623,14 @@ public class ListActivity extends AppCompatActivity {
         //END
         //----------------------------------------------------------------------------------------------------------------
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        categoryNames.clear();
+        url="";
+    }
+
     //----------------------------------------------------------------------------------------------------------------
     //BEGIN
     //----------------------------------------------------------------------------------------------------------------

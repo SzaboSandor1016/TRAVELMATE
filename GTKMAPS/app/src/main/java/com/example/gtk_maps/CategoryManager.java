@@ -211,6 +211,7 @@ public class CategoryManager extends AppCompatActivity {
             case "cafe":
             case "pub":
             case "bar":
+            case "biergarten":
                 return resources.getString(R.string.hotel);
             case "casino":
             case "cinema":

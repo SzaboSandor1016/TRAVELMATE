@@ -133,6 +133,20 @@ public class SavedActivity extends AppCompatActivity {
                 }
             });
         }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        clearAll();
+    }
+
+    private void clearAll(){
+        savedNames.clear();
+        savedLabels.clear();
+        savedCoordinates.clear();
+        savedCategories.clear();
+        savedPlaceNames.clear();
+    }
         private void refreshDataSet(){
             savedNames = saveManager.getSearchNames();
             savedLabels= saveManager.getSearchLabels();
@@ -153,7 +167,7 @@ public class SavedActivity extends AppCompatActivity {
                         .alpha(1.0f)
                         .scaleX(1.0f)
                         .scaleY(1.0f)
-                        .setDuration(100);
+                        .setDuration(0);
             }
         });
     }

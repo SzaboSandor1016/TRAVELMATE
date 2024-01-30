@@ -1,5 +1,6 @@
 package com.example.gtk_maps;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -68,6 +69,7 @@ public class MenuActivity extends AppCompatActivity {
     private Button categoriesBTN, detailedBTN;
     private ImageButton searchByPlaceBTN, savedBTN;
     //ImageButton optionsBTN;
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     public static Switch searchByCurrentPositionSW;
     private Spinner timeSpinner;
     private ListView matchLV;
@@ -282,11 +284,13 @@ public class MenuActivity extends AppCompatActivity {
                                             intent.putExtra("coordsTagsResponse",tagsResults);
                                             setResult(RESULT_OK, intent);
                                             finish();
+                                            volleyRequests.clearAllVolleyrequest();
                                         }
                                         @Override
                                         public void onError(String error) {
                                             Toast.makeText(MenuActivity.this, resources.getString(R.string.something_happened), Toast.LENGTH_LONG).show();
                                             loadingGif.setVisibility(View.INVISIBLE);
+                                            volleyRequests.clearAllVolleyrequest();
                                         }
                                     });
                                 }
@@ -301,6 +305,7 @@ public class MenuActivity extends AppCompatActivity {
                             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                                     LinearLayout.LayoutParams.MATCH_PARENT, 0);
                             matchLL.setLayoutParams(layoutParams);
+                            volleyRequests.clearAllVolleyrequest();
                         }
                     });
                 //----------------------------------------------------------------------------------------------------------------
@@ -353,11 +358,13 @@ public class MenuActivity extends AppCompatActivity {
                             intent.putStringArrayListExtra("coordsTagsResponse",tagsResults);
                             setResult(RESULT_OK, intent);
                             finish();
+                            volleyRequests.clearAllVolleyrequest();
                         }
                         @Override
                         public void onError(String error) {
                             Toast.makeText(MenuActivity.this, resources.getString(R.string.something_happened), Toast.LENGTH_LONG).show();
                             loadingGif.setVisibility(View.INVISIBLE);
+                            volleyRequests.clearAllVolleyrequest();
                         }
                     });
 

@@ -30,6 +30,7 @@
             android:backgroundTint="#00FFFFFF"
             android:text="@string/delete"
             style="@android:style/Widget.Holo.Button.Borderless"
+            android:visibility="invisible"
             android:textColor="#2A3F75" />
         <Button
             android:id="@+id/addMD"
@@ -39,6 +40,7 @@
             android:text="@string/select"
             style="@android:style/Widget.Holo.Button.Borderless"
             android:backgroundTint="#00FFFFFF"
+            android:visibility="invisible"
             android:textColor="#2A3F75"
             />
     </LinearLayout>

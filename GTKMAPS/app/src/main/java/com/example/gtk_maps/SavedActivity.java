@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -51,6 +52,8 @@ public class SavedActivity extends AppCompatActivity {
             savedLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    animateListViewItemClick(view);
+
                     Dialog dialog = new Dialog(SavedActivity.this);
                     dialog.setContentView(R.layout.details_dialog);
                     dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -137,4 +140,21 @@ public class SavedActivity extends AppCompatActivity {
             savedCategories = saveManager.getSearchCategories();
             savedPlaceNames = saveManager.getSearchPlaceNames();
         }
+    private void animateListViewItemClick(View view) {
+        ViewPropertyAnimator animator = view.animate()
+                .alpha(0.5f)
+                .scaleX(0.9f)
+                .scaleY(0.9f)
+                .setDuration(100);
+        animator.withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                view.animate()
+                        .alpha(1.0f)
+                        .scaleX(1.0f)
+                        .scaleY(1.0f)
+                        .setDuration(100);
+            }
+        });
+    }
     }

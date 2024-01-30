@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
@@ -236,6 +237,8 @@ public class MenuActivity extends AppCompatActivity {
                             matchLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                                    animateListViewItemClick(view);
 
                                     int selectedDistanceIndex = timeSpinner.getSelectedItemPosition();
                                     if (selectedDistanceIndex!=0){
@@ -524,6 +527,25 @@ public class MenuActivity extends AppCompatActivity {
     private void animateImageButton(View view) {
         Animation animation = AnimationUtils.loadAnimation(this, R.anim.image_button_click);
         view.startAnimation(animation);
+    }
+
+    private void animateListViewItemClick(View view) {
+        ViewPropertyAnimator animator = view.animate()
+                .alpha(0.5f)
+                .scaleX(0.9f)
+                .scaleY(0.9f)
+                .setDuration(100);
+
+        animator.withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                view.animate()
+                        .alpha(1.0f)
+                        .scaleX(1.0f)
+                        .scaleY(1.0f)
+                        .setDuration(100);
+            }
+        });
     }
 
     @Override

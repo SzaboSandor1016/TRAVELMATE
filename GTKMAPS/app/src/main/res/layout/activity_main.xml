@@ -31,21 +31,21 @@
             android:background="@drawable/menu" />
 
         <ImageButton
-            android:id="@+id/routeBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_margin="5dp"
-            android:background="@drawable/route_plan"
-            android:visibility="invisible" />
-
-        <ImageButton
             android:id="@+id/addSaveBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:background="@drawable/save"
+            android:visibility="invisible" />
+
+        <ImageButton
+            android:id="@+id/routeBTN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/route_plan"
             android:visibility="invisible" />
     </LinearLayout>
 

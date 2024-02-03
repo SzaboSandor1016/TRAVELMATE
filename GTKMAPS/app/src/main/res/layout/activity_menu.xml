@@ -64,7 +64,9 @@
             android:backgroundTint="#25E157"
             android:hint="@string/search_place"
             android:layout_weight="2"
-            android:inputType="text" />
+            android:inputType="text"
+            android:imeOptions="actionDone"
+            />
         <ImageButton
             android:id="@+id/searchByPlaceBTN"
             android:layout_width="50dp"
@@ -98,9 +100,8 @@
             android:id="@+id/matchLL"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:visibility="gone"
-            android:orientation="vertical">
+            android:gravity="center_horizontal|end"
+            android:orientation="horizontal">
 
             <ListView
                 android:id="@+id/matchLV"
@@ -108,7 +109,19 @@
                 android:layout_height="175dp"
                 android:divider="#6595C8"
                 android:dividerHeight="2dp"
+                android:visibility="gone"
                 android:layout_margin="20dp"/>
+
+            <ImageButton
+                android:id="@+id/openBTN"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:visibility="invisible"
+                android:background="@drawable/open"
+                />
         </LinearLayout>
     <LinearLayout
         android:id="@+id/detailedLL"
@@ -164,7 +177,8 @@
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="#3D568F"
+                android:background="@drawable/button_background"
+                android:textColor="@color/black"
                 android:text="@string/detailed" />
 
             <Button
@@ -173,7 +187,8 @@
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="#3D568F"
+                android:background="@drawable/button_background"
+                android:textColor="@color/black"
                 android:text="@string/categories" />
         </LinearLayout>
 
@@ -195,7 +210,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/walk"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="30dp"
             />
         <RadioButton
             android:id="@+id/walk"

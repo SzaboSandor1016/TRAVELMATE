@@ -79,5 +79,6 @@
     <string name="unknown">Ismeretlen</string>
 
     <string name="start">Kezdőpont</string>
+    <string name="provide_start">A kereséshez adj meg egy kiindulási helyet!</string>
 
 </resources>

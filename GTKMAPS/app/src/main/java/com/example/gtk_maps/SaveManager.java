@@ -130,6 +130,13 @@ private String generateID(String address, String place, String transportMode, St
         else
             return address + ";;"+ transportMode+ ";;"+ distance+ ";;"+shownCategories+ ";;"+ currentDate;
     }
+    private String generateLabel(String place, String transportMode, String distance, String concatedCategories){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm");
+        String currentDate = sdf.format(new Date());
+
+        return place + ";;"+ transportMode+ ";;"+ distance+ ";;"+concatedCategories+ ";;"+ currentDate;
+
+    }
     private String readStorage(String storageName) {
         String fileContent = new String();
         File dir = new File(context.getFilesDir(), "saved");
@@ -183,6 +190,11 @@ private String generateID(String address, String place, String transportMode, St
     public void preAddSearch(){
         //String id= generateID(address,place,transportMode,distance);
         String label= generateLabel(address, place, transportMode,distance, categories);
+        writeStorage("preSave.txt", label);
+    }
+    public void preAddSearch(String place,String transportMode,String distance,String concatedCategories){
+        //String id= generateID(address,place,transportMode,distance);
+        String label= generateLabel(place, transportMode,distance, concatedCategories);
         writeStorage("preSave.txt", label);
     }
     /*public void saveQrCodeContent(String name, String place, String[] coordinates){

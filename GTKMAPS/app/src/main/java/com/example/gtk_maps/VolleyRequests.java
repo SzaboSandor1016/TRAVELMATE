@@ -8,11 +8,19 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Cache;
 import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Network;
+import com.android.volley.NetworkResponse;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -21,21 +29,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class VolleyRequests extends AppCompatActivity {
 
+    private Context context;
     private final Resources resources;
     private final RequestQueue requestQueue;
-    private double startLat, startLong;
-    private String startCoords;
     private final ArrayList<String> nearbyCoords, nearbyCoordsTags, nearbyCoordsNames, matchCoordinates, matchLabels;
 
     private final CategoryManager categoryManager = new CategoryManager();
     public VolleyRequests(RequestQueue requestQueue, Context context) {
             this.requestQueue = requestQueue;
             resources = context.getResources();
+            this.context= context;
             nearbyCoords = new ArrayList<>();
             nearbyCoordsNames =new ArrayList<>();
             nearbyCoordsTags = new ArrayList<>();
@@ -67,51 +76,20 @@ public class VolleyRequests extends AppCompatActivity {
                                 double lon = center.getDouble("lon");
                                 String latlon = String.valueOf(lat) + "," + String.valueOf(lon);
                                 matchCoordinates.add(latlon);
-                                String name;
-                                String address = "";
-                                    if (tags.has("name")){
-                                        name= tags.getString("name");
-                                    }else{
-                                        name =resources.getString(R.string.unknown);
-                                    }
-                                    if (tags.has("addr:city")){
-                                        address += ", "+tags.getString("addr:city")+" ";
-                                    }
-                                    if (tags.has("addr:street")){
-                                        address += tags.getString("addr:street")+" ";
-                                    }
-                                    if (tags.has("addr:housenumber")){
-                                        address += tags.getString("addr:housenumber");
-                                    }
-                                    matchLabels.add(name + address);
+                                dataManipulation(tags);
                             }else {
                                 double lat = element.getDouble("lat");
                                 double lon = element.getDouble("lon");
                                 String latlon = String.valueOf(lat) + "," + String.valueOf(lon);
                                 matchCoordinates.add(latlon);
-                                String name;
-                                String address= "";
-                                    if (tags.has("name")){
-                                        name= tags.getString("name");
-                                    }else{
-                                        name = resources.getString(R.string.unknown);
-                                    }
-                                    if (tags.has("addr:city")){
-                                        address += ", "+ tags.getString("addr:city") + " ";
-                                    }
-                                    if (tags.has("addr:street")){
-                                        address += tags.getString("addr:street")+" ";
-                                    }
-                                    if (tags.has("addr:housenumber")){
-                                        address += tags.getString("addr:housenumber");
-                                    }
-                                matchLabels.add(name + address);
+                                dataManipulation(tags);
                             }
 
                         }
 
                         callback.onSuccess(matchCoordinates, matchLabels);
-
+                        matchCoordinates.clear();
+                        matchLabels.clear();
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -122,22 +100,38 @@ public class VolleyRequests extends AppCompatActivity {
                     callback.onError(error.toString());
                 }
             });
-
             // You need to set a timeout to avoid problems
             jsonObjectRequestPlaceName.setRetryPolicy(new DefaultRetryPolicy(
                     300000,
                     DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                     DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            requestQueue.add(jsonObjectRequestPlaceName);
 
-            startLat = 0;
-            startLong = 0;
+            requestQueue.add(jsonObjectRequestPlaceName);
 
     }
     //----------------------------------------------------------------------------------------------------------------
     //END OF searching by the name of the starting point
     //----------------------------------------------------------------------------------------------------------------
 
+    private void dataManipulation(JSONObject tags) throws JSONException {
+        String name;
+        String address= "";
+        if (tags.has("name")){
+            name= tags.getString("name");
+        }else{
+            name = resources.getString(R.string.unknown);
+        }
+        if (tags.has("addr:city")){
+            address += ", "+ tags.getString("addr:city") + " ";
+        }
+        if (tags.has("addr:street")){
+            address += tags.getString("addr:street")+" ";
+        }
+        if (tags.has("addr:housenumber")){
+            address += tags.getString("addr:housenumber");
+        }
+        matchLabels.add(name + address);
+    }
 
     // Send a request to the Overpass API
     // the parameter is a url accepted by Overpass

@@ -59,6 +59,7 @@ public class SavedActivity extends AppCompatActivity {
                     dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     dialog.setCancelable(true);
                     String[] details= savedLabels.get(position).split(";;");
+                    saveManager.preAddSearch(details[0], details[1], details[2], details[3]);
                     placeDD = dialog.findViewById(R.id.placeDD);
                     transportDD = dialog.findViewById(R.id.transportDD);
                     distanceDD = dialog.findViewById(R.id.distanceDD);

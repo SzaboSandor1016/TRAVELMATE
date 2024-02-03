@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
         map = (MapView) findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
 
+
         String[] permissions = new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         requestPermissionsIfNecessary(permissions
@@ -439,6 +440,15 @@ public class MainActivity extends AppCompatActivity {
                             selectedCategoriesArray.add(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index - 1)));
                         }
                         m.setIcon(resources.getDrawable(R.drawable.green_route_marker));
+
+                        if (selectedMarkers.size()>1){
+                            routeBTN.setVisibility(View.VISIBLE);
+                            routeBTN.setClickable(true);
+                        }else{
+                            routeBTN.setVisibility(View.INVISIBLE);
+                            routeBTN.setClickable(false);
+                        }
+
                         dialog.dismiss();
                     }
                 });
@@ -454,19 +464,19 @@ public class MainActivity extends AppCompatActivity {
                         selectedCategoriesArray.remove(categoryManager.getMarkerFullCategory(tagsResponseArray.get(index-1)));
                         m.setIcon(categoryManager.getMarkerIcon(tagsResponseArray.get(index-1)));
 
+                        if (selectedMarkers.size()>1){
+                            routeBTN.setVisibility(View.VISIBLE);
+                            routeBTN.setClickable(true);
+                        }else{
+                            routeBTN.setVisibility(View.INVISIBLE);
+                            routeBTN.setClickable(false);
+                        }
                         dialog.dismiss();
                     }
                 });
 
                 dialog.show();
 
-                if (selectedMarkers.size()>1){
-                    routeBTN.setVisibility(View.VISIBLE);
-                    routeBTN.setClickable(true);
-                }else{
-                    routeBTN.setVisibility(View.INVISIBLE);
-                    routeBTN.setClickable(false);
-                }
                 return true;
             });
             //----------------------------------------------------------------------------------------------------------------

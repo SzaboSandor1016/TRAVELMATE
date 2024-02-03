@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -20,6 +22,7 @@ import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -56,6 +59,8 @@ public class MenuActivity extends AppCompatActivity {
 
 
     private SaveManager saveManager;
+    private VolleyRequests volleyRequests;
+    private CacheManager cacheManager;
     private int flag=0;
     private final int avgWalkSpeed = 3500;
     private final int avgCarSpeed = 40000;
@@ -67,7 +72,7 @@ public class MenuActivity extends AppCompatActivity {
     private LinearLayout detailedLL, matchLL;
     private EditText cityET, streetET, houseNumberET, placeET;
     private Button categoriesBTN, detailedBTN;
-    private ImageButton searchByPlaceBTN, savedBTN;
+    private ImageButton searchByPlaceBTN, savedBTN, openBTN;
     //ImageButton optionsBTN;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     public static Switch searchByCurrentPositionSW;
@@ -77,7 +82,6 @@ public class MenuActivity extends AppCompatActivity {
     private RadioGroup formOfTransport;
     private MyLocationListener locationListener;
     private RequestQueue volleyQueue;
-    private VolleyRequests volleyRequests;
     private Resources resources;
 
     private static final int CATEGORIES_REQUEST_CODE = 1;
@@ -116,6 +120,7 @@ public class MenuActivity extends AppCompatActivity {
         saveManager= new SaveManager(this);
         volleyQueue = Volley.newRequestQueue(MenuActivity.this);
         volleyRequests = new VolleyRequests(volleyQueue, MenuActivity.this);
+        cacheManager = new CacheManager(MenuActivity.this);
 
         matchCoordinatesArrayList= new ArrayList<>();
         matchLabelsArrayList= new ArrayList<>();
@@ -146,17 +151,23 @@ public class MenuActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                LinearLayout.LayoutParams layoutParams;
-                if (flag==0) {
+
+                animateImageButton(v);
+                if (detailedLL.getVisibility()==View.GONE) {
                     Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
                     detailedLL.startAnimation(animation);
 
                     detailedLL.setVisibility(View.VISIBLE);
 
+                    if (matchLV.getVisibility()==View.VISIBLE){
+                        matchLV.setVisibility(View.GONE);
+                        Animation closeAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.close_slide_down);
+                        matchLV.startAnimation(closeAnimation);
+                    }
+
                     cityET.setEnabled(true);
                     streetET.setEnabled(true);
                     houseNumberET.setEnabled(true);
-                    flag=1;
                 }else {
 
                     Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.close_slide_down);
@@ -166,11 +177,34 @@ public class MenuActivity extends AppCompatActivity {
                     cityET.setEnabled(false);
                     streetET.setEnabled(false);
                     houseNumberET.setEnabled(false);
-                    flag=0;
                 }
 
             }
         });
+
+        openBTN= findViewById(R.id.openBTN);
+        openBTN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateImageButton(v);
+                if (matchLV.getVisibility()==View.VISIBLE){
+                    matchLV.setVisibility(View.GONE);
+                    Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.close_slide_down);
+                    matchLV.startAnimation(animation);
+
+                }else {
+                    matchLV.setVisibility(View.VISIBLE);
+                    Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
+                    matchLV.startAnimation(animation);
+                    if (detailedLL.getVisibility()==View.VISIBLE){
+                        detailedLL.setVisibility(View.GONE);
+                        Animation closeAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.close_slide_down);
+                        detailedLL.startAnimation(closeAnimation);
+                    }
+                }
+            }
+        });
+
 
         // Set an onClickListener for the searcByPlaceBTN,
         // and send a request to the Overpass API,
@@ -180,12 +214,12 @@ public class MenuActivity extends AppCompatActivity {
         //----------------------------------------------------------------------------------------------------------------
         //BEGINNING OF searchByPlaceBTN's OnClickListener
         //----------------------------------------------------------------------------------------------------------------
-
+        
         searchByPlaceBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 loadingGif.setVisibility(View.VISIBLE);
-
+                openBTN.setVisibility(View.INVISIBLE);
                 animateImageButton(v);
                 /*else{
                     //public transport
@@ -197,15 +231,9 @@ public class MenuActivity extends AppCompatActivity {
                 String street = streetET.getText().toString().trim();
                 String houseNumber = houseNumberET.getText().toString().trim();
 
-                /*if (savedSearch){
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    //editor.putString("nameOfPlace", nameOfPlace);
-                    editor.putInt("selected",timeSpinner.getSelectedItemPosition());
-                    editor.putFloat("dist", (float) dist);
-                    editor.putString("categories", categories);
-                    editor.apply();
-                }*/
-
+                boolean notEmpty = !(nameOfPlace.equals("") && city.equals("") && street.equals("") && houseNumber.equals(""));
+                if (notEmpty)
+                    cacheManager.setSearchLabelDetails(nameOfPlace,city,street,houseNumber);
                 // if the searchByCurrentPositionSW is not switched a search is made with the name of the starting point
                 // provided through the placeET EditText field
                 //----------------------------------------------------------------------------------------------------------------
@@ -213,101 +241,45 @@ public class MenuActivity extends AppCompatActivity {
                 //----------------------------------------------------------------------------------------------------------------
 
                 if (currentLocation == null) {
+                    if (notEmpty){
+                        if (cacheManager.checkCacheFileContentIfContains()){
+                            ArrayList<String> cacheFileMatchLabels= cacheManager.getCacheFileMatchLabels();
+                            ArrayList<String> cacheFileMatchCoordinates= cacheManager.getCacheFileMatchCoordinates();
+                            nearbyRequestHandler(cacheFileMatchLabels, cacheFileMatchCoordinates);
 
-                    ManipulateUrl manipulateCenterUrl = new ManipulateUrl(nameOfPlace, city,street,houseNumber);
-                    nameUrl=manipulateCenterUrl.getCenterUrl();
-                    Log.d("nameUrl", nameUrl);
+                        }else {
 
-                    volleyRequests.makeCenterRequest(nameUrl, new VolleyRequests.CenterVolleyCallback() {
-                        @Override
-                        public void onSuccess(ArrayList<String> matchCoordinatesResult, ArrayList<String> matchLabelsResult) {
-                            loadingGif.setVisibility(View.INVISIBLE);
-                            Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
-                            matchLL.startAnimation(animation);
-                            matchLL.setVisibility(View.VISIBLE);
+                            ManipulateUrl manipulateCenterUrl = new ManipulateUrl(nameOfPlace, city, street, houseNumber);
+                            nameUrl = manipulateCenterUrl.getCenterUrl();
+                            Log.d("nameUrl", nameUrl);
 
-                            Animation animation2 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.close_slide_down);
-                            detailedLL.startAnimation(animation2);
-                            detailedLL.setVisibility(View.GONE);
-
-                            matchLabelsArrayList=matchLabelsResult;
-                            matchCoordinatesArrayList= matchCoordinatesResult;
-
-                            matchArrayAdapter = new ArrayAdapter<>(MenuActivity.this, android.R.layout.simple_list_item_1, matchLabelsArrayList);
-                            matchLV.setAdapter(matchArrayAdapter);
-
-                            matchLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            volleyRequests.makeCenterRequest(nameUrl, new VolleyRequests.CenterVolleyCallback() {
                                 @Override
-                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                public void onSuccess(ArrayList<String> matchCoordinatesResult, ArrayList<String> matchLabelsResult) {
 
-                                    animateListViewItemClick(view);
+                                    cacheManager.writeToCacheFile(matchCoordinatesResult,matchLabelsResult);
 
-                                    int selectedDistanceIndex = timeSpinner.getSelectedItemPosition();
-                                    if (selectedDistanceIndex!=0){
-                                        saveManager.setDistance((String) timeSpinner.getSelectedItem());
-                                    }
-                                    if (selectedDistanceIndex == 0) {
-                                        Toast.makeText(MenuActivity.this, resources.getString(R.string.please_choose_distance), Toast.LENGTH_SHORT).show();
-                                        return;
-                                    }
+                                    nearbyRequestHandler(matchLabelsResult, matchCoordinatesResult);
 
-                                    if(formOfTransport.getCheckedRadioButtonId() == -1)
-                                    {
-                                        Toast.makeText(MenuActivity.this, resources.getString(R.string.please_choose_transport_mode), Toast.LENGTH_SHORT).show();
-                                        return;
-                                    }
-                                    if(formOfTransport.getCheckedRadioButtonId() == R.id.walk)
-                                    {
-                                        dist = avgWalkSpeed * (Double.parseDouble(timeSpinner.getSelectedItem().toString()) / 60);
-                                        saveManager.setTransportMode(resources.getString(R.string.walk));
+                            }
 
-                                    }else if(formOfTransport.getCheckedRadioButtonId() == R.id.car)
-                                    {
-                                        dist = avgCarSpeed * (Double.parseDouble(timeSpinner.getSelectedItem().toString()) / 60);
-                                        saveManager.setTransportMode(resources.getString(R.string.car));
-                                    }
+                                @Override
+                                public void onError(String error) {
+                                    Toast.makeText(MenuActivity.this, resources.getString(R.string.there_is_no_such_place), Toast.LENGTH_LONG).show();
+                                    loadingGif.setVisibility(View.INVISIBLE);
 
-                                    saveManager.setPlace(matchLabelsArrayList.get(position));
-                                    saveManager.preAddSearch();
-
-                                    loadingGif.setVisibility(View.VISIBLE);
-                                    splitResult = matchCoordinatesArrayList.get(position).split(",");
-                                    ManipulateUrl manipulateNearbyUrl = new ManipulateUrl(categories, splitResult[0], splitResult[1], dist);
-                                    nearbyUrl = manipulateNearbyUrl.getNearbyUrl();
-                                    Log.d("nearbyUrl", nearbyUrl);
-                                    volleyRequests.findNearbyPlacesRequest(matchCoordinatesArrayList.get(position),nearbyUrl, new VolleyRequests.NearbyVolleyCallback() {
-                                        @Override
-                                        public void onSuccess(ArrayList<String> result, ArrayList<String> namesResult,ArrayList<String>  tagsResults) {
-                                            Intent intent = new Intent();
-                                            intent.putExtra("coordsResponse", result);
-                                            intent.putExtra("coordsNamesResponse",namesResult);
-                                            intent.putExtra("coordsTagsResponse",tagsResults);
-                                            setResult(RESULT_OK, intent);
-                                            finish();
-                                            volleyRequests.clearAllVolleyrequest();
-                                        }
-                                        @Override
-                                        public void onError(String error) {
-                                            Toast.makeText(MenuActivity.this, resources.getString(R.string.something_happened), Toast.LENGTH_LONG).show();
-                                            loadingGif.setVisibility(View.INVISIBLE);
-                                            volleyRequests.clearAllVolleyrequest();
-                                        }
-                                    });
+                                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.MATCH_PARENT, 0);
+                                    matchLL.setLayoutParams(layoutParams);
+                                    volleyRequests.clearAllVolleyrequest();
                                 }
                             });
-
                         }
-                        @Override
-                        public void onError(String error) {
-                            Toast.makeText(MenuActivity.this, resources.getString(R.string.there_is_no_such_place), Toast.LENGTH_LONG).show();
-                            loadingGif.setVisibility(View.INVISIBLE);
+                    }else {
+                        Toast.makeText(MenuActivity.this,R.string.provide_start, Toast.LENGTH_LONG).show();
+                        loadingGif.setVisibility(View.INVISIBLE);
+                    }
 
-                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                                    LinearLayout.LayoutParams.MATCH_PARENT, 0);
-                            matchLL.setLayoutParams(layoutParams);
-                            volleyRequests.clearAllVolleyrequest();
-                        }
-                    });
                 //----------------------------------------------------------------------------------------------------------------
                 //END OF searching by the name of the starting point
                 //----------------------------------------------------------------------------------------------------------------
@@ -378,6 +350,8 @@ public class MenuActivity extends AppCompatActivity {
         //END OF searchByPlaceBTN's OnClickListener
         //----------------------------------------------------------------------------------------------------------------
 
+
+
         //A setOnCheckedChangeListener for the searchByCurrentPositionSW switch that sets the value of the currentLocation
         // variable, to the latest known location of the device
         // Used by the OnClick function of the searchByPlaceBTN
@@ -421,6 +395,8 @@ public class MenuActivity extends AppCompatActivity {
         categoriesBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                animateImageButton(v);
+
                 Intent intent = new Intent(MenuActivity.this, ListActivity.class);
                 startActivityForResult(intent, CATEGORIES_REQUEST_CODE);
             }
@@ -448,6 +424,91 @@ public class MenuActivity extends AppCompatActivity {
     //----------------------------------------------------------------------------------------------------------------
     //END OF scanQRCode
     //----------------------------------------------------------------------------------------------------------------
+
+    private void nearbyRequestHandler(ArrayList<String> labels,ArrayList<String> coordinates) {
+        openBTN.setVisibility(View.VISIBLE);
+
+        loadingGif.setVisibility(View.INVISIBLE);
+        Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.delayed_slide_down);
+        matchLV.startAnimation(animation);
+        matchLV.setVisibility(View.VISIBLE);
+
+        Animation animation2 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.close_slide_down);
+        detailedLL.startAnimation(animation2);
+        detailedLL.setVisibility(View.GONE);
+
+        matchArrayAdapter = new ArrayAdapter<>(MenuActivity.this, android.R.layout.simple_list_item_1, matchLabelsArrayList);
+        matchLV.setAdapter(matchArrayAdapter);
+
+        if (!matchArrayAdapter.isEmpty()) {
+            matchArrayAdapter.clear();
+            // Clear the data sources
+            matchLabelsArrayList.clear();
+            matchCoordinatesArrayList.clear();
+        }
+        matchLabelsArrayList.addAll(labels);
+        matchCoordinatesArrayList.addAll(coordinates);
+
+        matchArrayAdapter.notifyDataSetChanged();
+
+        matchLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                animateListViewItemClick(view);
+
+                int selectedDistanceIndex = timeSpinner.getSelectedItemPosition();
+                if (selectedDistanceIndex != 0) {
+                    saveManager.setDistance((String) timeSpinner.getSelectedItem());
+                }
+                if (selectedDistanceIndex == 0) {
+                    Toast.makeText(MenuActivity.this, resources.getString(R.string.please_choose_distance), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (formOfTransport.getCheckedRadioButtonId() == -1) {
+                    Toast.makeText(MenuActivity.this, resources.getString(R.string.please_choose_transport_mode), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (formOfTransport.getCheckedRadioButtonId() == R.id.walk) {
+                    dist = avgWalkSpeed * (Double.parseDouble(timeSpinner.getSelectedItem().toString()) / 60);
+                    saveManager.setTransportMode(resources.getString(R.string.walk));
+
+                } else if (formOfTransport.getCheckedRadioButtonId() == R.id.car) {
+                    dist = avgCarSpeed * (Double.parseDouble(timeSpinner.getSelectedItem().toString()) / 60);
+                    saveManager.setTransportMode(resources.getString(R.string.car));
+                }
+
+                saveManager.setPlace(matchLabelsArrayList.get(position));
+                saveManager.preAddSearch();
+
+                loadingGif.setVisibility(View.VISIBLE);
+                splitResult = matchCoordinatesArrayList.get(position).split(",");
+                ManipulateUrl manipulateNearbyUrl = new ManipulateUrl(categories, splitResult[0], splitResult[1], dist);
+                nearbyUrl = manipulateNearbyUrl.getNearbyUrl();
+                Log.d("nearbyUrl", nearbyUrl);
+                volleyRequests.findNearbyPlacesRequest(matchCoordinatesArrayList.get(position), nearbyUrl, new VolleyRequests.NearbyVolleyCallback() {
+                    @Override
+                    public void onSuccess(ArrayList<String> result, ArrayList<String> namesResult, ArrayList<String> tagsResults) {
+                        Intent intent = new Intent();
+                        intent.putExtra("coordsResponse", result);
+                        intent.putExtra("coordsNamesResponse", namesResult);
+                        intent.putExtra("coordsTagsResponse", tagsResults);
+                        setResult(RESULT_OK, intent);
+                        finish();
+                        volleyRequests.clearAllVolleyrequest();
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Toast.makeText(MenuActivity.this, resources.getString(R.string.something_happened), Toast.LENGTH_LONG).show();
+                        loadingGif.setVisibility(View.INVISIBLE);
+                        volleyRequests.clearAllVolleyrequest();
+                    }
+                });
+            }
+        });
+    }
 
     //----------------------------------------------------------------------------------------------------------------
     //BEGINNING OF handling the responses of QR code reader and category selection

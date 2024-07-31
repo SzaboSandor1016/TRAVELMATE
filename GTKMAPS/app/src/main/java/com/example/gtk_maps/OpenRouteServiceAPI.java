@@ -1,7 +1,13 @@
 package com.example.gtk_maps;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.osmdroid.util.GeoPoint;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,13 +15,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
-public class OpenRouteServiceAPI {
+public class OpenRouteServiceAPI extends Activity {
+
+    OpenRouteServiceAPI(){}
 
     public interface RouteCallback {
         void onRouteReceived(String result);
+        void onRouteFailure();
     }
-
     private static final String API_KEY = "5b3ce3597851110001cf624822732185f95b41bbadd3ad38afd95ef0"; // Cseréld le a saját API kulcsodra
     private static final String API_URL = "https://api.openrouteservice.org/v2/directions/";
 
@@ -29,6 +39,8 @@ public class OpenRouteServiceAPI {
                     URL url = new URL(API_URL + mode + "?api_key=" + API_KEY +
                             "&start=" + startLon + "," + startLat +
                             "&end=" + endLon + "," + endLat);
+
+                    Log.d("openUrl", String.valueOf(url));
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     try {
                         InputStream in = urlConnection.getInputStream();
@@ -64,7 +76,7 @@ public class OpenRouteServiceAPI {
                 } else {
                     // Hibakezelés, pl. üres vagy null válasz esetén
                     if (routeCallback != null) {
-                        routeCallback.onRouteReceived(result);
+                        routeCallback.onRouteFailure();
                     } else {
                         // Hibakezelés: RouteCallback null esetén
                         Log.e("OpenRouteServiceAPI", "RouteCallback is null");
@@ -73,4 +85,6 @@ public class OpenRouteServiceAPI {
             }
         }.execute();
     }
+
+
 }

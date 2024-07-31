@@ -7,7 +7,7 @@
         android:toYScale="0.9"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:duration="25"/>
+        android:duration="10"/>
     <scale
         android:fromXScale="0.9"
         android:toXScale="1.0"
@@ -16,5 +16,5 @@
         android:pivotX="50%"
         android:pivotY="50%"
         android:startOffset="100"
-        android:duration="25"/>
+        android:duration="10"/>
 </set>

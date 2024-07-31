@@ -50,9 +50,12 @@ public class ManipulateUrl{
             String[] splitNameOfPlace = nameOfPlace.split(" ");
             String concat="";
             for (int i=0; i<splitNameOfPlace.length; i++){
-                splitNameOfPlace[i]=splitNameOfPlace[i].replaceFirst(splitNameOfPlace[i].substring(0,1),"");
-                concat = concat+" "+ splitNameOfPlace[i];
-
+                if(splitNameOfPlace[i].length()>4) {
+                    splitNameOfPlace[i] = splitNameOfPlace[i].replaceFirst(splitNameOfPlace[i].substring(0, 1), "");
+                    concat = concat + " " + splitNameOfPlace[i];
+                }else {
+                    concat = concat+ " "+ splitNameOfPlace[i];
+                }
             }
             concat=concat.trim();
             upperAddrNameOfPlace= concat.replace(" ",".*");

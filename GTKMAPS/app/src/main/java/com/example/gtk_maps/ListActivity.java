@@ -31,9 +31,10 @@ public class ListActivity extends AppCompatActivity {
     private CheckBox selectAll,monumentchurch,museumexhibition,park,nationalpark,themepark,
             castlefort,accomodation,shopping,farm,beach,hiking,cycling,boat,watersport,
             food,entertainment,spa,music,concerts,theatre,sports, lookout;
-    private ArrayList<String> categoryNames;
+    private ArrayList<String> categoryNames, firebaseCategories;
     private String url="";
     private Button returnBTN;
+
 
 
     @Override
@@ -42,6 +43,7 @@ public class ListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_list);
 
         categoryNames = new ArrayList<>();
+        firebaseCategories= new ArrayList<>();
 
         selectAll = findViewById(R.id.selectAll);
         monumentchurch = findViewById(R.id.monumentchurch);
@@ -99,8 +101,12 @@ public class ListActivity extends AppCompatActivity {
         
         String savedURL = sharedPreferences.getString("savedURL", "");
         Set<String> savedCategoryNames = sharedPreferences.getStringSet("savedCategoryNames", null);
+        Set<String> savedFirebaseCategories = sharedPreferences.getStringSet("savedFirebaseCategories", null);
         if (savedCategoryNames!=null) {
             categoryNames.addAll(savedCategoryNames);
+        }
+        if (savedFirebaseCategories!=null) {
+            firebaseCategories.addAll(savedFirebaseCategories);
         }
         Log.d("categoryNames", String.valueOf(categoryNames));
         url= url + savedURL;
@@ -114,10 +120,13 @@ public class ListActivity extends AppCompatActivity {
                 editor.putString("savedURL", url);
                 Set<String> savedCategoryNames = new HashSet<>(categoryNames);
                 editor.putStringSet("savedCategoryNames",savedCategoryNames);
+                Set<String> savedFirebaseCategories = new HashSet<>(firebaseCategories);
+                editor.putStringSet("savedFirebaseCategories",savedFirebaseCategories);
                 editor.apply();
                 Intent intent = new Intent();
                 intent.putExtra("categories", url);
                 intent.putStringArrayListExtra("categoryNames", categoryNames);
+                intent.putStringArrayListExtra("firebaseCategories", firebaseCategories);
                 setResult(RESULT_OK,intent);
                 finish();
             }
@@ -157,12 +166,14 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedL", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("lookout");
                 }else{
                     url= url.replace("nwr[\"tourism\"=\"viewpoint\"](around:dist,startLat,startLong);","");
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.remove("isCheckedL");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("lookout");
                 }
             }
         });
@@ -178,6 +189,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedMC", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("monumentchurch");
                 }else{
                     url= url.replace("nwr[\"historic\"=\"monument\"](around:dist,startLat,startLong);" +
                             "nwr[\"building\"=\"church\"](around:dist,startLat,startLong);" +
@@ -186,6 +198,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedMC");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("monumentchurch");
                 }
             }
         });
@@ -201,6 +214,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedME", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("museumexhibition");
                 }else{
                     url= url.replace("nwr[\"tourism\"=\"museum\"](around:dist,startLat,startLong);" +
                             "nwr[\"tourism\"=\"gallery\"](around:dist,startLat,startLong);" +
@@ -210,6 +224,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedME");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("museumexhibition");
                 }
             }
         });
@@ -222,12 +237,14 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedP", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("park");
                 }else{
                     url= url.replace("nwr[\"leisure\"=\"park\"](around:dist,startLat,startLong);","");
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.remove("isCheckedP");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("park");
                 }
             }
         });
@@ -240,12 +257,14 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedNP", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("nationalpark");
                 }else{
                     url= url.replace("nwr[\"boundary\"=\"national_park\"](around:dist,startLat,startLong);","");
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.remove("isCheckedNP");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("nationalpark");
                 }
             }
         });
@@ -258,12 +277,14 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedTP", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("themepark");
                 }else{
                     url= url.replace("nwr[\"tourism\"=\"theme_park\"](around:dist,startLat,startLong);","");
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.remove("isCheckedTP");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("themepark");
                 }
             }
         });
@@ -277,6 +298,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedCF", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("castlefort");
                 }else{
                     url= url.replace("nwr[\"historic\"=\"fort\"](around:dist,startLat,startLong);" +
                             "nwr[\"historic\"=\"castle\"](around:dist,startLat,startLong);","");
@@ -284,6 +306,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedCF");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("castlefort");
                 }
             }
         });
@@ -302,6 +325,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedACC", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("accomodation");
                 }else{
                     url= url.replace("nwr[\"building\"=\"hotel\"](around:dist,startLat,startLong);" +
                             "nwr[\"leisure\"=\"summer_camp\"](around:dist,startLat,startLong);" +
@@ -314,6 +338,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedACC");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("accomodation");
                 }
             }
         });
@@ -330,6 +355,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedS", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("shopping");
                 }else{
                     url= url.replace("nwr[\"shop\"=\"department_store\"](around:dist,startLat,startLong);" +
                             "nwr[\"shop\"=\"mall\"](around:dist,startLat,startLong);" +
@@ -340,6 +366,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedS");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("shopping");
                 }
             }
         });
@@ -353,6 +380,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedF", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("farm");
                 }else{
                     url= url.replace("nwr[\"shop\"=\"farm\"](around:dist,startLat,startLong);" +
                             "nwr[\"shop\"=\"marketplace\"](around:dist,startLat,startLong);","");
@@ -360,6 +388,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedF");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("farm");
                 }
             }
         });
@@ -372,12 +401,14 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedB", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("beach");
                 }else{
                     url= url.replace("nwr[\"leisure\"=\"beach_resort\"](around:dist,startLat,startLong);","");
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.remove("isCheckedB");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("beach");
                 }
             }
         });
@@ -390,12 +421,14 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedH", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("hiking");
                 }else{
                     url= url.replace("nwr[\"route\"=\"hiking\"](around:dist,startLat,startLong);","");
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.remove("isCheckedH");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("hiking");
                 }
             }
         });
@@ -408,12 +441,14 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedC", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("cycling");
                 }else{
                     url= url.replace("nwr[\"route\"=\"cycling\"](around:dist,startLat,startLong);","");
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.remove("isCheckedC");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("cycling");
                 }
             }
         });
@@ -428,6 +463,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedBT", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("boat");
                 }else{
                     url= url.replace("nwr[\"boat\"=\"yes\"](around:dist,startLat,startLong);" +
                             "nwr[\"sport\"=\"sailing\"](around:dist,startLat,startLong);" +
@@ -436,6 +472,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedBT");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("boat");
                 }
             }
         });
@@ -452,6 +489,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedW", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("watersport");
                 }else{
                     url= url.replace("nwr[\"sport\"=\"surfing\"](around:dist,startLat,startLong);" +
                             "nwr[\"sport\"=\"swimming\"](around:dist,startLat,startLong);" +
@@ -462,6 +500,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedW");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("watersport");
                 }
             }
         });
@@ -480,6 +519,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedFD", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("food");
                 }else{
                     url= url.replace("nwr[\"amenity\"=\"restaurant\"](around:dist,startLat,startLong);" +
                             "nwr[\"amenity\"=\"biergarten\"](around:dist,startLat,startLong);" +
@@ -492,6 +532,8 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedFD");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("food");
+
                 }
             }
         });
@@ -507,6 +549,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedENT", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("entertainment");
                 }else{
                     url= url.replace("nwr[\"amenity\"=\"casino\"](around:dist,startLat,startLong);" +
                             "nwr[\"amenity\"=\"cinema\"](around:dist,startLat,startLong);" +
@@ -516,6 +559,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedENT");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("entertainment");
                 }
             }
         });
@@ -529,6 +573,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedSA", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("spa");
                 }else{
                     url= url.replace("nwr[\"shop\"=\"massage\"](around:dist,startLat,startLong);" +
                             "nwr[\"leisure\"=\"water_park\"](around:dist,startLat,startLong);","");
@@ -536,6 +581,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedSA");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("spa");
                 }
             }
         });
@@ -549,6 +595,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedMS", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("music");
                 }else{
                     url= url.replace("nwr[\"amenity\"=\"music_venue\"](around:dist,startLat,startLong);" +
                             "nwr[\"amenity\"=\"community_centre\"](around:dist,startLat,startLong);","");
@@ -556,6 +603,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedMS");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("music");
                 }
             }
         });
@@ -569,6 +617,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedCS", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("concerts");
                 }else{
                     url= url.replace("nwr[\"amenity\"=\"music_venue\"](around:dist,startLat,startLong);" +
                             "nwr[\"amenity\"=\"theatre\"](around:dist,startLat,startLong);","");
@@ -576,6 +625,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedCS");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("concerts");
                 }
             }
         });
@@ -588,12 +638,14 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedTH", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("theatre");
                 }else{
                     url= url.replace("nwr[\"amenity\"=\"theatre\"](around:dist,startLat,startLong);","");
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.remove("isCheckedTH");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("theatre");
                 }
             }
         });
@@ -608,6 +660,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.putBoolean("isCheckedSP", true);
                     editor.apply();
                     categoryNames.add((String) buttonView.getText());
+                    firebaseCategories.add("sports");
                 }else{
                     url= url.replace("nwr[\"amenity\"=\"events_venue\"](around:dist,startLat,startLong);" +
                             "nwr[\"building\"=\"stadium\"](around:dist,startLat,startLong);" +
@@ -616,6 +669,7 @@ public class ListActivity extends AppCompatActivity {
                     editor.remove("isCheckedSP");
                     editor.apply();
                     categoryNames.remove((String) buttonView.getText());
+                    firebaseCategories.remove("sports");
                 }
             }
         });
@@ -625,9 +679,10 @@ public class ListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onDestroy() {
+        super.onDestroy();
         categoryNames.clear();
+        firebaseCategories.clear();
         url="";
     }
 

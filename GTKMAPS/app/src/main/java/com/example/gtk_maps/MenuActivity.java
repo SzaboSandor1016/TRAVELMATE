@@ -1,12 +1,16 @@
 package com.example.gtk_maps;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -30,12 +34,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.osmdroid.util.GeoPoint;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import pl.droidsonroids.gif.GifImageView;
 
@@ -61,19 +72,20 @@ public class MenuActivity extends AppCompatActivity {
     private SaveManager saveManager;
     private VolleyRequests volleyRequests;
     private CacheManager cacheManager;
-    private int flag=0;
+    private FirebaseManager firebaseManager;
+    private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
     private final int avgWalkSpeed = 3500;
     private final int avgCarSpeed = 40000;
     //private boolean savedSearch;
     private double dist;
-    private String categories="", nearbyUrl, nameUrl;
+    private String categories="", nearbyUrl, nameUrl, transportMode, distance, tMode,selectedDist, place;
     private String[] splitResult;
     private GeoPoint currentLocation=null;
     private LinearLayout detailedLL, matchLL;
     private EditText cityET, streetET, houseNumberET, placeET;
     private Button categoriesBTN, detailedBTN;
-    private ImageButton searchByPlaceBTN, savedBTN, openBTN;
-    //ImageButton optionsBTN;
+    private ImageButton searchByPlaceBTN, savedBTN, openBTN, userBTN;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     public static Switch searchByCurrentPositionSW;
     private Spinner timeSpinner;
@@ -86,9 +98,12 @@ public class MenuActivity extends AppCompatActivity {
 
     private static final int CATEGORIES_REQUEST_CODE = 1;
     private static final int SAVED_REQUEST_CODE = 2;
-    private static final int QR_READER_CODE = 3;
-    private ArrayList<String> categoryNames,matchCoordinatesArrayList, matchLabelsArrayList;
+    private static final int SHARED_REQUEST_CODE =3;
+    //private static final int QR_READER_CODE = 3;
+    private ArrayList<String> categoryNames,matchCoordinatesArrayList, matchLabelsArrayList, firebaseCategories;
     private ArrayAdapter<String> matchArrayAdapter;
+    private SharedPreferences sharedPreferences, warning;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +118,7 @@ public class MenuActivity extends AppCompatActivity {
         searchByPlaceBTN = findViewById(R.id.searchByPlaceBTN);
         categoriesBTN = findViewById(R.id.categoriesBTN);
         searchByCurrentPositionSW = findViewById(R.id.searchByCurrentPositionSW);
-        //optionsBTN= findViewById(R.id.optionsBTN);
+        userBTN= findViewById(R.id.userBTN);
         loadingGif = findViewById(R.id.loadingGif);
         formOfTransport = findViewById(R.id.formOfTravel);
         placeET= findViewById(R.id.placeET);
@@ -117,26 +132,35 @@ public class MenuActivity extends AppCompatActivity {
 
         loadingGif.setVisibility(View.INVISIBLE);
 
-        saveManager= new SaveManager(this);
+        saveManager= SaveManager.getInstance(MenuActivity.this);
         volleyQueue = Volley.newRequestQueue(MenuActivity.this);
         volleyRequests = new VolleyRequests(volleyQueue, MenuActivity.this);
         cacheManager = new CacheManager(MenuActivity.this);
 
         matchCoordinatesArrayList= new ArrayList<>();
         matchLabelsArrayList= new ArrayList<>();
+        firebaseCategories= new ArrayList<>();
 
+        mAuth= FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        sharedPreferences= getSharedPreferences("FirebaseManager", Context.MODE_PRIVATE);
+        warning= getSharedPreferences("warning", Context.MODE_PRIVATE);
+
+        firebaseManager= FirebaseManager.getInstance(MenuActivity.this,mAuth,mDatabase, sharedPreferences);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.distances_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         timeSpinner.setAdapter(adapter);
 
-        /*optionsBTN.setOnClickListener(new View.OnClickListener() {
+        userBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MenuActivity.this, OptionsActivity.class);
-                startActivity(intent);
+                animateImageButton(v);
+                Intent intent = new Intent(MenuActivity.this, UserActivity.class);
+                startActivityForResult(intent, SHARED_REQUEST_CODE);
             }
-        });*/
+        });
 
         savedBTN.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,7 +176,6 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                animateImageButton(v);
                 if (detailedLL.getVisibility()==View.GONE) {
                     Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
                     detailedLL.startAnimation(animation);
@@ -242,6 +265,20 @@ public class MenuActivity extends AppCompatActivity {
 
                 if (currentLocation == null) {
                     if (notEmpty){
+
+                        boolean isFirstWarning = warning.getBoolean("isFirstWarning",true);
+
+                        if(isFirstWarning) {
+                            Dialog dialog = new Dialog(MenuActivity.this);
+                            dialog.setContentView(R.layout.longer_wait_alert);
+                            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                            dialog.setCancelable(true);
+                            dialog.show();
+                            SharedPreferences.Editor editor = warning.edit();
+                            editor.putBoolean("isFirstWarning", false);
+                            editor.apply();
+                        }
+
                         if (cacheManager.checkCacheFileContentIfContains()){
                             ArrayList<String> cacheFileMatchLabels= cacheManager.getCacheFileMatchLabels();
                             ArrayList<String> cacheFileMatchCoordinates= cacheManager.getCacheFileMatchCoordinates();
@@ -271,7 +308,7 @@ public class MenuActivity extends AppCompatActivity {
                                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                                         LinearLayout.LayoutParams.MATCH_PARENT, 0);
                                     matchLL.setLayoutParams(layoutParams);
-                                    volleyRequests.clearAllVolleyrequest();
+                                    volleyRequests.clearAllVolleyRequest();
                                 }
                             });
                         }
@@ -291,7 +328,8 @@ public class MenuActivity extends AppCompatActivity {
 
                     int selectedDistanceIndex = timeSpinner.getSelectedItemPosition();
                     if (selectedDistanceIndex!=0){
-                        saveManager.setDistance((String) timeSpinner.getSelectedItem());
+                        selectedDist = (String) timeSpinner.getSelectedItem();
+                        distance=(String) timeSpinner.getSelectedItem();
                     }
                     if (selectedDistanceIndex == 0) {
                         Toast.makeText(MenuActivity.this, resources.getString(R.string.please_choose_distance), Toast.LENGTH_SHORT).show();
@@ -308,37 +346,53 @@ public class MenuActivity extends AppCompatActivity {
                     if(formOfTransport.getCheckedRadioButtonId() == R.id.walk)
                     {
                         dist = avgWalkSpeed * (Double.parseDouble(timeSpinner.getSelectedItem().toString()) / 60);
-                        saveManager.setTransportMode(resources.getString(R.string.walk));
+                        tMode = resources.getString(R.string.walk);
+                        transportMode="walk";
 
                     }else if(formOfTransport.getCheckedRadioButtonId() == R.id.car)
                     {
                         dist = avgCarSpeed * (Double.parseDouble(timeSpinner.getSelectedItem().toString()) / 60);
-                        saveManager.setTransportMode(resources.getString(R.string.car));
+                        tMode = resources.getString(R.string.car);
+                        transportMode="car";
                     }
 
-                    ManipulateUrl manipulateUrl = new ManipulateUrl(categories, String.valueOf(currentLocation.getLatitude()), String.valueOf(currentLocation.getLongitude()), dist);
-                    nearbyUrl = manipulateUrl.getNearbyUrl();
-                    Log.d("nearbyUrl", nearbyUrl);
-                    String start = currentLocation.getLatitude() + "," + currentLocation.getLongitude();
-                    volleyRequests.findNearbyPlacesRequest(start, nearbyUrl, new VolleyRequests.NearbyVolleyCallback() {
-                        @Override
-                        public void onSuccess(ArrayList<String>  result, ArrayList<String>  namesResult, ArrayList<String>  tagsResults) {
-                            saveManager.preAddSearch();
-                            Intent intent = new Intent();
-                            intent.putStringArrayListExtra("coordsResponse",result);
-                            intent.putStringArrayListExtra("coordsNamesResponse",namesResult);
-                            intent.putStringArrayListExtra("coordsTagsResponse",tagsResults);
-                            setResult(RESULT_OK, intent);
-                            finish();
-                            volleyRequests.clearAllVolleyrequest();
-                        }
-                        @Override
-                        public void onError(String error) {
-                            Toast.makeText(MenuActivity.this, resources.getString(R.string.something_happened), Toast.LENGTH_LONG).show();
-                            loadingGif.setVisibility(View.INVISIBLE);
-                            volleyRequests.clearAllVolleyrequest();
-                        }
-                    });
+                    if (!categories.equals("")) {
+
+                        ManipulateUrl manipulateUrl = new ManipulateUrl(categories, String.valueOf(currentLocation.getLatitude()), String.valueOf(currentLocation.getLongitude()), dist);
+                        nearbyUrl = manipulateUrl.getNearbyUrl();
+                        Log.d("nearbyUrl", nearbyUrl);
+                        String start = currentLocation.getLatitude() + "," + currentLocation.getLongitude();
+                        volleyRequests.findNearbyPlacesRequest(start, nearbyUrl, new VolleyRequests.NearbyVolleyCallback() {
+                            @Override
+                            public void onSuccess(Map<String, ArrayList<String>> extractedMap) {
+
+                                Map<String, Object> labelDetails = new HashMap<>();
+                                labelDetails.put("categories", categoryNames);
+                                labelDetails.put("place", resources.getString(R.string.current));
+                                labelDetails.put("transportMode", tMode);
+                                labelDetails.put("distance", selectedDist);
+
+                                Intent intent = new Intent();
+                                intent.putExtra("label", (Serializable) labelDetails);
+                                intent.putExtra("extractedMap", (Serializable) extractedMap);
+                                setResult(RESULT_OK, intent);
+                                if (firebaseCategories.size() != 0) {
+                                    firebaseManager.incrementDatabaseStat(firebaseCategories, transportMode, timeSpinner.getSelectedItem().toString());
+                                }
+                                finish();
+                                volleyRequests.clearAllVolleyRequest();
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(MenuActivity.this, resources.getString(R.string.something_happened), Toast.LENGTH_LONG).show();
+                                loadingGif.setVisibility(View.INVISIBLE);
+                                volleyRequests.clearAllVolleyRequest();
+                            }
+                        });
+                    }else {
+                        Toast.makeText(MenuActivity.this,R.string.empty_category_list,Toast.LENGTH_LONG).show();
+                    }
 
                 //----------------------------------------------------------------------------------------------------------------
                 //END OF searching by the current location
@@ -375,7 +429,6 @@ public class MenuActivity extends AppCompatActivity {
 
                     currentLocation = new GeoPoint(latitude, longitude);
                     Log.d("gps", longitude + " " + latitude);
-                    saveManager.setPlace(resources.getString(R.string.current));
                     locationListener.stopListener();
                 }
                 else currentLocation= null;
@@ -395,7 +448,6 @@ public class MenuActivity extends AppCompatActivity {
         categoriesBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                animateImageButton(v);
 
                 Intent intent = new Intent(MenuActivity.this, ListActivity.class);
                 startActivityForResult(intent, CATEGORIES_REQUEST_CODE);
@@ -459,7 +511,8 @@ public class MenuActivity extends AppCompatActivity {
 
                 int selectedDistanceIndex = timeSpinner.getSelectedItemPosition();
                 if (selectedDistanceIndex != 0) {
-                    saveManager.setDistance((String) timeSpinner.getSelectedItem());
+                    selectedDist = (String) timeSpinner.getSelectedItem();
+                    distance = (String) timeSpinner.getSelectedItem();
                 }
                 if (selectedDistanceIndex == 0) {
                     Toast.makeText(MenuActivity.this, resources.getString(R.string.please_choose_distance), Toast.LENGTH_SHORT).show();
@@ -472,40 +525,56 @@ public class MenuActivity extends AppCompatActivity {
                 }
                 if (formOfTransport.getCheckedRadioButtonId() == R.id.walk) {
                     dist = avgWalkSpeed * (Double.parseDouble(timeSpinner.getSelectedItem().toString()) / 60);
-                    saveManager.setTransportMode(resources.getString(R.string.walk));
+                    tMode = resources.getString(R.string.walk);
+                    transportMode= "walk";
 
                 } else if (formOfTransport.getCheckedRadioButtonId() == R.id.car) {
                     dist = avgCarSpeed * (Double.parseDouble(timeSpinner.getSelectedItem().toString()) / 60);
-                    saveManager.setTransportMode(resources.getString(R.string.car));
+                    tMode = resources.getString(R.string.car);
+                    transportMode="car";
                 }
 
-                saveManager.setPlace(matchLabelsArrayList.get(position));
-                saveManager.preAddSearch();
+                place = matchLabelsArrayList.get(position);
 
                 loadingGif.setVisibility(View.VISIBLE);
                 splitResult = matchCoordinatesArrayList.get(position).split(",");
-                ManipulateUrl manipulateNearbyUrl = new ManipulateUrl(categories, splitResult[0], splitResult[1], dist);
-                nearbyUrl = manipulateNearbyUrl.getNearbyUrl();
-                Log.d("nearbyUrl", nearbyUrl);
-                volleyRequests.findNearbyPlacesRequest(matchCoordinatesArrayList.get(position), nearbyUrl, new VolleyRequests.NearbyVolleyCallback() {
-                    @Override
-                    public void onSuccess(ArrayList<String> result, ArrayList<String> namesResult, ArrayList<String> tagsResults) {
-                        Intent intent = new Intent();
-                        intent.putExtra("coordsResponse", result);
-                        intent.putExtra("coordsNamesResponse", namesResult);
-                        intent.putExtra("coordsTagsResponse", tagsResults);
-                        setResult(RESULT_OK, intent);
-                        finish();
-                        volleyRequests.clearAllVolleyrequest();
-                    }
 
-                    @Override
-                    public void onError(String error) {
-                        Toast.makeText(MenuActivity.this, resources.getString(R.string.something_happened), Toast.LENGTH_LONG).show();
-                        loadingGif.setVisibility(View.INVISIBLE);
-                        volleyRequests.clearAllVolleyrequest();
-                    }
-                });
+                if (!categories.equals("")) {
+
+                    ManipulateUrl manipulateNearbyUrl = new ManipulateUrl(categories, splitResult[0], splitResult[1], dist);
+                    nearbyUrl = manipulateNearbyUrl.getNearbyUrl();
+                    Log.d("nearbyUrl", nearbyUrl);
+                    volleyRequests.findNearbyPlacesRequest(matchCoordinatesArrayList.get(position), nearbyUrl, new VolleyRequests.NearbyVolleyCallback() {
+                        @Override
+                        public void onSuccess(Map<String, ArrayList<String>> returnTagsMap) {
+
+                            Map<String, Object> labelDetails = new HashMap<>();
+                            labelDetails.put("categories", categoryNames);
+                            labelDetails.put("place", place);
+                            labelDetails.put("transportMode", tMode);
+                            labelDetails.put("distance", selectedDist);
+
+                            Intent intent = new Intent();
+                            intent.putExtra("label", (Serializable) labelDetails);
+                            intent.putExtra("extractedMap", (Serializable) returnTagsMap);
+                            setResult(RESULT_OK, intent);
+                            if (firebaseCategories.size() != 0) {
+                                firebaseManager.incrementDatabaseStat(firebaseCategories, transportMode, timeSpinner.getSelectedItem().toString());
+                            }
+                            finish();
+                            volleyRequests.clearAllVolleyRequest();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Toast.makeText(MenuActivity.this, resources.getString(R.string.something_happened), Toast.LENGTH_LONG).show();
+                            loadingGif.setVisibility(View.INVISIBLE);
+                            volleyRequests.clearAllVolleyRequest();
+                        }
+                    });
+                }else {
+                    Toast.makeText(MenuActivity.this,R.string.empty_category_list,Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -528,8 +597,11 @@ public class MenuActivity extends AppCompatActivity {
                 if (data.getStringExtra("categories")!=null){
                         categories = data.getStringExtra("categories");
                         categoryNames = data.getStringArrayListExtra("categoryNames");
-                        saveManager.setCategories(categoryNames);
+                        if (data.getStringArrayListExtra("firebaseCategories")!=null) {
+                            firebaseCategories.addAll(data.getStringArrayListExtra("firebaseCategories"));
+                        }
                         Log.d("categories", categories);
+                        Log.d("firebaseCategories", String.valueOf(firebaseCategories));
                     }else {
                         Toast.makeText(MenuActivity.this, resources.getString(R.string.category_selection_error), Toast.LENGTH_LONG).show();
                     }
@@ -547,12 +619,32 @@ public class MenuActivity extends AppCompatActivity {
                 //----------------------------------------------------------------------------------------------------------------
                 //BEGIN
                 //----------------------------------------------------------------------------------------------------------------
-                if (data.getStringArrayListExtra("savedSearch")!=null){
+                if (data.getSerializableExtra("savedMap")!=null){
                     Intent intent = new Intent();
-                    intent.putStringArrayListExtra("savedSearch", data.getStringArrayListExtra("savedSearch"));
-                    intent.putStringArrayListExtra("savedSearchCategories", data.getStringArrayListExtra("savedSearchCategories"));
-                    intent.putStringArrayListExtra("savedSearchNames", data.getStringArrayListExtra("savedSearchNames"));
+                    intent.putExtra("label", data.getSerializableExtra("label"));
+                    intent.putExtra("savedMap", data.getSerializableExtra("savedMap"));
                     setResult(RESULT_OK,intent);
+                    finish();
+                }
+
+                //----------------------------------------------------------------------------------------------------------------
+                //END
+                //----------------------------------------------------------------------------------------------------------------
+
+            }
+        }
+        if (requestCode==SHARED_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                //Handle the string returned by the ListActivity
+                // containing the categories in proper format
+                //----------------------------------------------------------------------------------------------------------------
+                //BEGIN
+                //----------------------------------------------------------------------------------------------------------------
+                if (data.getSerializableExtra("sharedMap") != null) {
+                    Intent intent = new Intent();
+                    intent.putExtra("label", data.getSerializableExtra("label"));
+                    intent.putExtra("sharedMap", data.getSerializableExtra("sharedMap"));
+                    setResult(RESULT_OK, intent);
                     finish();
                 }
 
@@ -619,6 +711,7 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
+        firebaseCategories.clear();
+        resources.flushLayoutCache();
     }
 }

@@ -13,5 +13,38 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
         <item name="android:windowBackground">#3C3F41</item>
+        <item name="background">@color/transparent</item>
+
     </style>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_down</item>
+        <item name="android:windowExitAnimation">@anim/close_slide_down</item>
+    </style>
+
+
+    <color name="DialogLayoutBackground"> @color/night_dialog </color>
+
+    <style name="CustomDialogTheme" parent="Theme.AppCompat.Dialog">
+        <!-- Set the background of the dialog window to transparent -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="DialogBackground">
+        <item name="background">@color/night_dialog</item>
+    </style>
+
+    <style name="spinner_background" parent="Widget.AppCompat.Spinner">
+        <item name="dropDownBackgroundTint">@color/night</item>
+    </style>
+    <style name="edit_text_standard">
+        <item name="backgroundTint">#25E157</item>
+    </style>
+    <style name="title_standard">
+        <item name="android:textColor">#6595C8</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+
 </resources>

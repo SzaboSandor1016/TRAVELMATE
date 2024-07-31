@@ -7,59 +7,95 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class SavedActivity extends AppCompatActivity {
 
-    private boolean flag;
     private SaveManager saveManager;
     private ListView savedLV;
     private Button selectDD, deleteDD;
-    private ArrayList<String> savedNames, savedLabels, savedCoordinates, savedCategories, savedPlaceNames;
+    private ArrayList<String> titles, labels, coordinates, categories, placeNames, cuisine, openingHours, charges;
+    private Map<String,ArrayList<String>> savedMap;
+    private static String[] returned = {"titles","labels","coordinates","categories","placeNames","cuisine","opening_hours","charge"};
     private ArrayAdapter<String> savedArrayAdapter;
     private Resources resources;
-    TextView placeDD, transportDD,distanceDD, categoriesDD, categoriesListDD, dateDD;
+    private TextView placeDD, transportDD,distanceDD, categoriesDD, categoriesListDD, dateDD;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_saved);
-        saveManager = new SaveManager(this);
+        saveManager = SaveManager.getInstance(SavedActivity.this);
+        savedMap = saveManager.getSearches();
+
+        titles = savedMap.get("titles");
+        labels = savedMap.get("labels");
+        coordinates = savedMap.get("coordinates");
+        categories = savedMap.get("categories");
+        placeNames = savedMap.get("placeNames");
+        cuisine = savedMap.get("cuisines");
+        openingHours = savedMap.get("openingHours");
+        charges = savedMap.get("charges");
+
+
 
         resources = getResources();
         savedLV = findViewById(R.id.savedLV);
-        savedNames = saveManager.getSearchNames();
-        savedLabels= saveManager.getSearchLabels();
-        savedCoordinates= saveManager.getSearchCoordinates();
-        savedCategories = saveManager.getSearchCategories();
-        savedPlaceNames = saveManager.getSearchPlaceNames();
 
-            savedArrayAdapter = new ArrayAdapter<>(SavedActivity.this, android.R.layout.simple_list_item_1, savedNames);
+
+            savedArrayAdapter = new ArrayAdapter<>(SavedActivity.this, android.R.layout.simple_list_item_1, titles);
             savedLV.setAdapter(savedArrayAdapter);
 
             savedLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    animateListViewItemClick(view);
 
-                    Dialog dialog = new Dialog(SavedActivity.this);
+                    Dialog dialog = new Dialog(SavedActivity.this, R.style.CustomDialogTheme);
                     dialog.setContentView(R.layout.details_dialog);
-                    dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    Window window = dialog.getWindow();
+                    if (window!=null) {
+                        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        /*window.setBackgroundDrawableResource(R.drawable.fade);*/
+                        window.setWindowAnimations(R.style.DialogAnimation);
+
+                        WindowManager.LayoutParams layoutParams = window.getAttributes();
+                        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT; // Match parent width
+                        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT; // Wrap content height
+                        layoutParams.gravity = Gravity.TOP; // Position at the bottom of the screen
+                        window.setAttributes(layoutParams);
+                    }
+
                     dialog.setCancelable(true);
-                    String[] details= savedLabels.get(position).split(";;");
-                    saveManager.preAddSearch(details[0], details[1], details[2], details[3]);
+                    String[] details= labels.get(position).split(";;");
+                    ArrayList<String> categoryDetails = new ArrayList<>(Arrays.asList(details[3].split(";")));
+
+                    Map<String, Object> labelDetails = new HashMap<>();
+
+                    labelDetails.put("place",details[0]);
+                    labelDetails.put("transportMode",details[1]);
+                    labelDetails.put("distance",details[2]);
+                    labelDetails.put("categories",categoryDetails);
+
                     placeDD = dialog.findViewById(R.id.placeDD);
                     transportDD = dialog.findViewById(R.id.transportDD);
                     distanceDD = dialog.findViewById(R.id.distanceDD);
@@ -73,7 +109,11 @@ public class SavedActivity extends AppCompatActivity {
                     transportDD.setText(transportMode);
                     distanceDD.setText(distance);
                     categoriesDD.setText(resources.getString(R.string.categories));
-                    categoriesListDD.setText(details[3]);
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (String category : categoryDetails){
+                        stringBuilder.append(category).append("\n");
+                    }
+                    categoriesListDD.setText(stringBuilder.toString());
                     dateDD.setText(details[4]);
 
                     selectDD = dialog.findViewById(R.id.selectDD);
@@ -83,16 +123,16 @@ public class SavedActivity extends AppCompatActivity {
                         public void onClick(View v) {
                             Intent intent = new Intent();
 
-                            String[] savedCoordinatesArray = savedCoordinates.get(position).split(";;");
-                            String[] savedCategoriesArray = savedCategories.get(position).split(";;");
-                            String[] savedPlaceNamesArray = savedPlaceNames.get(position).split(";;");
-                            ArrayList<String> savedCoordinatesArrayList = new ArrayList<>(Arrays.asList(savedCoordinatesArray));
-                            ArrayList<String> savedCategoriesArrayList = new ArrayList<>(Arrays.asList(savedCategoriesArray));
-                            ArrayList<String> savedPlaceNamesArrayList = new ArrayList<>(Arrays.asList(savedPlaceNamesArray));
+                            Map<String,ArrayList<String>> savedMap= new HashMap<>();
+                            savedMap.put("coordinates", new ArrayList<>(Arrays.asList(coordinates.get(position).split(";;"))));
+                            savedMap.put("categories", new ArrayList<>(Arrays.asList(categories.get(position).split(";;"))));
+                            savedMap.put("placeNames",new ArrayList<>(Arrays.asList(placeNames.get(position).split(";;"))));
+                            savedMap.put("cuisines",new ArrayList<>(Arrays.asList(cuisine.get(position).split(";;"))));
+                            savedMap.put("openingHours",new ArrayList<>(Arrays.asList(openingHours.get(position).split(";;"))));
+                            savedMap.put("charges",new ArrayList<>(Arrays.asList(charges.get(position).split(";;"))));
 
-                            intent.putStringArrayListExtra("savedSearch", savedCoordinatesArrayList);
-                            intent.putStringArrayListExtra("savedSearchCategories", savedCategoriesArrayList);
-                            intent.putStringArrayListExtra("savedSearchNames", savedPlaceNamesArrayList);
+                            intent.putExtra("label", (Serializable) labelDetails);
+                            intent.putExtra("savedMap", (Serializable) savedMap);
                             setResult(RESULT_OK, intent);
                             finish();
                             dialog.dismiss();
@@ -109,14 +149,18 @@ public class SavedActivity extends AppCompatActivity {
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    saveManager.removeSavedSearch(savedLabels.get(position));
+                                                    saveManager.removeSavedSearch(labels.get(position));
 
                                                     refreshDataSet();
-                                                    savedArrayAdapter = new ArrayAdapter<>(SavedActivity.this, android.R.layout.simple_list_item_1, savedNames);
+                                                    savedArrayAdapter = new ArrayAdapter<>(SavedActivity.this, android.R.layout.simple_list_item_1, titles);
                                                     savedLV.setAdapter(savedArrayAdapter);
 
                                                 }
-                                            });
+                                            });/*
+                                            saveManager.removeSavedSearch(labels.get(position));
+                                            refreshDataSet();
+                                            savedArrayAdapter.remove(labels.get(position));
+                                            savedArrayAdapter.notifyDataSetChanged();*/
                                         }
                                     }).setNegativeButton(
                                     R.string.negative,
@@ -142,18 +186,28 @@ public class SavedActivity extends AppCompatActivity {
     }
 
     private void clearAll(){
-        savedNames.clear();
-        savedLabels.clear();
-        savedCoordinates.clear();
-        savedCategories.clear();
-        savedPlaceNames.clear();
+        titles.clear();
+        labels.clear();
+        coordinates.clear();
+        categories.clear();
+        placeNames.clear();
+        cuisine.clear();
+        openingHours.clear();
+        charges.clear();
     }
         private void refreshDataSet(){
-            savedNames = saveManager.getSearchNames();
-            savedLabels= saveManager.getSearchLabels();
-            savedCoordinates= saveManager.getSearchCoordinates();
-            savedCategories = saveManager.getSearchCategories();
-            savedPlaceNames = saveManager.getSearchPlaceNames();
+
+            savedMap = saveManager.getSearches();
+
+            titles= savedMap.get("titles");
+            labels= savedMap.get("labels");
+            coordinates= savedMap.get("coordinates");
+            categories= savedMap.get("categories");
+            placeNames= savedMap.get("placeNames");
+            cuisine = savedMap.get("cuisines");
+            openingHours = savedMap.get("openingHours");
+            charges = savedMap.get("charges");
+
         }
     private void animateListViewItemClick(View view) {
         ViewPropertyAnimator animator = view.animate()

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GTK-MAPS</string>
+    <string name="app_name">PANNON-MAPS</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -48,7 +48,9 @@
     <string name="there_is_no_such_place">We could not find such place</string>
     <string name="please_choose_distance">Please choose a distance!</string>
     <string name="please_choose_transport_mode">Please choose the form of transport!</string>
+    <string name="empty_category_list">Please select the desired categories to search!</string>
     <string name="category_selection_error">Some error occurred while choosing the categories!</string>
+    <string name="route_planning_error">Some error occurred while getting the routes! \n Please try again later!</string>
 
 
     <string name="load_current_location">Show current location when loading</string>
@@ -72,16 +74,135 @@
     <string name="delete_message">Delete search?</string>
     <string name="positive"> Yes</string>
     <string name="negative">No</string>
-    <string name="search_title">Title</string>
+    <string name="search_title">Title...</string>
+    <string name="new_search_title">New title... (optional)</string>
     <string name="save">Save</string>
     <string name="dismiss">Back</string>
     <string name="select">Select</string>
     <string name="delete">Delete</string>
     <string name="save_as">Save as...</string>
+    <string name="save_title_empty">Please provide a title for the save!</string>
     <string name="QR">From QR code</string>
     <string name="unknown">Unknown</string>
 
 
     <string name="start">Start point</string>
     <string name="provide_start">Please provide a starting location!</string>
+
+    <string name="email">E-mail address...</string>
+    <string name="email_2">E-mail address:</string>
+    <string name="username">Username...</string>
+    <string name="username_2">Username:</string>
+    <string name="password">Password...</string>
+    <string name="password_2">Password:</string>
+    <string name="new_password">New password...</string>
+    <string name="password_again">Password again...</string>
+    <string name="password_again_2">Password again:</string>
+    <string name="new_password_again">New password again...</string>
+    <string name="birthdate">Birthdate... </string>
+    <string name="birthdate_year">Year...</string>
+    <string name="birthdate_month">Month...</string>
+    <string name="birthdate_day">Day...</string>
+    <string name="family_name">Family name...</string>
+    <string name="family_name_2">Family name:</string>
+    <string name="given_name">Given name...</string>
+    <string name="given_name_2">Given name:</string>
+    <string name="empty_log_in">The e-mail address and/or the password field is empty! </string>
+
+    <string name="login">Sign In</string>
+    <string name="register">Register</string>
+    <string name="logout">Sign Out</string>
+    <string name="change_data">Change user data</string>
+    <string name="change_success">Data update has been successful!</string>
+    <string name="change_unsuccess">Data update has been unsuccessful!</string>
+    <string name="login_unsuccess">Authentication failed!</string>
+    <string name="signup_unsuccess">Authentication failed!</string>
+    <string name="empty_message">Please fill in every field!</string>
+    <string name="password_mismatch">Passwords do not match!</string>
+    <string name="old_password_mismatch">Old passwords do not match!</string>
+    <string name="new_password_mismatch">New passwords do not match!</string>
+    <string name="used_username">This username is already in use!</string>
+    <string name="share_title_empty">Please provide a title for the share!</string>
+    <string name="empty_addressee">Addressee field is empty!</string>
+    <string name="empty_addressee_list">Addressee list is empty!</string>
+    <string name="share_success">Sharing has been successful!</string>
+    <string name="share_unsuccess">Sharing has been unsuccessful!</string>
+    <string name="logged_as">Signed in as: </string>
+    <string name="delete_account">Delete account</string>
+    <string name="change_password">Change password</string>
+    <string name="confirm_delete_account_message">For deleting please confirm your e-mail address and password.\n Note: This action cannot be undone!</string>
+    <string name="delete_successful">Deleting account has been successful!</string>
+    <string name="delete_unsuccessful">Deleting account has been unsuccessful!</string>
+    <string name="update_username_unsuccess"> Updating the username has been unsuccessful!</string>
+    <string name="delete_share_message">Delete shared search?</string>
+
+    <string name="confirm_password_change_message">For changing please confirm your password!</string>
+    <string name="change_successful">Password change has been successful!</string>
+    <string name="change_unsuccessful">Password change has been unsuccessful!</string>
+
+    <string name="cuisine"> Cuisine: </string>
+    <string name="opening_hours"> Opening hours: </string>
+    <string name="charge">Charges: </string>
+
+    <string name="shares">Shares</string>
+    <array name="shares_options">
+        <item> Recent addressees</item>
+        <item> Shared with me </item>
+        <item> My shares </item>
+    </array>
+    <string name="account">Account</string>
+    <array name="account_data">
+        <item> User data</item>
+        <item>Further settings </item>
+    </array>
+
+    <array name="further_settings_options">
+        <item>Change password</item>
+        <item>Delete account</item>
+    </array>
+
+    <string name="share"> Share</string>
+    <string name="update">Update</string>
+    <string name="shared_with_me"> Shared with me </string>
+    <string name="shared_by_me"> My shares </string>
+    <string name="shared_with">Shared with: </string>
+
+    <string name="recent_addressees"> Recent addressees</string>
+    <string name="addressees"> Addressees</string>
+    <string name="updated_addressees_success">The list of the recent addressees \n has been successfully updated!</string>
+    <string name="updated_addressees_unsuccess">Update of the list of the recent addressees has been unsuccessful!</string>
+
+    <string name="delete_shared_with_me_warning">You will not see this share unless it is shared with you again! </string>
+    <string name="wait_warning"> Finding the desired place can last longer,
+        \n if a search has not been made with the exact expression recently!  </string>
+    <string name="accept_privacy_policy">By registering, you accept our Privacy Policy</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_text">Welcome to the PANNON-MAPS mobile application! Below, we would like to inform you about the data we collect and manage, as well as its usage. Please read the following carefully:
+
+\n\nData Collection and Usage:
+
+\n\n\tThe PANNON-MAPS mobile application collects and manages the following data:
+
+
+\n\n\t\tEmail address used for login
+\n\t\tName provided during registration
+\n\t\tUsername provided during registration
+\n\t\tDate of birth provided during registration
+
+\n\n\tThe purpose of collecting and managing this data is to ensure identification within the application, as well as to create and analyze statistics to improve the performance and usage of the application.
+\n\n\tApart from the mentioned, we do not handle or request any other personal information from you in any form (email, phone).
+
+
+\n\nData Security:
+
+\n\n\tWe handle your provided personal data securely and take all necessary measures to prevent unauthorized access, use, or alteration. Your personal data is only used for the purposes of the application and will never be disclosed or sold to third parties under any circumstances.
+
+\n\nConsent:
+
+\n\n\tBy using the mobile application, you consent to the PANNON-MAPS mobile application managing your personal data as described here.
+
+\n\nPlease note that our privacy practices may be updated periodically, so we recommend that you regularly check the privacy statement in the application for any changes.
+
+\n\nThank you for choosing the PANNON-MAPS mobile application!</string>
+
 </resources>

@@ -10,10 +10,9 @@
 
     <org.osmdroid.views.MapView
         android:id="@+id/map"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-
-    </org.osmdroid.views.MapView>
+        tilesource="Mapnik"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -38,6 +37,15 @@
             android:layout_weight="1"
             android:background="@drawable/save"
             android:visibility="invisible" />
+        <ImageButton
+            android:id="@+id/shareSearchBTN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/share"
+            android:visibility="invisible" />
+
 
         <ImageButton
             android:id="@+id/routeBTN"

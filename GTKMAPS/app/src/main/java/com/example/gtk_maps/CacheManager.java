@@ -56,6 +56,7 @@ public class CacheManager extends AppCompatActivity {
                 }
 
                 reader.close();
+                bufferedReader.close();
                 fileContent= content.toString();
                 // Now 'content' contains the content read from the file
                 // You can use 'content.toString()' to get it as a String
@@ -90,22 +91,23 @@ public class CacheManager extends AppCompatActivity {
     }
 
     public boolean checkCacheFileContentIfContains(){
+        boolean contains=false;
         StringBuilder incrementedCacheFileContent = new StringBuilder();
         String cacheFileContent = readStorage("searchCache.txt");
-        if (cacheFileContent.contains(searchLabel)){
+        if (cacheFileContent.length()!=0) {
             String[] splitToRecords = cacheFileContent.split("::");
-            for (String record: splitToRecords){
+            for (String record : splitToRecords) {
                 String[] splitRecord = record.split("//");
                 if (splitRecord[0].equals(searchLabel)) {
-                    splitRecord[3] = String.valueOf(Integer.parseInt(splitRecord[3])+1);
+                    splitRecord[3] = String.valueOf(Integer.parseInt(splitRecord[3]) + 1);
+                    contains = true;
                 }
-                String concatRecord = splitRecord[0]+"//"+splitRecord[1]+"//"+splitRecord[2]+"//"+splitRecord[3]+"//";
+                String concatRecord = splitRecord[0] + "//" + splitRecord[1] + "//" + splitRecord[2] + "//" + splitRecord[3] + "//";
                 incrementedCacheFileContent.append(concatRecord).append("::");
             }
-            writeStorage("searchCache.txt",incrementedCacheFileContent.toString());
-            return true;
+            writeStorage("searchCache.txt", incrementedCacheFileContent.toString());
         }
-        return false;
+        return contains;
     }
     public ArrayList<String> getCacheFileMatchLabels(){
         ArrayList<String> cacheFileMatchLabels= new ArrayList<>();

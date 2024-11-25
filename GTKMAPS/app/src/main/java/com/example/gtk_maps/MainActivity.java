@@ -1,20 +1,27 @@
 package com.example.gtk_maps;
 
 import static android.app.ProgressDialog.show;
+import static com.android.volley.toolbox.Volley.newRequestQueue;
 import static java.lang.Math.abs;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -23,44 +30,48 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ListView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.room.Room;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
+import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer;
+import org.osmdroid.bonuspack.utils.BonusPackHelper;
 import org.osmdroid.config.Configuration;
+import org.osmdroid.events.MapListener;
+import org.osmdroid.events.ScrollEvent;
+import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.BoundingBox;
-import org.osmdroid.util.Distance;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
-import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.Polyline;
-import org.osmdroid.views.overlay.infowindow.InfoWindow;
 
-import java.nio.channels.SelectableChannel;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 // -------------------------------------------------------------------------------------------------------------
 // | MainActivity                                                                                              |
@@ -76,33 +87,60 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 2;
+    private static final int SHARED_REQUEST_CODE =3;
     private static final int REQUEST_CODE = 1;
+
+    private ImageButton userBTN;
+
+    private BottomNavigationView menuLayout;
+    private FrameLayout menuItemLayout;
+    private View handleArrow;
+    private LinearLayout itemContainer;
+    private LinearLayout handle;
+    private FloatingActionButton routePlanActionButton;
+
+    private ArrayAdapter<String> placesAdapter;
+
+    private int selectedDistance;
+    private String selectedTransport;
+    private ArrayList<Place> selectedPlaces;
+    private ArrayList<String> selectedCategories;
+    private ArrayList<String> allCategories;
+    private ArrayList<String> suggestedPlaces;
+    private ArrayList<Marker> otherMarkers;
+    private ArrayList<Marker> allMarkers;
+    private ArrayList<Polyline> routePolys;
+    private ArrayList<Place> places;
+    private boolean isUpdatedFromActivity;
+    private Boolean isNavi;
+
     private MapView map = null;
 
 
-    private SaveManager saveManager;
-    private CategoryManager categoryManager;
-    private FirebaseManager firebaseManager;
-    private OpenRouteServiceAPI openRouteServiceAPI;
 
-    private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
-    private SharedPreferences sharedPreferences;
-    private int start=0;
-    //private boolean enabledGPS, qrResponse= false;
-    private Marker startMarker, newstartMarker;
-    private ArrayList<Marker> selectedMarkers, selectedTextMarkers, allMarkers, textMarkers;
-    private ArrayList<String> selectedMarkersArray,selectedTagsArray,selectedNamesArray,selectedCategoriesArray,
-    selectedCuisineArray, selectedOpeningHoursArray, selectedChargesArray;
-    private ArrayList<String> coordinates,categories,names,cuisine,openingHours,charge;
-    private Map<String, Object> labelDetails;
-    private GeoPoint currentLocation;
-    private TextView markerNameMD, markerCategoryMD,markerCuisineMD,markerChargeMD,markerOpeningHoursMD,
-            openTV, cuisineTV, chargesTV;
-    private Button addMD, removeMD;
-    private ImageButton menuBTN, addSaveBTN, routeBTN, shareSearchBTN;
+    private Marker startMarker;
+
+    private LinearLayout categoriesChipLayout, searchDetailsLayout;
+    private ImageView transportImage;
+    private TextView withinText;
+    private AutoCompleteTextView mapAutoComplete;
+
+
+    private CategoryManager categoryManager;
     private Resources resources;
-    private static String[] labelData= {"place","transportMode","distance","categories"};
+
+    private Navigation navigation;
+
+    private FragmentsViewModel fragmentsViewModel;
+    private FirebaseAuth mAuth;
+
+    private AppDatabase appDatabase;
+    private AppDatabase.SearchDao searchDao;
+
+
+    private RadiusMarkerClusterer radiusMarkerClusterer;
+    private ArrayList<Marker> routeMarkers;
+    private ArrayList<Marker> nameMarkers;
 
 
     //Code lines necessary for the integration of the OSM
@@ -110,9 +148,12 @@ public class MainActivity extends AppCompatActivity {
     //BEGIN
     //----------------------------------------------------------------------------------------------------------------
 
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         //handle permissions first, before map is created. not depicted here
 
@@ -121,11 +162,9 @@ public class MainActivity extends AppCompatActivity {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
 
         //inflate and create the map
-        setContentView(R.layout.activity_main);
 
-        map = (MapView) findViewById(R.id.map);
+        map = findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
-
 
         //String[] permissions = new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
@@ -150,131 +189,451 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
-
-
-        //requestPermissionsIfNecessary(permissions
-                // if you need to show the current location, uncomment the line below
-                //
-                // WRITE_EXTERNAL_STORAGE is required in order to show the map
-
-        //);
-
         resources = MainActivity.this.getResources();
 
-        mAuth= FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        openRouteServiceAPI = new OpenRouteServiceAPI();
+        fragmentsViewModel = new ViewModelProvider(this).get(FragmentsViewModel.class);
 
-        sharedPreferences= getSharedPreferences("FirebaseManager", Context.MODE_PRIVATE);
 
-        saveManager = SaveManager.getInstance(MainActivity.this);
-        categoryManager = new CategoryManager(MainActivity.this);
-        firebaseManager = FirebaseManager.getInstance(MainActivity.this,mAuth,mDatabase,sharedPreferences);
 
-        selectedMarkers = new ArrayList<>();
-        selectedMarkersArray = new ArrayList<>();
-        selectedTagsArray = new ArrayList<>();
-        selectedNamesArray = new ArrayList<>();
-        selectedCategoriesArray= new ArrayList<>();
-        selectedCuisineArray = new ArrayList<>();
-        selectedOpeningHoursArray = new ArrayList<>();
-        selectedChargesArray = new ArrayList<>();
-        selectedTextMarkers = new ArrayList<>();
-        textMarkers = new ArrayList<>();
+        navigation = new Navigation(newRequestQueue(getApplicationContext()),getApplicationContext());
+
+        places = new ArrayList<>();
+
+        isUpdatedFromActivity = false;
+        isNavi = false;
+
+
+        selectedPlaces = new ArrayList<>();
+        selectedCategories = new ArrayList<>();
+        allCategories = new ArrayList<>();
+        otherMarkers = new ArrayList<>();
+        routePolys = new ArrayList<>();
+        suggestedPlaces = new ArrayList<>();
         allMarkers = new ArrayList<>();
+        routeMarkers = new ArrayList<>();
+        nameMarkers = new ArrayList<>();
 
 
-        coordinates = new ArrayList<>();
-        categories = new ArrayList<>();
-        names = new ArrayList<>();
-        cuisine= new ArrayList<>();
-        openingHours= new ArrayList<>();
-        charge= new ArrayList<>();
+        categoryManager = new CategoryManager(MainActivity.this);
+
+        menuLayout = findViewById(R.id.menu_layout);
+        menuItemLayout = findViewById(R.id.menu_item_layout);
+
+        handleArrow = findViewById(R.id.handle_arrow);
+        itemContainer = findViewById(R.id.item_container);
+        handle = findViewById(R.id.handle);
+
+        categoriesChipLayout = findViewById(R.id.categories_chip_layout);
+        searchDetailsLayout = findViewById(R.id.search_details_layout);
+        transportImage = findViewById(R.id.transport_image);
+        withinText = findViewById(R.id.within_text);
+
+        mapAutoComplete = findViewById(R.id.map_autocomplete_text_field);
+        mapAutoComplete.setThreshold(2);
+
+        mAuth = FirebaseAuth.getInstance();
+
+        appDatabase = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "temporary_search").build();
+
+         searchDao = appDatabase.searchDao();
+
+        fragmentsViewModel.setSearchDao(searchDao);
+
 
         IMapController mapController = map.getController();
         mapController.setZoom(15.0);
         GeoPoint firstPoint = new GeoPoint(47.09327, 17.91149);
         mapController.setCenter(firstPoint);
         map.setMultiTouchControls(true);
+
         startMarker = new Marker(map);
         startMarker.setPosition(firstPoint);
         startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
+        allMarkers.add(startMarker);
         map.getOverlays().add(startMarker);
-        startMarker.setIcon(resources.getDrawable(R.drawable.blue_marker));
+        startMarker.setIcon(resources.getDrawable(R.drawable.start_marker));
 
 
-
-
-        addSaveBTN= findViewById(R.id.addSaveBTN);
-        addSaveBTN.setOnClickListener(new View.OnClickListener() {
+        GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public void onClick(View v) {
-                animateImageButton(v);
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                // Lefelé pöccintés
+                if (velocityY > 0) {
+                    //if (isItemContainerOut) {
+                    handleArrow.animate().rotation(0).setDuration(300).start();
+                    itemContainer.animate().translationY(itemContainer.getHeight()-handle.getHeight()).setDuration(300).start();
+                    map.setMultiTouchControls(true);
+                    map.setBuiltInZoomControls(true);
+                    map.resetScrollableAreaLimitLatitude();
+                    map.resetScrollableAreaLimitLongitude();
 
-                Dialog dialog = new Dialog(MainActivity.this,R.style.CustomDialogTheme);
-                dialog.setContentView(R.layout.add_search_dialog);
 
-                Window window = dialog.getWindow();
-                if(window!=null) {
-                    window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    /*window.setBackgroundDrawableResource(R.drawable.fade);*/
-                    window.setWindowAnimations(R.style.DialogAnimation);
-
-                    WindowManager.LayoutParams layoutParams = window.getAttributes();
-                    layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT; // Match parent width
-                    layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT; // Wrap content height
-                    layoutParams.gravity = Gravity.TOP; // Position at the bottom of the screen
-                    window.setAttributes(layoutParams);
-                }
-
-                dialog.setCancelable(true);
-                TextView titleASD = dialog.findViewById(R.id.titleASD);
-                EditText nameASD = dialog.findViewById(R.id.nameASD);
-
-                titleASD.setText(resources.getString(R.string.save_as));
-
-                Button saveASD =dialog.findViewById(R.id.saveASD);
-                saveASD.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        if (!nameASD.getText().toString().trim().equals("")) {
-                            if (selectedMarkersArray.size() > 1) {
-                                labelDetails.replace("categories", selectedCategoriesArray);
-                                String label = generateLabel(labelDetails);
-                                Map<String, ArrayList<String>> saveDetails = new HashMap<>();
-                                saveDetails.put("coordinates", selectedMarkersArray);
-                                saveDetails.put("categories", selectedTagsArray);
-                                saveDetails.put("placeNames", selectedNamesArray);
-                                saveDetails.put("cuisines", selectedCuisineArray);
-                                saveDetails.put("openingHours", selectedOpeningHoursArray);
-                                saveDetails.put("charges", selectedChargesArray);
-
-                                saveManager.addSearch(nameASD.getText().toString().trim(), label, saveDetails);
-
-                            } else {
-                                String label = generateLabel(labelDetails);
-                                Map<String, ArrayList<String>> saveDetails = new HashMap<>();
-                                saveDetails.put("coordinates", coordinates);
-                                saveDetails.put("categories", categories);
-                                saveDetails.put("placeNames", names);
-                                saveDetails.put("cuisines", cuisine);
-                                saveDetails.put("openingHours", openingHours);
-                                saveDetails.put("charges", charge);
-
-                                saveManager.addSearch(nameASD.getText().toString().trim(), label, saveDetails);
-                            }
-
-                            Toast.makeText(MainActivity.this, R.string.add_toast, Toast.LENGTH_LONG).show();
-                            dialog.dismiss();
-                        }else {
-                            Toast.makeText(MainActivity.this,R.string.save_title_empty,Toast.LENGTH_LONG).show();
-                        }
+                    if (places.size()>1){
+                        searchDetailsLayout.setVisibility(View.VISIBLE);
                     }
-                });
-                    dialog.show();
+                    if (selectedPlaces.size()>1){
+                        routePlanActionButton.setVisibility(View.VISIBLE);
+                    }
+
+                    /*} else {
+                        menuContainer.animate().translationY(+menuContainer.getHeight()).setDuration(300).start();
+                        searchContainer.animate().translationY(searchContainer.getHeight() - handle.getHeight()).setDuration(300).start();
+                        isMenuOut = false;
+                    }*/
+                }
+                // Felfelé pöccintés
+                else if (velocityY < 0) {
+                    //if (!isItemContainerOut) {
+                    map.setMultiTouchControls(false);
+                    map.setBuiltInZoomControls(false);
+                    handleArrow.animate().rotation(180).setDuration(300).start();
+                    itemContainer.animate().translationY(0).setDuration(300).start();
+                    //searchContainer.animate().translationY(searchContainer.getHeight() - menuContainer.getHeight() - handle.getHeight()).setDuration(300).start();
+                    //isItemContainerOut = true;
+
+                    searchDetailsLayout.setVisibility(View.GONE);
+
+                    if (selectedPlaces.size()>1) {
+                        isUpdatedFromActivity = true;
+
+                        /*fragmentsViewModel.getCategories().postValue(selectedCategories);
+                        //fragmentsViewModel.setCategories(selectedCategories);
+                        fragmentsViewModel.getPlaces().postValue(selectedPlaces);
+                        //fragmentsViewModel.setPlaces(selectedPlaces);*/
+
+                        fragmentsViewModel.uploadToDatabase(selectedDistance,selectedTransport,
+                                selectedPlaces,selectedCategories);
+
+
+                    }
+                    if (routePlanActionButton.getVisibility() == View.VISIBLE){
+                        routePlanActionButton.setVisibility(View.GONE);
+                    }
+
+                    if (places.size()==0) {
+                        map.setScrollableAreaLimitLatitude(47.09327, 47.09327, 0);
+                        map.setScrollableAreaLimitLongitude(17.91149, 17.91149, 0);
+                    }else{
+                        map.setScrollableAreaLimitLatitude(places.get(0).getCoordinates().getLat(), places.get(0).getCoordinates().getLat(), 0);
+                        map.setScrollableAreaLimitLongitude(places.get(0).getCoordinates().getLon(), places.get(0).getCoordinates().getLon(), 0);
+                    }
+                    /*} else {
+
+                        searchContainer.animate().translationY(-menuContainer.getHeight()).setDuration(300).start();
+                        categoriesContainer.animate().translationY(categoriesContainer.getHeight() - menuContainer.getHeight() - handle.getHeight()).setDuration(300).start();
+                        map.setMultiTouchControls(false);
+                        map.setBuiltInZoomControls(false);
+
+                        isSecondOut = true;
+                    }*/
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true; // Szükséges ahhoz, hogy a fling esemény működjön
             }
         });
+
+
+        handle.setOnTouchListener(new View.OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // Átadjuk az érintési eseményeket a GestureDetector-nak
+
+                return gestureDetector.onTouchEvent(event);
+            }
+        });
+
+        map.addMapListener(new MapListener() {
+            @Override
+            public boolean onScroll(ScrollEvent event) {
+
+                if (!isNavi)
+                    checkBoundingBox(allMarkers);
+                else checkBoundingBox(routeMarkers);
+
+                return true;
+            }
+
+            @Override
+            public boolean onZoom(ZoomEvent event) {
+
+                if(!isNavi)
+                    checkBoundingBox(allMarkers);
+                else checkBoundingBox(routeMarkers);
+
+                return true;
+            }
+        });
+
+
+        SaveFragment saveFragment = new SaveFragment();
+        SearchFragment searchFragment = new SearchFragment();
+        ShareFragment shareFragment = new ShareFragment();
+
+        menuLayout.setSelectedItemId(R.id.search_menu_item);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.menu_item_layout, searchFragment)
+                .commit();
+
+        menuLayout.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+
+                if (item.getItemId()==R.id.save_menu_item){
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.menu_item_layout, saveFragment)
+                            .commit();
+                    return true;
+                }
+                if (item.getItemId()==R.id.search_menu_item){
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.menu_item_layout, searchFragment)
+                            .commit();
+                    return true;
+                }
+                if (item.getItemId()==R.id.share_menu_item) {
+                    if (mAuth.getCurrentUser()!=null) {
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.menu_item_layout, shareFragment)
+                                .commit();
+                        return true;
+                    }else{
+                        Toast.makeText(MainActivity.this,R.string.please_login,Toast.LENGTH_LONG).show();
+                    }
+                }
+                    /*switch (item.getItemId()) {
+                    case R.id.save_menu_item:
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.menu_item_layout, saveFragment)
+                                .commit();
+                        return true;
+
+                    case R.id.search_menu_item:
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.menu_item_layout, searchFragment)
+                                .commit();
+                        return true;
+
+                    case R.id.share_menu_item:
+                        if (mAuth.getCurrentUser()!=null) {
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.menu_item_layout, shareFragment)
+                                    .commit();
+                            return true;
+                        }else{
+                            Toast.makeText(MainActivity.this,R.string.please_login,Toast.LENGTH_LONG).show();
+                        }
+
+                }*/
+                return false;
+            }
+        });
+
+        /*fragmentsViewModel.getPlaces().observe(MainActivity.this, new Observer<ArrayList<Place>>() {
+            @Override
+            public void onChanged(ArrayList<Place> p) {
+                if (!isUpdatedFromActivity) {
+                    suggestedPlaces.clear();
+
+                    selectedPlaces.clear();
+                    places.clear();
+                    places.addAll(p);
+
+                    map.setScrollableAreaLimitLatitude(places.get(0).getCoordinates().getLat(), places.get(0).getCoordinates().getLat(), 0);
+                    map.setScrollableAreaLimitLongitude(places.get(0).getCoordinates().getLon(), places.get(0).getCoordinates().getLon(), 0);
+                    handleArrow.animate().rotation(0).setDuration(300).start();
+                    itemContainer.animate().translationY(itemContainer.getHeight()-handle.getHeight()).setDuration(300).start();
+                    map.setMultiTouchControls(true);
+                    map.setBuiltInZoomControls(true);
+                    map.resetScrollableAreaLimitLatitude();
+                    map.resetScrollableAreaLimitLongitude();
+
+                    markCoordinatesOnMap(places);
+                }else {
+                    isUpdatedFromActivity = false;
+                }
+            }
+        });
+
+        fragmentsViewModel.getTransport().observe(this, new Observer<String>() {
+            @SuppressLint("UseCompatLoadingForDrawables")
+            @Override
+            public void onChanged(String s) {
+                selectedTransport = s;
+
+                searchDetailsLayout.setVisibility(View.VISIBLE);
+
+                if (s.equals("walk")){
+                    transportImage.setImageDrawable(resources.getDrawable(R.drawable.walk, getTheme()));
+                }else {
+                    transportImage.setImageDrawable(resources.getDrawable(R.drawable.car, getTheme()));
+                }
+
+            }
+        });
+        fragmentsViewModel.getDistance().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+
+                selectedDistance = integer;
+
+                switch (integer){
+                    case 15: {
+                        withinText.setText(R.string.within_15);
+                        break;
+                    }
+                    case 30: {
+                        withinText.setText(R.string.within_30);
+                        break;
+                    }
+                    default: {
+                        withinText.setText(R.string.within_45);
+                        break;
+                    }
+                }
+
+            }
+        });
+        fragmentsViewModel.getCategories().observe(this, new Observer<ArrayList<String>>() {
+            @SuppressLint("UseCompatLoadingForDrawables")
+            @Override
+            public void onChanged(ArrayList<String> arrayList) {
+                allCategories.clear();
+                allCategories.addAll(arrayList);
+
+                categoriesChipLayout.removeAllViews();
+
+                for (String category: arrayList){
+                    Chip chip = new Chip(MainActivity.this);
+                    chip.setText(category);
+                    chip.setBackgroundDrawable(resources.getDrawable(R.drawable.toggle_button_style_off,getTheme()));
+                    categoriesChipLayout.addView(chip);
+                }
+            }
+        });*/
+
+        fragmentsViewModel.getUpdated().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+
+                if (!isUpdatedFromActivity) {
+                    suggestedPlaces.clear();
+
+                    selectedPlaces.clear();
+                    places.clear();
+
+                    allCategories.clear();
+
+                    ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+                    executorService.execute(() -> {
+
+                        try {
+                            List<Search> search = fragmentsViewModel.getSearch();
+                            /*
+                            List<SearchWithPlaces> searchWithPlaces = fragmentsViewModel.getSearchWithPlaces();*/
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                executorService.execute(() -> {
+
+                                    try {
+
+                                        List<Place> tempPlace = fragmentsViewModel.getPlaces(search.get(0).getId());
+
+                                        new Handler(Looper.getMainLooper()).post(() -> {
+
+                                            executorService.execute(() -> {
+                                                try {
+
+                                                    List<String> categoryEntities = fragmentsViewModel.getCategories(search.get(0).getId());
+
+                                                    new Handler(Looper.getMainLooper()).post(() -> {
+                                                        allCategories.addAll(categoryEntities);
+                                                        places.addAll(tempPlace);
+
+                                                        if (search.get(0).getTransport().equals("walk")){
+                                                            transportImage.setImageDrawable(resources.getDrawable(R.drawable.walk, getTheme()));
+                                                        }else {
+                                                            transportImage.setImageDrawable(resources.getDrawable(R.drawable.car, getTheme()));
+                                                        }
+
+                                                        selectedDistance = ((int) search.get(0).getDistance());
+                                                        selectedTransport = search.get(0).getTransport();
+
+                                                        switch (selectedDistance){
+                                                            case 15: {
+                                                                withinText.setText(R.string.within_15);
+                                                                break;
+                                                            }
+                                                            case 30: {
+                                                                withinText.setText(R.string.within_30);
+                                                                break;
+                                                            }
+                                                            default: {
+                                                                withinText.setText(R.string.within_45);
+                                                                break;
+                                                            }
+                                                        }
+
+                                                        categoriesChipLayout.removeAllViews();
+
+                                                        for (String category: allCategories){
+                                                            Chip chip = new Chip(MainActivity.this);
+                                                            chip.setText(category);
+                                                            chip.setBackgroundDrawable(resources.getDrawable(R.drawable.toggle_button_style_off,getTheme()));
+                                                            categoriesChipLayout.addView(chip);
+                                                        }
+
+                                                        searchDetailsLayout.setVisibility(View.VISIBLE);
+
+                                                        map.setScrollableAreaLimitLatitude(places.get(0).getCoordinates().getLat(), places.get(0).getCoordinates().getLat(), 0);
+                                                        map.setScrollableAreaLimitLongitude(places.get(0).getCoordinates().getLon(), places.get(0).getCoordinates().getLon(), 0);
+                                                        handleArrow.animate().rotation(0).setDuration(300).start();
+                                                        itemContainer.animate().translationY(itemContainer.getHeight()-handle.getHeight()).setDuration(300).start();
+                                                        map.setMultiTouchControls(true);
+                                                        map.setBuiltInZoomControls(true);
+                                                        map.resetScrollableAreaLimitLatitude();
+                                                        map.resetScrollableAreaLimitLongitude();
+
+                                                        markCoordinatesOnMap(places);
+                                                    });
+                                                }catch (Exception exception){}
+
+                                            });
+
+                                        });
+
+                                    }catch (Exception ignored){}
+
+                                });
+
+
+                            });
+                        } catch (Exception e) {
+                        }
+
+                    });
+
+                }else {
+                    isUpdatedFromActivity = false;
+                }
+
+            }
+        });
+
 
 
         //OnClickListener for routeBTN
@@ -282,12 +641,81 @@ public class MainActivity extends AppCompatActivity {
         //----------------------------------------------------------------------------------------------------------------
         //BEGINNING OF routeBTN's OnClickListener
         //----------------------------------------------------------------------------------------------------------------
-        routeBTN = findViewById(R.id.routeBTN);
-        routeBTN.setOnClickListener(new View.OnClickListener() {
+        routePlanActionButton = findViewById(R.id.route_plan_action_button);
+        routePlanActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 animateImageButton(v);
-                showTransportationDialog(selectedMarkers);
+
+                if (!isNavi) {
+                    if (selectedPlaces.size()!=0) {
+
+                        routePlanActionButton.setImageDrawable(resources.getDrawable(R.drawable.route_plan_done, getTheme()));
+
+                        removeOtherMarkers();
+
+
+                        String mode;
+
+                        if (selectedTransport.equals("car"))
+                            mode = "driving-car";
+                        else mode = "foot-walking";
+
+                        navigation.tspSolver(mode, selectedPlaces, new Navigation.TspCallback() {
+                            @Override
+                            public void onComplete(ArrayList<Polyline> polylines,ArrayList<Integer>indexes) {
+                                map.getOverlays().addAll(polylines);
+                                routePolys.addAll(polylines);
+                                for (int i=1; i<selectedPlaces.size();i++){
+                                    Place place = selectedPlaces.get(i);
+                                    for (Marker marker: allMarkers){
+                                        if (marker.getPosition().getLatitude()==place.getCoordinates().getLat() && marker.getPosition().getLongitude()==place.getCoordinates().getLon()){
+                                            if (nameMarkers.contains(marker)){
+                                                marker.setTextIcon(indexes.get(selectedPlaces.indexOf(place)) + " " + place.getName());
+                                            }
+                                        }
+                                    }
+                                }
+                                map.invalidate();
+                                isNavi = true;
+                            }
+
+                            @Override
+                            public void onFailure() {
+                                Toast.makeText(MainActivity.this, R.string.route_planning_error, Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    } else {
+                        Toast.makeText(MainActivity.this,R.string.route_empty_place_list,Toast.LENGTH_LONG).show();
+                    }
+                }
+                else {
+                    routePlanActionButton.setImageDrawable(resources.getDrawable(R.drawable.route_plan, getTheme()));
+
+                    List<Marker> markers = radiusMarkerClusterer.getItems();
+                    setupMarkerClusterer(MainActivity.this);
+                    markers.addAll(otherMarkers);
+
+                    for (int i=1; i<selectedPlaces.size();i++){
+                        Place place = selectedPlaces.get(i);
+                        for (Marker marker: markers){
+                            if (marker.getPosition().getLatitude()==place.getCoordinates().getLat() && marker.getPosition().getLongitude()==place.getCoordinates().getLon()){
+                                if (nameMarkers.contains(marker)){
+                                    marker.setTextIcon(place.getName());
+                                }
+                            }
+                        }
+                    }
+
+                    for (Marker marker: markers){
+                        radiusMarkerClusterer.add(marker);
+                    }
+
+                    map.getOverlays().add(radiusMarkerClusterer);
+                    map.getOverlays().removeAll(routePolys);
+                    map.invalidate();
+                    isNavi = false;
+                }
 
             }
         });
@@ -295,261 +723,41 @@ public class MainActivity extends AppCompatActivity {
         //END OF routeBTN's OnClickListener
         //----------------------------------------------------------------------------------------------------------------
 
-        menuBTN = findViewById(R.id.menuBTN);
-        //Start the MenuActivity if the Menu button is clicked
-        //----------------------------------------------------------------------------------------------------------------
-        //BEGINNING OF menuBTN's OnClickListener
-        //----------------------------------------------------------------------------------------------------------------
-        menuBTN.setOnClickListener(new View.OnClickListener() {
+
+        userBTN= findViewById(R.id.userBTN2);
+        userBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 animateImageButton(v);
-                Intent intent = new Intent(MainActivity.this, MenuActivity.class);
-                startActivityForResult(intent, REQUEST_CODE);
+                Intent intent = new Intent(MainActivity.this, UserActivity.class);
+                startActivityForResult(intent, SHARED_REQUEST_CODE);
             }
         });
 
-        shareSearchBTN = findViewById(R.id.shareSearchBTN);
 
-        if (mAuth.getCurrentUser()!=null || sharedPreferences.getBoolean("loggedIn", false)){
-            shareSearchBTN.setVisibility(View.VISIBLE);
-        }else {
-            shareSearchBTN.setVisibility(View.INVISIBLE);
-        }
-        shareSearchBTN.setOnClickListener(new View.OnClickListener() {
+        mapAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
-                animateImageButton(v);
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String name = placesAdapter.getItem(position);
 
-                Dialog dialog = new Dialog(MainActivity.this,R.style.CustomDialogTheme);
-                dialog.setContentView(R.layout.share_search_dialog);
-
-                Window window = dialog.getWindow();
-                if(window!=null) {
-                    window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    /*window.setBackgroundDrawableResource(R.drawable.fade);*/
-                    window.setWindowAnimations(R.style.DialogAnimation);
-
-                    WindowManager.LayoutParams layoutParams = window.getAttributes();
-                    layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT; // Match parent width
-                    layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT; // Wrap content height
-                    layoutParams.gravity = Gravity.TOP; // Position at the bottom of the screen
-                    window.setAttributes(layoutParams);
+                for (Place place : places){
+                    if (place.getName()!=null) {
+                        if (place.getName().equals(name)) {
+                            GeoPoint geoPoint = new GeoPoint(place.getCoordinates().getLat(), place.getCoordinates().getLon());
+                            mapController.setCenter(geoPoint);
+                            mapController.setZoom(20.0);
+                        }
+                    }
                 }
-
-                dialog.setCancelable(true);
-
-                TextView titleSSD = dialog.findViewById(R.id.titleSSD);
-                /*TextView addedEmailSSD = dialog.findViewById(R.id.addedEmailsSSD);*/
-                EditText withSSD = dialog.findViewById(R.id.withSSD);
-                EditText nameSSD = dialog.findViewById(R.id.nameSSD);
-
-                ListView addedEmailsSSD = dialog.findViewById(R.id.addedEmailsSSD);
-                ListView contactsListSSD = dialog.findViewById(R.id.contactListSSD);
-
-                titleSSD.setText(resources.getString(R.string.share));
-
-                //StringBuilder stringBuilder = new StringBuilder();
-                ArrayList<String> usernames = new ArrayList<>();
-                ArrayList<String> recentUsernames = new ArrayList<>();
-
-                ArrayAdapter withEmailsArrayAdapter = new ArrayAdapter(dialog.getContext(),android.R.layout.simple_list_item_1,usernames);
-                addedEmailsSSD.setAdapter(withEmailsArrayAdapter);
-
-                ArrayAdapter contactsArrayAdapter = new ArrayAdapter<>(dialog.getContext(), android.R.layout.simple_list_item_1, recentUsernames);
-                contactsListSSD.setAdapter(contactsArrayAdapter);
-
-                addedEmailsSSD.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                    @Override
-                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-                        withEmailsArrayAdapter.remove(usernames.get(position));
-                        withEmailsArrayAdapter.notifyDataSetChanged();
-                        return true;
-                    }
-                });
-
-                contactsListSSD.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        if (!usernames.contains((String) recentUsernames.get(position))) {
-                            usernames.add((String) recentUsernames.get(position));
-                            withEmailsArrayAdapter.notifyDataSetChanged();
-                        }
-                    }
-                });
-
-                firebaseManager.getRecentSharedWithUsernames(new FirebaseManager.RecentUsernames() {
-                    @Override
-                    public void onSuccess(ArrayList<String> usernames) {
-                        recentUsernames.addAll(usernames);
-
-                        contactsArrayAdapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onFailure() {
-
-                    }
-                });
-
-                ImageButton addMoreSSD = dialog.findViewById(R.id.addMoreSSD);
-                ImageButton contactsSSD = dialog.findViewById(R.id.contactsSSD);
-
-
-                contactsSSD.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        animateImageButton(v);
-                        if (contactsListSSD.getVisibility()== View.GONE){
-                            contactsListSSD.setVisibility(View.VISIBLE);
-                            Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
-                            contactsListSSD.startAnimation(animation);
-                        }else {
-                            contactsListSSD.setVisibility(View.GONE);
-                            Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.close_slide_down);
-                            contactsListSSD.startAnimation(animation);
-                        }
-                    }
-                });
-
-                addMoreSSD.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        animateImageButton(v);
-                        if (!usernames.contains(withSSD.getText().toString().trim())) {
-                            if (!withSSD.getText().toString().trim().equals("")) {
-                                usernames.add(withSSD.getText().toString().trim());
-
-                                withEmailsArrayAdapter.notifyDataSetChanged();
-
-
-                                withSSD.setText("");
-                            }else {
-                                Toast.makeText(MainActivity.this,R.string.empty_addressee,Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    }
-                });
-
-
-                Button saveSSD =dialog.findViewById(R.id.saveSSD);
-                saveSSD.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (usernames.size()!=0) {
-                            if (!nameSSD.getText().toString().trim().equals("")) {
-
-                                for(String username: usernames){
-                                    if (!recentUsernames.contains(username)){
-                                        recentUsernames.add(username);
-                                    }
-                                }
-
-                                firebaseManager.addRecentlySharedWithUsername(recentUsernames);
-
-                                labelDetails.put("date", getCurrentDate());
-
-
-                                if (selectedMarkersArray.size() > 1) {
-                                    labelDetails.replace("categories", selectedCategoriesArray);
-
-                                    Map<String, Object> shareDetails = new HashMap<>();
-                                    shareDetails.put("coordinates", selectedMarkersArray);
-                                    shareDetails.put("categories", selectedTagsArray);
-                                    shareDetails.put("placeNames", selectedNamesArray);
-                                    shareDetails.put("cuisines", selectedCuisineArray);
-                                    shareDetails.put("openingHours", selectedOpeningHoursArray);
-                                    shareDetails.put("charges", selectedChargesArray);
-
-                                    firebaseManager.shareSearch(usernames, nameSSD.getText().toString().trim(),
-                                            labelDetails, shareDetails);
-
-                                } else {
-
-                                    Map<String, Object> shareDetails = new HashMap<>();
-                                    shareDetails.put("coordinates", coordinates);
-                                    shareDetails.put("categories", categories);
-                                    shareDetails.put("placeNames", names);
-                                    shareDetails.put("cuisines", cuisine);
-                                    shareDetails.put("openingHours", openingHours);
-                                    shareDetails.put("charges", charge);
-
-                                    firebaseManager.shareSearch(usernames, nameSSD.getText().toString().trim(),
-                                            labelDetails, shareDetails);
-
-                                }
-                                dialog.dismiss();
-                            }else{
-                                Toast.makeText(MainActivity.this,R.string.share_title_empty,Toast.LENGTH_LONG).show();
-                            }
-                        }else {
-                            Toast.makeText(MainActivity.this,R.string.empty_addressee_list,Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-                dialog.show();
             }
         });
+
 
     }
     //----------------------------------------------------------------------------------------------------------------
     //END OF menuBTN's OnClickListener
     //----------------------------------------------------------------------------------------------------------------
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode== REQUEST_CODE){
-            if (resultCode== RESULT_OK){
-                //Handle the response of the MenuActivity,
-                // calls the markCoordinatesOnMap function
-                //----------------------------------------------------------------------------------------------------------------
-                //BEGIN
-                //----------------------------------------------------------------------------------------------------------------
 
-                    if (data.getSerializableExtra("extractedMap")!=null){
-                        addSaveBTN.setVisibility(View.VISIBLE);
-                        shareSearchBTN.setVisibility(View.VISIBLE);
-                        clearAll();
-                        Map<String,ArrayList<String>> extractedMap= (Map<String, ArrayList<String>>) data.getSerializableExtra("extractedMap");
-                        labelDetails = (Map<String, Object>) data.getSerializableExtra("label");
-                        if (extractedMap!=null){
-
-                            markCoordinatesOnMap(extractedMap);
-                        }
-                    }/*
-                    if (data.getStringExtra("qrResponse")!=null){
-                        addSaveBTN.setVisibility(View.VISIBLE);
-                        splitResponse = data.getStringExtra("qrResponse").split(";");
-                        markCoordinatesOnMap();
-                    }*/if (data.getSerializableExtra("savedMap")!=null) {
-                        addSaveBTN.setVisibility(View.VISIBLE);
-                        shareSearchBTN.setVisibility(View.VISIBLE);
-                        clearAll();
-                        labelDetails = (Map<String, Object>) data.getSerializableExtra("label");
-                        Map<String,ArrayList<String>> savedMap = (Map<String, ArrayList<String>>) data.getSerializableExtra("savedMap");
-                        if (savedMap!=null){
-                            markCoordinatesOnMap(savedMap);
-                        }
-                    }
-                    if (data.getSerializableExtra("sharedMap")!=null) {
-                        addSaveBTN.setVisibility(View.VISIBLE);
-                        shareSearchBTN.setVisibility(View.VISIBLE);
-                        clearAll();
-                        labelDetails = (Map<String, Object>) data.getSerializableExtra("label");
-                        Map<String,ArrayList<String>> sharedMap = (Map<String, ArrayList<String>>) data.getSerializableExtra("sharedMap");
-                        if (sharedMap!=null){
-                            markCoordinatesOnMap(sharedMap);
-                        }
-                    }
-
-                }
-                //----------------------------------------------------------------------------------------------------------------
-                //END
-                //----------------------------------------------------------------------------------------------------------------
-            }
-    }
 
     //Code lines necessary for the integration of the OSM
     //----------------------------------------------------------------------------------------------------------------
@@ -561,15 +769,15 @@ public class MainActivity extends AppCompatActivity {
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
 
-        if (mAuth.getCurrentUser()!=null || sharedPreferences.getBoolean("loggedIn", false)){
+        /*if (mAuth.getCurrentUser()!=null || sharedPreferences.getBoolean("loggedIn", false)){
             shareSearchBTN.setVisibility(View.VISIBLE);
         }else {
             shareSearchBTN.setVisibility(View.INVISIBLE);
-        }
+        }*/
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        /*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
-        map.onResume(); //needed for compass, my location overlays, v6.0.0 and up
+        map.onResume();*/ //needed for compass, my location overlays, v6.0.0 and up
     }
 
     @Override
@@ -582,68 +790,95 @@ public class MainActivity extends AppCompatActivity {
 
         //if you switch to the menu the selectedMarkers array is cleared
         // and the routeBTN is set invisible and unclickable
-        routeBTN.setVisibility(View.INVISIBLE);
-        routeBTN.setClickable(false);
         map.onPause();  //needed for compass, my location overlays, v6.0.0 and up
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         clearAll();
     }
+
+/*    @Override
+    protected void onStop() {
+        super.onStop();
+
+        appDatabase.clearAllTables();
+    }*/
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SHARED_REQUEST_CODE){
+            if (resultCode == RESULT_OK) {
+                if (data != null) {
+                    if (data.getSerializableExtra("result") != null) {
+
+                        Share share = (Share) data.getSerializableExtra("result");
+                        places.clear();
+                        selectedPlaces.clear();
+                        places.addAll(share.getSharedPlaces());
+                        selectedTransport = share.getShareDetails().getTransportMode();
+                        allCategories.addAll(share.getShareDetails().getCategories());
+
+                        if (share.getShareDetails().getTransportMode().equals("walk")){
+                            transportImage.setImageDrawable(resources.getDrawable(R.drawable.walk, getTheme()));
+                        }else {
+                            transportImage.setImageDrawable(resources.getDrawable(R.drawable.car, getTheme()));
+                        }
+
+                        selectedDistance = (share.getShareDetails().getDistance());
+
+                        switch (selectedDistance){
+                            case 15: {
+                                withinText.setText(R.string.within_15);
+                                break;
+                            }
+                            case 30: {
+                                withinText.setText(R.string.within_30);
+                                break;
+                            }
+                            default: {
+                                withinText.setText(R.string.within_45);
+                                break;
+                            }
+                        }
+
+                        categoriesChipLayout.removeAllViews();
+
+                        for (String category: allCategories){
+                            Chip chip = new Chip(MainActivity.this);
+                            chip.setText(category);
+                            chip.setBackgroundDrawable(resources.getDrawable(R.drawable.toggle_button_style_off,getTheme()));
+                            categoriesChipLayout.addView(chip);
+                        }
+
+                        searchDetailsLayout.setVisibility(View.VISIBLE);
+
+
+                        isUpdatedFromActivity = true;
+                        /*fragmentsViewModel.getTransport().postValue(share.getShareDetails().getTransportMode());
+                        fragmentsViewModel.getCategories().postValue(share.getShareDetails().getCategories());
+                        fragmentsViewModel.getPlaces().postValue(share.getSharedPlaces());
+                        fragmentsViewModel.getCategories().postValue(share.getShareDetails().getCategories());
+                        fragmentsViewModel.getDistance().postValue(share.getShareDetails().getDistance());*/
+                        fragmentsViewModel.uploadToDatabase(share.getShareDetails().getDistance(),share.getShareDetails().getTransportMode(),
+                                share.getSharedPlaces(),share.getShareDetails().getCategories());
+
+
+                        markCoordinatesOnMap(places);
+
+                    }
+                }
+            }
+        }
+    }
+
     private void clearAll(){
-        selectedMarkers.clear();
-        selectedMarkersArray.clear();
-        selectedTagsArray.clear();
-        selectedNamesArray.clear();
-        selectedCategoriesArray.clear();
-        selectedChargesArray.clear();
-        selectedOpeningHoursArray.clear();
-        selectedCuisineArray.clear();
-        coordinates.clear();
-        categories.clear();
-        names.clear();
-        cuisine.clear();
-        openingHours.clear();
-        charge.clear();
-        allMarkers.clear();
-        textMarkers.clear();
-        selectedTextMarkers.clear();
         resources.flushLayoutCache();
     }
 
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        ArrayList<String> permissionsToRequest = new ArrayList<>();
-        for (int i = 0; i < grantResults.length; i++) {
-            permissionsToRequest.add(permissions[i]);
-        }
-        if (permissionsToRequest.size() > 0) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    permissionsToRequest.toArray(new String[0]),
-                    REQUEST_PERMISSIONS_REQUEST_CODE);
-        }
-    }*/
-
-   /* private void requestPermissionsIfNecessary(String[] permissions) {
-        ArrayList<String> permissionsToRequest = new ArrayList<>();
-        for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Permission is not granted
-                permissionsToRequest.add(permission);
-            }
-        }
-        if (permissionsToRequest.size() > 0) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    permissionsToRequest.toArray(new String[0]),
-                    REQUEST_PERMISSIONS_REQUEST_CODE);
-        }
-    }*/
     //----------------------------------------------------------------------------------------------------------------
     //END
     //----------------------------------------------------------------------------------------------------------------
@@ -657,54 +892,66 @@ public class MainActivity extends AppCompatActivity {
     //----------------------------------------------------------------------------------------------------------------
     //BEGINNING OF markCoordinatesOnMap
     //----------------------------------------------------------------------------------------------------------------
-    public void markCoordinatesOnMap(Map<String, ArrayList<String>> mapResponse){
+    public void markCoordinatesOnMap(ArrayList<Place> places){
 
         map.getOverlays().clear();
 
-        coordinates = mapResponse.get("coordinates");
-        categories = mapResponse.get("categories");
-        names = mapResponse.get("placeNames");
-        cuisine= mapResponse.get("cuisines");
-        openingHours= mapResponse.get("openingHours");
-        charge= mapResponse.get("charges");
-
-        Log.d("mainActivity", String.valueOf(coordinates.size()));
-        Log.d("mainActivity", String.valueOf(categories.size()));
-        Log.d("mainActivity", String.valueOf(charge.size()));
-
-        String[] startPoint= coordinates.get(0).split(",");
-        Double latitude = Double.parseDouble(startPoint[0]);
-        Double longitude = Double.parseDouble(startPoint[1]);
         IMapController mapControllerOnResume = map.getController();
         mapControllerOnResume.setZoom(15.0);
-        GeoPoint startPointOnCreate = new GeoPoint(latitude, longitude);
 
-        newstartMarker = new Marker(map);
-        newstartMarker.setPosition(startPointOnCreate);
-        newstartMarker.setTitle(String.valueOf(R.string.start));
-        newstartMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
-        map.getOverlays().add(newstartMarker);
-        newstartMarker.setIcon(getResources().getDrawable(R.drawable.blue_marker));
-        if (!selectedMarkers.contains(newstartMarker)) {
-            selectedMarkers.add(newstartMarker);
-            selectedMarkersArray.add(latitude + "," + longitude);
+        allMarkers = new ArrayList<>();
+        nameMarkers.clear();
+
+        Marker start = new Marker(map);
+        GeoPoint startGeoPoint = new GeoPoint(places.get(0).getCoordinates().getLat(),places.get(0).getCoordinates().getLon());
+        start.setPosition(startGeoPoint);
+        start.setIcon(resources.getDrawable(R.drawable.start_marker));
+
+        allMarkers.add(start);
+        start.setAnchor(Marker.ANCHOR_CENTER,Marker.ANCHOR_CENTER);
+
+        if (!selectedPlaces.contains(places.get(0))) {
+            selectedPlaces.add(places.get(0));
         }
 
+        for(int i = 1; i< places.size(); i++){
+            suggestedPlaces.add(places.get(i).getName());
+        }
 
-        for (int i = 1; i < coordinates.size(); i++) {
+        placesAdapter = new ArrayAdapter<>(MainActivity.this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,suggestedPlaces);
+        mapAutoComplete.setAdapter(placesAdapter);
+
+
+        for (int i = 1; i < places.size(); i++) {
+
             Marker marker = new Marker(map);
-            marker.setIcon(categoryManager.getMarkerIcon(categories.get(i-1)));
-            String[] markerPoint = coordinates.get(i).split(",");
-            Double pointLat = Double.parseDouble(markerPoint[0]);
-            Double pointLong = Double.parseDouble(markerPoint[1]);
-            GeoPoint geoPoint = new GeoPoint(pointLat, pointLong);
-            marker.setPosition(geoPoint);
-            Marker markerTest = new Marker(map);
-            markerTest.setTextIcon(names.get(i-1).toUpperCase());
-            markerTest.setPosition(geoPoint);
+            Drawable icon = categoryManager.getMarkerIcon(places.get(i).getCategory());
 
-            textMarkers.add(markerTest);
+            if (categoryManager.getMarkerFullCategory(places.get(i).getCategory()).equals(resources.getString(R.string.aquatics))){
+                icon.setTint(resources.getColor(R.color.beach_resort_alt,getTheme()));
+            }
+            if (categoryManager.getMarkerFullCategory(places.get(i).getCategory()).equals(resources.getString(R.string.concert))){
+                icon.setTint(resources.getColor(R.color.music_alt, getTheme()));
+            }
+            if (categoryManager.getMarkerFullCategory(places.get(i).getCategory()).equals(resources.getString(R.string.theatre))){
+                icon.setTint(resources.getColor(R.color.theatre_alt, getTheme()));
+            }
+
+            marker.setIcon(icon);
+            marker.setTitle(places.get(i).getName());
+            GeoPoint geoPoint = new GeoPoint(places.get(i).getCoordinates().getLat(),places.get(i).getCoordinates().getLon());
+            marker.setPosition(geoPoint);
+
+            Marker nameMarker = new Marker(map);
+            nameMarker.setTextIcon(places.get(i).getName());
+            nameMarker.setPosition(geoPoint);
+
             allMarkers.add(marker);
+            allMarkers.add(nameMarker);
+            nameMarkers.add(nameMarker);
+
+            /*textMarkers.add(nameMarker);
+            allMarkers.add(marker);*/
             //OnClickListener for markers
             //if a marker is clicked, it is added to the selectedMarkers ArrayList and its image is replaced
             // if it is not already contained in the array
@@ -715,8 +962,13 @@ public class MainActivity extends AppCompatActivity {
             marker.setOnMarkerClickListener((m, mapView) -> {
                 //showTransportationDialog(m);
                 GeoPoint position = m.getPosition();
-                String positionString = String.valueOf(position.getLatitude())+"," + String.valueOf(position.getLongitude());
-                int index = coordinates.indexOf(positionString);
+                int index = 0;
+
+                for(Place place: places){
+                    if (place.getCoordinates().getLat()==position.getLatitude() && place.getCoordinates().getLon()==position.getLongitude())
+                        index = places.indexOf(place);
+                }
+
 
                 Dialog dialog = new Dialog(MainActivity.this,R.style.CustomDialogTheme);
                 dialog.setContentView(R.layout.marker_dialog);
@@ -741,6 +993,7 @@ public class MainActivity extends AppCompatActivity {
                 TextView markerCuisineMD = dialog.findViewById(R.id.markerCuisineMD);
                 TextView markerOpeningHoursMD = dialog.findViewById(R.id.markerOpeningHoursMD);
                 TextView markerChargeMD = dialog.findViewById(R.id.markerChargeMD);
+                TextView markerAddressMD = dialog.findViewById(R.id.markerAddressMD);
 
                 TextView openTV= dialog.findViewById(R.id.openTV);
                 TextView cuisineTV= dialog.findViewById(R.id.cuisineTV);
@@ -749,14 +1002,14 @@ public class MainActivity extends AppCompatActivity {
                 Button addMD= dialog.findViewById(R.id.addMD);
                 Button removeMD= dialog.findViewById(R.id.removeMD);
 
-                markerNameMD.setText(names.get(index-1));
-                markerCategoryMD.setText(categoryManager.getMarkerFullCategory(categories.get(index - 1)));
+                markerNameMD.setText(places.get(index).getName());
+                markerCategoryMD.setText(categoryManager.getMarkerFullCategory(places.get(index).getCategory()));
 
-                markerCuisineMD.setText(formatStringToShow(cuisine.get(index-1)));
-                markerOpeningHoursMD.setText(formatStringToShow(openingHours.get(index-1)));
-                markerChargeMD.setText(formatStringToShow(charge.get(index-1)));
+                markerCuisineMD.setText(places.get(index).getCuisine().replaceAll(";","\n"));
+                markerOpeningHoursMD.setText(places.get(index).getOpeningHours().replaceAll(";","\n"));
+                markerChargeMD.setText(places.get(index).getCharge().replaceAll(";","\n"));
 
-                if (selectedMarkers.contains(m)){
+                if (selectedPlaces.contains(places.get(index))){
                     addMD.setVisibility(View.INVISIBLE);
                     removeMD.setVisibility(View.VISIBLE);
                 }else{
@@ -764,44 +1017,40 @@ public class MainActivity extends AppCompatActivity {
                     removeMD.setVisibility(View.INVISIBLE);
                 }
 
-                if (cuisine.get(index-1).equals("unknown")){
+                if (places.get(index).getAddress()!=null)
+                    if (places.get(index).getAddress().AddressAsString().equals("unknown")){
+                        markerAddressMD.setVisibility(View.GONE);
+                    }else markerAddressMD.setText(places.get(index).getAddress().AddressAsString());
+                else markerAddressMD.setVisibility(View.GONE);
+
+                if (places.get(index).getCuisine().equals("unknown")){
                     cuisineTV.setVisibility(View.GONE);
                     markerCuisineMD.setVisibility(View.GONE);
                 }
-                if (openingHours.get(index-1).equals("unknown")){
+                if (places.get(index).getOpeningHours().equals("unknown")){
                     openTV.setVisibility(View.GONE);
                     markerOpeningHoursMD.setVisibility(View.GONE);
                 }
-                if (charge.get(index-1).equals("unknown")){
+                if (places.get(index).getCharge().equals("unknown")){
                     chargesTV.setVisibility(View.GONE);
                     markerChargeMD.setVisibility(View.GONE);
                 }
 
+                int finalIndex = index;
                 addMD.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        selectedMarkers.add(m);
-                        selectedTextMarkers.add(textMarkers.get(allMarkers.indexOf(m)));
-                        selectedMarkersArray.add(positionString);
-                        selectedTagsArray.add(categories.get(index-1));
-                        selectedNamesArray.add(names.get(index-1));
-                        selectedCuisineArray.add(cuisine.get(index-1));
-                        selectedOpeningHoursArray.add(openingHours.get(index-1));
-                        selectedChargesArray.add(charge.get(index-1));
+                        selectedPlaces.add(places.get(finalIndex));
 
-                        if (!selectedCategoriesArray.contains(categoryManager.getMarkerFullCategory(categories.get(index-1)))) {
-                            selectedCategoriesArray.add(categoryManager.getMarkerFullCategory(categories.get(index - 1)));
-                        }
-                        m.setIcon(resources.getDrawable(R.drawable.green_route_marker));
-
-                        if (selectedMarkers.size()>1 && selectedMarkers.size()<7){
-                            routeBTN.setVisibility(View.VISIBLE);
-                            routeBTN.setClickable(true);
-                        }else{
-                            routeBTN.setVisibility(View.INVISIBLE);
-                            routeBTN.setClickable(false);
+                        if (selectedPlaces.size()>2){
+                            routePlanActionButton.setVisibility(View.VISIBLE);
                         }
 
+                        if (!selectedCategories.contains(categoryManager.getMarkerFullCategory(places.get(finalIndex).getCategory()))) {
+                            selectedCategories.add(categoryManager.getMarkerFullCategory(places.get(finalIndex).getCategory()));
+                        }
+                        m.setIcon(resources.getDrawable(R.drawable.selected_marker));
+                        map.invalidate();
                         dialog.dismiss();
                     }
                 });
@@ -810,24 +1059,15 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
 
-                        selectedMarkers.remove(m);
-                        selectedMarkersArray.remove(positionString);
-                        selectedTagsArray.remove(categories.get(index-1));
-                        selectedNamesArray.remove(names.get(index-1));
-                        selectedCuisineArray.remove(cuisine.get(index-1));
-                        selectedOpeningHoursArray.remove(openingHours.get(index-1));
-                        selectedChargesArray.remove(charge.get(index-1));
+                        selectedPlaces.remove(places.get(finalIndex));
 
-                        selectedCategoriesArray.remove(categoryManager.getMarkerFullCategory(categories.get(index-1)));
-                        m.setIcon(categoryManager.getMarkerIcon(categories.get(index-1)));
-
-                        if (selectedMarkers.size()>1){
-                            routeBTN.setVisibility(View.VISIBLE);
-                            routeBTN.setClickable(true);
-                        }else{
-                            routeBTN.setVisibility(View.INVISIBLE);
-                            routeBTN.setClickable(false);
+                        if (selectedPlaces.size()<2){
+                            routePlanActionButton.setVisibility(View.GONE);
                         }
+
+                        selectedCategories.remove(categoryManager.getMarkerFullCategory(places.get(finalIndex).getCategory()));
+                        m.setIcon(categoryManager.getMarkerIcon(places.get(finalIndex).getCategory()));
+                        map.invalidate();
                         dialog.dismiss();
                     }
                 });
@@ -841,91 +1081,17 @@ public class MainActivity extends AppCompatActivity {
             //----------------------------------------------------------------------------------------------------------------
 
 
-            map.getOverlays().add(marker);
-            map.getOverlays().add(markerTest);
-            //marker.setIcon(getResources().getDrawable(R.drawable.green_marker));
+            /*map.getOverlays().add(marker);
+            map.getOverlays().add(nameMarker);*/
+            //marker.setIcon(getResources().getDrawable(R.drawable.other_marker));
 
 
         }
-
-        mapControllerOnResume.setCenter(startPointOnCreate);
+        checkBoundingBox(allMarkers);
+        mapControllerOnResume.setCenter(start.getPosition());
     }
     //----------------------------------------------------------------------------------------------------------------
     //END OF markCoordinatesOnMap
-    //----------------------------------------------------------------------------------------------------------------
-
-    private String formatStringToShow(String string){
-        String[] stringArray = string.split(";");
-        StringBuilder formattedString = new StringBuilder(stringArray[0]);
-
-        for (int i=1; i<stringArray.length; i++){
-            formattedString.append("\n");
-            formattedString.append(stringArray[i]);
-        }
-
-        return formattedString.toString();
-    }
-
-    //ShowTransportationDialog
-    //When the routeBTN is clicked, this dialog is shown
-    //the user is able to choose a transportation mode, which are "on foot", "car", or "public transport"
-    //When a transportation mode is chosen, the selectedMarkers array is sorted by the relative distance from each other
-    // and stored in the sortedMarkers then the startNavigation function is called for each Marker pairs in the sortedMarkers
-    //apart from these the other (not selected) markers are removed from the map
-    //----------------------------------------------------------------------------------------------------------------
-    //BEGINNING OF showTransportationDialog
-    //----------------------------------------------------------------------------------------------------------------
-
-    private void showTransportationDialog(ArrayList<Marker> markers) {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle(resources.getString(R.string.choose_transport));
-
-        String[] transportationModes = {resources.getString(R.string.car), resources.getString(R.string.walk)};
-
-        //ArrayList<Marker> sortedMarkers = sortMarkers(markers);
-
-        builder.setItems(transportationModes, (dialog, which) -> {
-
-            switch (which) {
-                case 0:
-                    // Autóval
-                    removeOtherMarkers();
-                    tspSolver("driving-car",markers);
-
-                    /*startNavigation("driving-car", sortedMarkers.get(0), sortedMarkers.get(1));
-                    for (int i= 1; i< (sortedMarkers.size())-1; i++ ) {
-
-                        startNavigation("driving-car", sortedMarkers.get(i), sortedMarkers.get(i+1));
-                    }
-                    startNavigation("driving-car", sortedMarkers.get(sortedMarkers.size()-1),sortedMarkers.get(0));*/
-                    break;
-
-                case 1:
-                    removeOtherMarkers();
-                    tspSolver("foot-walking",markers);
-
-                    /*startNavigation("foot-walking", sortedMarkers.get(0), sortedMarkers.get(1));
-                    for (int i= 1; i< sortedMarkers.size()-1; i++ ) {
-
-                        startNavigation("foot-walking", sortedMarkers.get(i), sortedMarkers.get(i+1));
-                    }
-                    startNavigation("foot-walking", sortedMarkers.get(sortedMarkers.size()-1),sortedMarkers.get(0));*/
-                    break;
-
-                case 2:
-                    //selectedMarker = marker;
-                    //removeOtherMarkers(selectedMarker);
-                    //startNavigation("pt");
-                    break;
-            }
-        });
-
-        builder.create().show();
-    }
-
-    //----------------------------------------------------------------------------------------------------------------
-    //END OF showTransportationDialog
     //----------------------------------------------------------------------------------------------------------------
 
     //removeOtherMarkers
@@ -934,20 +1100,19 @@ public class MainActivity extends AppCompatActivity {
     //BEGINNING OF removeOtherMarkers
     //----------------------------------------------------------------------------------------------------------------
     private void removeOtherMarkers() {
-        List<Overlay> overlays = map.getOverlays();
-        List<Overlay> overlaysToRemove = new ArrayList<>();
+        routeMarkers.clear();
 
-        for (Overlay overlay : overlays) {
-                if (overlay instanceof Marker && !selectedMarkers.contains(overlay) && !selectedTextMarkers.contains(overlay)) {
-                    if (overlay == newstartMarker) {
-
-                    } else {
-                        overlaysToRemove.add(overlay);
-                    }
-                }
+        setupMarkerClusterer(this);
+        for (Place place : selectedPlaces) {
+            for (Marker marker: allMarkers) {
+                if (marker.getPosition().getLongitude() == place.getCoordinates().getLon() && marker.getPosition().getLatitude() == place.getCoordinates().getLat()){
+                    radiusMarkerClusterer.add(marker);
+                    routeMarkers.add(marker);
+                }else otherMarkers.add(marker);
+            }
         }
-
-        overlays.removeAll(overlaysToRemove);
+        Log.d("routeSize", String.valueOf(routeMarkers.size()));
+        map.getOverlays().add(radiusMarkerClusterer);
     }
     //----------------------------------------------------------------------------------------------------------------
     //END OF removeOtherMarkers
@@ -959,360 +1124,44 @@ public class MainActivity extends AppCompatActivity {
     //----------------------------------------------------------------------------------------------------------------
     //BEGINNING OF startNavigation
     //----------------------------------------------------------------------------------------------------------------
-    /*private void startNavigation(String transportationMode, Marker marker1, Marker marker2) {
 
-        double startLat= marker1.getPosition().getLatitude();
-        double startLng= marker1.getPosition().getLongitude();
-        double destinationLat= marker2.getPosition().getLatitude();
-        double destinationLng= marker2.getPosition().getLongitude();
-        OpenRouteServiceAPI.getRoute(startLat, startLng, destinationLat, destinationLng, transportationMode, new OpenRouteServiceAPI.RouteCallback() {
-            @Override
-            public void onRouteReceived(String result) {
-
-                try {
-
-
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.e("OpenRouteServiceAPI", "Received null or empty response");
-                }
-            }
-
-            @Override
-            public void onRouteFailure() {
-
-            }
-
-        });
-        }*/
     //----------------------------------------------------------------------------------------------------------------
     //END OF startNavigation
     //----------------------------------------------------------------------------------------------------------------
 
-    private BoundingBox addPaddingToBoundingBox(BoundingBox boundingBox, double padding) {
-        double latMin = boundingBox.getLatSouth() - padding;
-        double latMax = boundingBox.getLatNorth() + padding;
-        double lonMin = boundingBox.getLonWest() - padding;
-        double lonMax = boundingBox.getLonEast() + padding;
+    private void setupMarkerClusterer(Context context){
 
-        return new BoundingBox(latMax, lonMax, latMin, lonMin);
+        if (radiusMarkerClusterer!=null)
+            map.getOverlays().remove(radiusMarkerClusterer);
+
+
+        radiusMarkerClusterer = new RadiusMarkerClusterer(context);
+
+        Bitmap clusterIcon = BonusPackHelper.getBitmapFromVectorDrawable(this,R.drawable.other_marker);
+
+        radiusMarkerClusterer.setIcon(clusterIcon);
+
+        radiusMarkerClusterer.setRadius(300);
+
+        radiusMarkerClusterer.setMaxClusteringZoomLevel(16);
+
     }
 
-    //sortMarkers
-    //sorts the content of the ArrayList provided as the function's parameter
-    //by the distance from each other
-    //by the end of the sorting, the marker that follows an other marker is the one that is the closest from the preceding markers in the list
-    //(in theory)
-    //----------------------------------------------------------------------------------------------------------------
-    //BEGINNING OF sortMarkers
-    //----------------------------------------------------------------------------------------------------------------
-    private ArrayList<Marker> sortMarkers(ArrayList<Marker> markers){
-        //NOTE: It is actually a travelling agent problem, feel free to implement this feature
-        for (int i=0; i<markers.size()-1; i++){
-            double distance = haversine(markers.get(i).getPosition().getLatitude(),markers.get(i).getPosition().getLongitude(),markers.get(i+1).getPosition().getLatitude(),markers.get(i+1).getPosition().getLongitude());
+    private void checkBoundingBox(ArrayList<Marker> markers){
 
-            for (int j=i+1; j<markers.size(); j++){
-                double compareDistance = haversine(markers.get(i).getPosition().getLatitude(),markers.get(i).getPosition().getLongitude(),markers.get(j).getPosition().getLatitude(),markers.get(j).getPosition().getLongitude());
-                    if (compareDistance<distance){
-                        distance= compareDistance;
-                        Marker temp= markers.get(j);
-                        markers.set(j, markers.get(i));
-                        markers.set(i, temp);
-                    }
+        if (map!=null) {
+            setupMarkerClusterer(this);
+
+            BoundingBox boundingBox = map.getBoundingBox();
+
+            for (Marker marker : markers) {
+                if (boundingBox.contains(marker.getPosition())) {
+                    radiusMarkerClusterer.add(marker);
+                }
             }
+
+            map.getOverlays().add(radiusMarkerClusterer);
         }
-        return markers;
-    }
-    //----------------------------------------------------------------------------------------------------------------
-    //END OF sortMarkers
-    //----------------------------------------------------------------------------------------------------------------
-
-    //harvesine
-    //Distance calculator
-    //----------------------------------------------------------------------------------------------------------------
-    //BEGINNING OF harvesine
-    //----------------------------------------------------------------------------------------------------------------
-    private double haversine(double lat1, double lon1, double lat2, double lon2) {
-        lat1 = Math.toRadians(lat1);
-        lon1 = Math.toRadians(lon1);
-        lat2 = Math.toRadians(lat2);
-        lon2 = Math.toRadians(lon2);
-
-        double dLat = lat2 - lat1;
-        double dLon = lon2 - lon1;
-
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        double earthRadius = 6371;
-        double distance = earthRadius * c;
-
-        return distance;
-    }
-    //----------------------------------------------------------------------------------------------------------------
-    //END OF harvesine
-    //----------------------------------------------------------------------------------------------------------------
-
-    private String generateLabel(Map<String, Object> detailsMap){
-
-        StringBuilder label = new StringBuilder();
-
-        for(String labelElement: labelData){
-            StringBuilder subEntry = new StringBuilder();
-            Object element = detailsMap.get(labelElement);
-
-            if (element.getClass()==ArrayList.class){
-                for(int i=0; i<((ArrayList<?>) element).size(); i++){
-                    subEntry.append(((ArrayList<?>) element).get(i)).append(";");
-                }
-                subEntry.delete(subEntry.length()-1,subEntry.length());
-                label.append(subEntry).append(";;");
-            }else
-                label.append(element).append(";;");
-        }
-        label.append(getCurrentDate());
-
-
-        return label.toString();
     }
 
-    private String getCurrentDate(){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm");
-        String currentDate = sdf.format(new Date());
-        return currentDate;
-    }
-
-    private interface RowsExecuted{
-        void Success(ArrayList<ArrayList<Double>> distancesResult,
-                     ArrayList<ArrayList<ArrayList<GeoPoint>>> geoPointsResult);
-        void Failure();
-    }
-    private interface RowExecuted{
-        void Success(ArrayList<Double> rowDistancesResult,
-                     ArrayList<ArrayList<GeoPoint>> rowGeoPointsResult);
-        void Failure();
-    }
-
-    private void tspSolver(String transportMode, ArrayList<Marker> selectedMarkers){
-
-
-        ArrayList<ArrayList<Double>> distancesResult = new ArrayList<>();
-        ArrayList<ArrayList<ArrayList<GeoPoint>>> coordinatesResult = new ArrayList<>();
-
-        executeRouteRequests(transportMode, selectedMarkers, distancesResult, coordinatesResult, 0, new RowsExecuted() {
-
-            @Override
-            public void Success(ArrayList<ArrayList<Double>> distancesResult, ArrayList<ArrayList<ArrayList<GeoPoint>>> geoPointsResult) {
-
-                Log.d("routeRequest", distancesResult.toString());
-
-                ArrayList<ArrayList<Double>> distances = new ArrayList<>(distancesResult);
-                Log.d("indexesDistances", distances.toString());
-                ArrayList<ArrayList<ArrayList<GeoPoint>>> geoPointsArray = new ArrayList<>(geoPointsResult);
-                ArrayList<ArrayList<Double>> finalDistances = new ArrayList<>();
-                ArrayList<ArrayList<GeoPoint>> finalGeoPoints = new ArrayList<>();
-                ArrayList<Integer> indexes = new ArrayList<>();
-
-                indexes.add(0);
-
-                do {
-
-                    int index = selectedMarkers.size()-1;
-                    double minDistance = Double.MAX_VALUE;
-
-                    for (int i= 0; i < distances.size(); i++){
-
-                        for (int j = i+1; j< distances.get(i).size()-1; j++){
-
-                            if ( distances.get(i).get(j)< minDistance && !indexes.contains(j)){
-                                index = j;
-                                minDistance = distances.get(i).get(j);
-                            }
-
-                        }
-                    }
-                    indexes.add(index);
-                    Log.d("mittomen_indexes", indexes.toString());
-                    finalGeoPoints.add(geoPointsArray.get(indexes.get(indexes.size()-2)).get(index));
-
-                }while (finalGeoPoints.size()<selectedMarkers.size()-1);
-
-                finalGeoPoints.add(geoPointsArray.get(0).get(indexes.get(indexes.size()-1)));
-
-                Log.d("indexes", indexes.toString());
-
-                for (int i = 0; i< finalGeoPoints.size(); i++) {
-                    Polyline polyline = new Polyline();
-                    polyline.setPoints(finalGeoPoints.get(i));
-                    polyline.setColor(Color.argb(200, 42, 63, 117));
-                    polyline.getOutlinePaint().setStrokeWidth(15);
-                    map.getOverlayManager().add(polyline);
-
-                    BoundingBox existingBoundingBox = BoundingBox.fromGeoPoints(finalGeoPoints.get(i));
-
-                    BoundingBox newBoundingBox = addPaddingToBoundingBox(existingBoundingBox, 0.001);
-                    map.zoomToBoundingBox(newBoundingBox, true);
-                }
-            }
-
-            @Override
-            public void Failure() {
-                Toast.makeText(MainActivity.this,R.string.route_planning_error,Toast.LENGTH_LONG).show();
-                Log.e("nem_megyen", "nem megyen");
-            }
-        });
-
-    }
-
-    private void executeRouteRequests(String transportMode,ArrayList<Marker> selectedMarkers,ArrayList<ArrayList<Double>> distancesResult,
-                                      ArrayList<ArrayList<ArrayList<GeoPoint>>> geoPointsResult,int index, RowsExecuted rowsExecuted){
-
-        ArrayList<Double> rowCoordinates = new ArrayList<>();
-
-        for(int i=0; i<index; i++){
-            rowCoordinates.add(selectedMarkers.get(i).getPosition().getLatitude());
-            rowCoordinates.add(selectedMarkers.get(i).getPosition().getLongitude());
-        }
-
-        for (int i = index; i< selectedMarkers.size(); i++){
-            rowCoordinates.add(selectedMarkers.get(i).getPosition().getLatitude());
-            rowCoordinates.add(selectedMarkers.get(i).getPosition().getLongitude());
-        }
-        ArrayList<Double> rowDistances = new ArrayList<>();
-        ArrayList<ArrayList<GeoPoint>> rowGeoPoints = new ArrayList<>();
-
-        Log.d("rowCoordinates", rowCoordinates.toString());
-
-        executeRow(transportMode, rowCoordinates,rowDistances,rowGeoPoints,index*2, 0,  new RowExecuted() {
-            @Override
-            public void Success(ArrayList<Double> rowDistancesResult, ArrayList<ArrayList<GeoPoint>> rowGeoPointsResult) {
-
-                for (int i=0; i< selectedMarkers.size()-rowDistancesResult.size(); i++){
-                    rowDistances.add(Double.MAX_VALUE);
-                    rowGeoPoints.add(new ArrayList<>());
-                }
-                ArrayList<Double> rowDistances = new ArrayList<>(rowDistancesResult);
-                ArrayList<ArrayList<GeoPoint>> rowGeoPoints = new ArrayList<>(rowGeoPointsResult);
-
-                distancesResult.add(rowDistances);
-                geoPointsResult.add(rowGeoPoints);
-                if (index== selectedMarkers.size()-1){
-                    rowsExecuted.Success(distancesResult,geoPointsResult);
-                    Log.d("rowGEO", geoPointsResult.toString());
-                }else {
-                    Log.d("rowGEO", geoPointsResult.toString());
-                    executeRouteRequests(transportMode, selectedMarkers,distancesResult,geoPointsResult, index+1, rowsExecuted);
-                }
-            }
-
-            @Override
-            public void Failure() {
-                rowsExecuted.Failure();
-            }
-        });
-
-    }
-
-    private void executeRow(String transportMode, ArrayList<Double> coordinatesOrig,
-                            ArrayList<Double> rowDistances,ArrayList<ArrayList<GeoPoint>> rowGeoPoints,int startIndex,int index,  RowExecuted rowExecuted){
-
-        OpenRouteServiceAPI.getRoute(coordinatesOrig.get(startIndex), coordinatesOrig.get(startIndex+1), coordinatesOrig.get(index), coordinatesOrig.get(index+1), transportMode, new OpenRouteServiceAPI.RouteCallback() {
-            @Override
-            public void onRouteReceived(String result) {
-                //rowDistances.add()
-
-                try {
-                    JSONObject jsonResponse = new JSONObject(result);
-
-                    Log.d("routeResponse", jsonResponse.toString());
-
-                    JSONArray features = jsonResponse.getJSONArray("features");
-
-                    JSONObject firstFeature = features.getJSONObject(0);
-
-                    JSONObject geometry = firstFeature.getJSONObject("geometry");
-
-                    JSONObject properties = firstFeature.getJSONObject("properties");
-
-                    JSONObject summary = properties.getJSONObject("summary");
-
-                    double distance = Double.MAX_VALUE;
-
-                    if (summary.has("distance")) {
-
-                        distance = summary.getDouble("distance");
-
-                    }
-
-                    JSONArray coordinates = null;
-
-                    if ( geometry.has("coordinates")){
-
-                        coordinates = geometry.getJSONArray("coordinates");
-
-                    }
-
-                    ArrayList<GeoPoint> routePoints = new ArrayList<>();
-
-                    for (int i = 0; i < coordinates.length(); i++) {
-                        JSONArray point = coordinates.getJSONArray(i);
-                        double lat = point.getDouble(1);
-                        double lon = point.getDouble(0);
-
-                        routePoints.add(new GeoPoint(lat, lon));
-                    }
-                    rowGeoPoints.add(routePoints);
-                    rowDistances.add(distance);
-
-                    if (index == coordinatesOrig.size() - 2) {
-                        rowExecuted.Success(rowDistances,rowGeoPoints);
-                    }else {
-                        executeRow(transportMode,coordinatesOrig,rowDistances,rowGeoPoints,startIndex, index+2,rowExecuted);
-                    }
-
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-
-
-            }
-
-            @Override
-            public void onRouteFailure() {
-                rowExecuted.Failure();
-            }
-        });
-
-    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

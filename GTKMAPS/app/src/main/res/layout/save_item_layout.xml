@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/layout_color"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="6dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/save_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="24sp"
+            style="@style/text_view_style"
+            />
+        <View
+            android:id="@+id/show_save_details"
+            android:layout_width="48dp"
+            android:layout_height="24dp"
+            android:background="@drawable/list_item_arrow"
+            style="@style/toggle_button" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/save_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/from_start_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginVertical="10dp"
+            android:orientation="horizontal"
+            android:background="@drawable/details_background">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="5dp"
+                android:layout_marginHorizontal="10dp"
+                android:textSize="18sp"
+                style="@style/text_view_style"
+                android:text="@string/from"/>
+            <TextView
+                android:id="@+id/save_start_address"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="5dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_weight="1"
+                style="@style/text_view_style"
+                android:text="tesztt"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginVertical="5dp"
+            android:layout_marginHorizontal="6dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/details_background">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/text_view_style"
+                    android:paddingHorizontal="6dp"
+                    android:text="@string/distance"/>
+
+                <TextView
+                    android:id="@+id/save_distance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    style="@style/text_view_style" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/details_background">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/text_view_style"
+                    android:paddingHorizontal="6dp"
+                    android:text="@string/transporte_form"/>
+
+                <TextView
+                    android:id="@+id/save_transport"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    style="@style/text_view_style"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginHorizontal="10dp"
+            style="@style/text_view_style"
+            android:text="@string/categories"/>
+        <TextView
+            android:id="@+id/save_categories"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_marginVertical="5dp"
+            android:layout_marginHorizontal="10dp"
+            style="@style/text_view_style"
+            android:text="tesztt"
+            android:background="@drawable/details_background"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="right"
+            >
+            <TextView
+                android:id="@+id/save_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="10dp"
+                android:layout_marginVertical="5dp"
+                android:layout_marginHorizontal="10dp"
+                style="@style/text_view_style"
+                android:text="tesztt"
+                android:background="@drawable/details_background"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp">
+
+            <Button
+                android:id="@+id/delete_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/delete"
+                android:textColor="@color/dialog_button"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_marginEnd="10dp"
+                android:padding="10dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="0.4dp"
+        android:background="@color/divider"/>
+
+</LinearLayout>

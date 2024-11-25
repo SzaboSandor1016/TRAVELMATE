@@ -1,24 +1,20 @@
 package com.example.gtk_maps;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.EmailAuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.SignInMethodQueryResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,27 +23,27 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+
+import javax.crypto.NullCipher;
 
 public class FirebaseManager extends AppCompatActivity {
     private static FirebaseManager instance;
-    private Context context;
-    private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
+    private final Context context;
+    private final FirebaseAuth mAuth;
+    private final DatabaseReference mDatabase;
     private User loggedInUser;
-    private SharedPreferences sharedPreferences;
-    private Map<String, Integer> stats = new HashMap<>();
-    private Map<String, Integer> transportStats = new HashMap<>();
-    private Map<String, Integer> distanceStats = new HashMap<>();
-    private static String[] activities = {"accomodation", "food", "shopping", "monumentchurch", "museumexhibition", "entertainment",
-            "castlefort", "beach", "music", "spa", "sports", "watersport", "concerts", "park", "theatre",
-            "themepark", "farm", "lookout", "hiking", "cycling", "boat", "nationalpark"};
-    private static String[] transportModes = {"car", "walk"};
-    private static String[] distances = {"15", "30", "45"};
+    private final SharedPreferences sharedPreferences;
+    private final Map<String, Integer> stats = new HashMap<>();
+    private final Map<String, Integer> transportStats = new HashMap<>();
+    private final Map<String, Integer> distanceStats = new HashMap<>();
+    private static final String[] activities = {"accommodation", "restaurant", "shopping", "monument_church", "museum_exhibition", "entertainment",
+            "castle_fort", "beach", "music_festival", "spa", "sport", "watersport", "concert", "park", "theatre",
+            "theme_park", "farmers_market", "viewpoint", "hiking", "cycling", "sailing", "national_park"};
+    private static final String[] transportModes = {"car", "walk"};
+    private static final String[] distances = {"15", "30", "45"};
 
     public interface AuthListener {
         void onSignUpSuccess();
@@ -55,7 +51,7 @@ public class FirebaseManager extends AppCompatActivity {
         void onSignUpFailure(Exception exception);
     }
 
-    private interface Share {
+    private interface ShareSearch {
         void onSuccess(boolean isSuccess);
 
         void onFailure(boolean isSuccess);
@@ -106,6 +102,10 @@ public class FirebaseManager extends AppCompatActivity {
         void Success();
         void UnSuccess();
     }
+    public interface ResetEmail{
+        void Success();
+        void UnSuccess();
+    }
 
 
     FirebaseManager(Context context, FirebaseAuth mAuth, DatabaseReference mDatabase, SharedPreferences sharedPreferences) {
@@ -120,6 +120,23 @@ public class FirebaseManager extends AppCompatActivity {
             instance = new FirebaseManager(context, mAuth, mDatabase, sharedPreferences);
         }
         return instance;
+    }
+
+    public void resetPassword(String email , ResetEmail resetEmail) {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+
+        auth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            resetEmail.Success();
+                            Log.d("reset", "Email sent.");
+                        }else {
+                            resetEmail.UnSuccess();
+                        }
+                    }
+                });
     }
 
     private void initialStats() {
@@ -138,15 +155,15 @@ public class FirebaseManager extends AppCompatActivity {
         Log.d("distanceStats", distanceStats.toString());
     }
 
-    private void uploadSearch(Map<String, Object> searchDetails, Share share) {
+    private void uploadSearch(Share share, ShareSearch shareSearch) {
         DatabaseReference reference = mDatabase.child("shared").push();
-        reference.setValue(searchDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
+        reference.setValue(share).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (!task.isSuccessful()) {
-                    share.onFailure(false);
+                    shareSearch.onFailure(false);
                 } else {
-                    share.onSuccess(true);
+                    shareSearch.onSuccess(true);
                 }
             }
         });
@@ -571,11 +588,9 @@ public class FirebaseManager extends AppCompatActivity {
 
     }
 
-    public void shareSearch(
-            ArrayList<String> with,
-            String title,
-            Map<String, Object> labelData,
-            Map<String, Object> shareData) {
+    public void shareSearch(String title,ArrayList<String> with, ArrayList<Place> selectedPlaces,
+                            String selectedTransport,ArrayList<String> selectedCategories,
+                            String startName, int selectedDistance, Address startAddress, String date,String note) {
         DatabaseReference mapReference = mDatabase.child("username_to_uid");
         ArrayList<Query> queries = new ArrayList<>();
         for (String element: with){
@@ -594,15 +609,22 @@ public class FirebaseManager extends AppCompatActivity {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 String Uid = user.getUid();
 
-                Map<String, Object> shareMap = new HashMap<>();
+                Share share = new Share(title, selectedPlaces, note, selectedTransport,selectedCategories,startName,selectedDistance,startAddress,date);
+
+                share.setSharedWith(withUsernames);
+                share.setOp(Uid);
+
+                /*Map<String, Object> shareMap = new HashMap<>();
 
                 shareMap.put("details", shareData);
                 shareMap.put("label", labelData);
                 shareMap.put("op", Uid);
                 shareMap.put("title", title);
-                shareMap.put("shared_with", withUsernames);
+                shareMap.put("shared_with", withUsernames);*/
 
-                uploadSearch(shareMap, new Share() {
+
+
+                uploadSearch(share, new ShareSearch() {
                     @Override
                     public void onSuccess(boolean isSuccess) {
                         Toast.makeText(context, R.string.share_success, Toast.LENGTH_LONG).show();
@@ -617,16 +639,25 @@ public class FirebaseManager extends AppCompatActivity {
         });
 
     }
-    public void updateSharedWith(String newTitle,ArrayList<String> updatedWith, DatabaseReference referenceToUpdate, UpdateShare updateShare){
+    public void updateShare(String newTitle,String newNote, ArrayList<String> updatedWith, DatabaseReference referenceToUpdate, UpdateShare updateShare){
 
-        DatabaseReference sharedWithReference = referenceToUpdate.child("shared_with");
+        DatabaseReference sharedWithReference = referenceToUpdate.child("sharedWith");
         DatabaseReference titleReference = referenceToUpdate.child("title");
+        DatabaseReference noteReference = referenceToUpdate.child("note");
 
         if (!newTitle.equals("")) {
             removeReference(titleReference, new RemoveReference() {
                 @Override
                 public void Executed() {
                     titleReference.setValue(newTitle);
+                }
+            });
+        }
+        if (!newNote.equals("")) {
+            removeReference(noteReference, new RemoveReference() {
+                @Override
+                public void Executed() {
+                    noteReference.setValue(newNote);
                 }
             });
         }
@@ -696,9 +727,10 @@ public class FirebaseManager extends AppCompatActivity {
         });
     }
 
-    public void deleteUser(String email, String password, DeleteUser deleteUser){
+    public void deleteUser(String password, DeleteUser deleteUser){
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String email = user.getEmail();
 
         AuthCredential credential = EmailAuthProvider.getCredential(email, password);
 
@@ -739,13 +771,13 @@ public class FirebaseManager extends AppCompatActivity {
 
                     DatabaseReference sharedWith = mDatabase.child("shared");
 
-                    Query withMe = sharedWith.orderByChild("shared_with/"+ user.getUid()).equalTo(true);
+                    Query withMe = sharedWith.orderByChild("sharedWith/"+ user.getUid()).equalTo(true);
 
                     withMe.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                                DatabaseReference sharedWithMe = snapshot.child("shared_with").child(user.getUid()).getRef();
+                                DatabaseReference sharedWithMe = snapshot.child("sharedWith").child(user.getUid()).getRef();
                                 sharedWithMe.removeValue();
 
                             }

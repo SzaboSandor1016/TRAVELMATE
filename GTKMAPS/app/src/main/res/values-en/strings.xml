@@ -8,8 +8,7 @@
     <string name="action_settings">Settings</string>
 
 
-
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="select_all">Select all</string>
     <string name="church">Monuments, churches</string>
     <string name="museum">Museums, exhibitions</string>
@@ -26,7 +25,7 @@
     <string name="bicycle">Cycling</string>
     <string name="sailing">Boat, sailing</string>
     <string name="aquatics">Aquatics</string>
-    <string name="hotel">Local food</string>
+    <string name="hotel">Restaurants</string>
     <string name="nightclub">Entertainment, night life</string>
     <string name="spa">Spa, wellness</string>
     <string name="festival">Music festivals</string>
@@ -35,12 +34,15 @@
     <string name="sport_event">Sport events</string>
     <string name="other"> Other</string>
 
+    <string name="within_15">Within 15 minutes</string>
+    <string name="within_30">Within 30 minutes</string>
+    <string name="within_45">Within 45 minutes</string>
 
-    <string name="scan">Scan QR code</string>
-    <string name="current_location">Use your current \n location for searching</string>
+    <string name="current_location">Use your current location for searching</string>
+    <string name="current_location_off">Your current location is cannot be determined right now. \n Please ty again later!</string>
     <string name="current">By current location</string>
-    <string name="search_place">Starting location...</string>
-    <string name="distance">"Distance (Minute)..."</string>
+    <string name="search_place">Starting location</string>
+    <string name="distance">Distance (Minute)</string>
     <string name="categories">Categories</string>
     <string name="search_button">Search</string>
     <string name="add_search">Saved Searches</string>
@@ -50,7 +52,8 @@
     <string name="please_choose_transport_mode">Please choose the form of transport!</string>
     <string name="empty_category_list">Please select the desired categories to search!</string>
     <string name="category_selection_error">Some error occurred while choosing the categories!</string>
-    <string name="route_planning_error">Some error occurred while getting the routes! \n Please try again later!</string>
+    <string name="route_empty_place_list">Please select at least one place!</string>
+    <string name="route_planning_error">We could not determine the desired route! \n Please try again later!</string>
 
 
     <string name="load_current_location">Show current location when loading</string>
@@ -62,55 +65,64 @@
     <string name="transporte_form">Transport mode:</string>
     <string name="walk">Walk</string>
     <string name="car">Car</string>
-    <string name="public_transport">Public transport</string>
+    <string name="more_categories"> More categories</string>
+
+    <string name="from">From:</string>
 
     <string name="detailed">Detailed search</string>
-    <string name="city">City...</string>
-    <string name="street">Street...</string>
-    <string name="housenumber">House number...</string>
+    <string name="city">City</string>
+    <string name="street">Street</string>
+    <string name="housenumber">House number</string>
 
     <string name="route">Plan route</string>
     <string name="add_toast"> Search successfully saved</string>
     <string name="delete_message">Delete search?</string>
     <string name="positive"> Yes</string>
     <string name="negative">No</string>
-    <string name="search_title">Title...</string>
-    <string name="new_search_title">New title... (optional)</string>
+    <string name="search_title">Title </string>
+    <string name="new_search_title">New title (optional)</string>
     <string name="save">Save</string>
     <string name="dismiss">Back</string>
     <string name="select">Select</string>
     <string name="delete">Delete</string>
     <string name="save_as">Save as...</string>
     <string name="save_title_empty">Please provide a title for the save!</string>
-    <string name="QR">From QR code</string>
     <string name="unknown">Unknown</string>
 
 
     <string name="start">Start point</string>
     <string name="provide_start">Please provide a starting location!</string>
 
-    <string name="email">E-mail address...</string>
-    <string name="email_2">E-mail address:</string>
-    <string name="username">Username...</string>
-    <string name="username_2">Username:</string>
-    <string name="password">Password...</string>
+    <string name="email">E-mail address </string>
+    <string name="email_2">E-mail address: </string>
+    <string name="username">Username </string>
+    <string name="username_2">Username: </string>
+    <string name="forgot_password">Forgot password</string>
+    <string name="reset_password"> Reset password</string>
+    <string name="confirm_forgot_password"> Please type the E-mail address associated with your account, click the \"Reset password\" button, then follow the instructions sent via E-mail.</string>
+    <string name="email_sent">E-mail sent!</string>
+    <string name="email_not_sent">E-mail not sent!</string>
+    <string name="password">Password </string>
     <string name="password_2">Password:</string>
-    <string name="new_password">New password...</string>
-    <string name="password_again">Password again...</string>
-    <string name="password_again_2">Password again:</string>
-    <string name="new_password_again">New password again...</string>
-    <string name="birthdate">Birthdate... </string>
-    <string name="birthdate_year">Year...</string>
-    <string name="birthdate_month">Month...</string>
-    <string name="birthdate_day">Day...</string>
-    <string name="family_name">Family name...</string>
-    <string name="family_name_2">Family name:</string>
-    <string name="given_name">Given name...</string>
-    <string name="given_name_2">Given name:</string>
+    <string name="old_password">Old password</string>
+    <string name="new_password">New password </string>
+    <string name="password_again">Password again </string>
+    <string name="password_again_2">Password again: </string>
+    <string name="new_password_again">New password again </string>
+    <string name="birthdate">Birthdate  </string>
+    <string name="birthdate_year">Year </string>
+    <string name="birthdate_month">Month </string>
+    <string name="birthdate_day">Day </string>
+    <string name="family_name">Family name </string>
+    <string name="family_name_2">Family name: </string>
+    <string name="given_name">Given name </string>
+    <string name="given_name_2">Given name: </string>
     <string name="empty_log_in">The e-mail address and/or the password field is empty! </string>
 
     <string name="login">Sign In</string>
-    <string name="register">Register</string>
+    <string name="please_login">Please sign in to share!</string>
+    <string name="register">Sign Up</string>
+    <string name="new_user">I\'m a new user.</string>
     <string name="logout">Sign Out</string>
     <string name="change_data">Change user data</string>
     <string name="change_success">Data update has been successful!</string>
@@ -123,22 +135,27 @@
     <string name="new_password_mismatch">New passwords do not match!</string>
     <string name="used_username">This username is already in use!</string>
     <string name="share_title_empty">Please provide a title for the share!</string>
+    <string name="share_empty_place_list">Please select at least one place!</string>
     <string name="empty_addressee">Addressee field is empty!</string>
     <string name="empty_addressee_list">Addressee list is empty!</string>
     <string name="share_success">Sharing has been successful!</string>
     <string name="share_unsuccess">Sharing has been unsuccessful!</string>
     <string name="logged_as">Signed in as: </string>
-    <string name="delete_account">Delete account</string>
+    <string name="delete_account">Deleting account</string>
     <string name="change_password">Change password</string>
-    <string name="confirm_delete_account_message">For deleting please confirm your e-mail address and password.\n Note: This action cannot be undone!</string>
+    <string name="confirm_delete_account_message">Deleting your account will remove all of your information from our database. \n This cannot be undone!</string>
+    <string name="confirm_delete"> To confirm this, type your password</string>
     <string name="delete_successful">Deleting account has been successful!</string>
     <string name="delete_unsuccessful">Deleting account has been unsuccessful!</string>
     <string name="update_username_unsuccess"> Updating the username has been unsuccessful!</string>
     <string name="delete_share_message">Delete shared search?</string>
 
-    <string name="confirm_password_change_message">For changing please confirm your password!</string>
+    <string name="confirm_password_change_message">Please confirm your password!</string>
     <string name="change_successful">Password change has been successful!</string>
     <string name="change_unsuccessful">Password change has been unsuccessful!</string>
+
+    <string name="personal">Personal</string>
+    <string name="email_and_password">E-mail and password</string>
 
     <string name="cuisine"> Cuisine: </string>
     <string name="opening_hours"> Opening hours: </string>
@@ -151,6 +168,7 @@
         <item> My shares </item>
     </array>
     <string name="account">Account</string>
+    <string name="edit_account">Edit account</string>
     <array name="account_data">
         <item> User data</item>
         <item>Further settings </item>
@@ -163,18 +181,24 @@
 
     <string name="share"> Share</string>
     <string name="update">Update</string>
+    <string name="update_share_success"> Share update was successful!</string>
     <string name="shared_with_me"> Shared with me </string>
     <string name="shared_by_me"> My shares </string>
     <string name="shared_with">Shared with: </string>
+    <string name="note">Note</string>
 
-    <string name="recent_addressees"> Recent addressees</string>
+    <string name="share_message">
+        Add a new addressee with the \'add\' button or select from the list below.
+    </string>
+    <string name="save_message"> Please type the title of the new save.</string>
+
+    <string name="contacts"> Contacts/ recent addressees</string>
     <string name="addressees"> Addressees</string>
     <string name="updated_addressees_success">The list of the recent addressees \n has been successfully updated!</string>
     <string name="updated_addressees_unsuccess">Update of the list of the recent addressees has been unsuccessful!</string>
 
     <string name="delete_shared_with_me_warning">You will not see this share unless it is shared with you again! </string>
-    <string name="wait_warning"> Finding the desired place can last longer,
-        \n if a search has not been made with the exact expression recently!  </string>
+
     <string name="accept_privacy_policy">By registering, you accept our Privacy Policy</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_policy_text">Welcome to the PANNON-MAPS mobile application! Below, we would like to inform you about the data we collect and manage, as well as its usage. Please read the following carefully:

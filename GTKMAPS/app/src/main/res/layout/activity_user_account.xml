@@ -5,177 +5,255 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_marginStart="5dp"
     android:gravity="center_horizontal"
+    android:background="@color/layout_color"
     tools:context=".UserAccountActivity">
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="50dp"
-            android:gravity="start">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="30dp"
-                style="@style/title_standard"
-                android:text="@string/account"/>
-
-        </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_marginTop="20dp"
+        android:background="@color/layout_color"
+        android:layout_marginHorizontal="10dp">
 
-        <TextView
+        <ImageButton
+            android:id="@+id/go_back_account"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/username"/>
+            android:src="@drawable/go_back"
+            android:background="@color/transparent"
+            android:visibility="visible"
+            />
 
-        <EditText
-            android:id="@+id/loggedInUsernameET"
+        <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:hint="@string/username"
-            android:enabled="false"
-            android:inputType="text"
-            android:visibility="visible"
-            style="@style/edit_text_standard"
-            android:layout_weight="1"
+            android:textSize="24sp"
+            android:text="@string/edit_account"
+            android:gravity="center_horizontal"
+            style="@style/text_view_style"
+            android:layout_weight="1"/>
+
+        <ImageButton
+            android:id="@+id/delete_account"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/delete_account"
             />
-        <ImageButton
-            android:id="@+id/editUsernameIB"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginEnd="10dp"
-            android:visibility="visible"
-            android:background="@drawable/edit"/>
-        <ImageButton
-            android:id="@+id/confirmUsernameIB"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginEnd="10dp"
-            android:visibility="invisible"
-            android:background="@drawable/confirm_edit"/>
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            style="@style/text_view_style"
+            android:text="@string/personal"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusBottomEnd="32dp"
+            app:boxCornerRadiusBottomStart="32dp"
+            app:boxCornerRadiusTopEnd="32dp"
+            app:boxCornerRadiusTopStart="32dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+
+                android:id="@+id/loggedInUsernameET"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/cabin"
+                android:hint="@string/username"
+                android:inputType="text"
+                android:visibility="visible"
+                android:imeOptions="actionNext"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:layout_marginHorizontal="10dp"
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/family_name"/>
-
-            <EditText
-                android:id="@+id/loggedInFNameET"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:hint="@string/family_name"
-                android:enabled="false"
-                android:inputType="text"
-                android:visibility="visible"
-                style="@style/edit_text_standard"
-                android:layout_weight="1"
-                />
-            <ImageButton
-                android:id="@+id/editFNameIB"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginEnd="10dp"
-                android:visibility="visible"
-                android:background="@drawable/edit"/>
-            <ImageButton
-                android:id="@+id/confirmFNameIB"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginEnd="10dp"
-                android:visibility="invisible"
-                android:background="@drawable/confirm_edit"/>
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="32dp"
+                app:boxCornerRadiusBottomStart="32dp"
+                app:boxCornerRadiusTopEnd="32dp"
+                app:boxCornerRadiusTopStart="32dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1">
 
-        </LinearLayout>
+                <com.google.android.material.textfield.TextInputEditText
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+                    android:id="@+id/loggedInFNameET"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/cabin"
+                    android:hint="@string/family_name"
+                    android:inputType="text"
+                    android:visibility="visible"
+                    android:imeOptions="actionNext"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/given_name"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/loggedInGNameET"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:hint="@string/given_name"
-                android:enabled="false"
-                android:inputType="text"
-                android:visibility="visible"
-                style="@style/edit_text_standard"
-                android:layout_weight="1"
-                />
-            <ImageButton
-                android:id="@+id/editGNameIB"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginEnd="10dp"
-                android:visibility="visible"
-                android:background="@drawable/edit"/>
-            <ImageButton
-                android:id="@+id/confirmGNameIB"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginEnd="10dp"
-                android:visibility="invisible"
-                android:background="@drawable/confirm_edit"/>
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="32dp"
+                app:boxCornerRadiusBottomStart="32dp"
+                app:boxCornerRadiusTopEnd="32dp"
+                app:boxCornerRadiusTopStart="32dp"
+                android:layout_weight="1">
+
+                <com.google.android.material.textfield.TextInputEditText
+
+                    android:id="@+id/loggedInGNameET"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/cabin"
+                    android:hint="@string/given_name"
+                    android:inputType="text"
+                    android:visibility="visible"
+                    android:imeOptions="actionDone"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
 
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/loggedInBirthDateLL"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:visibility="visible"
+            android:layout_margin="3dp"
+            android:background="@drawable/search_text_field_style"
             android:gravity="center">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/birthdate"/>
             <TextView
                 android:id="@+id/loggedInSelectedAgeTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""/>
+                style="@style/text_view_style"
+                android:textColor="@color/edit_text_hint"/>
             <ImageButton
                 android:id="@+id/loggedInAgeIB"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
                 android:background="@drawable/calendar"/>
-            <ImageButton
-                android:id="@+id/confirmAgeIB"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginEnd="10dp"
-                android:visibility="invisible"
-                android:background="@drawable/confirm_edit"/>
 
         </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            style="@style/text_view_style"
+            android:text="@string/password"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/account_password_old_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusBottomEnd="32dp"
+            app:boxCornerRadiusBottomStart="32dp"
+            app:boxCornerRadiusTopEnd="32dp"
+            app:boxCornerRadiusTopStart="32dp"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/toggle_button_on"
+            android:visibility="visible" >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/account_password_old"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/cabin"
+                android:hint="@string/old_password"
+                android:inputType="textPassword"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusBottomEnd="32dp"
+            app:boxCornerRadiusBottomStart="32dp"
+            app:boxCornerRadiusTopEnd="32dp"
+            app:boxCornerRadiusTopStart="32dp"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/toggle_button_on">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/account_password"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/cabin"
+                android:hint="@string/new_password"
+                android:inputType="textPassword"
+                android:imeOptions="actionDone"
+                android:visibility="visible" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/account_password_again_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusBottomEnd="32dp"
+            app:boxCornerRadiusBottomStart="32dp"
+            app:boxCornerRadiusTopEnd="32dp"
+            app:boxCornerRadiusTopStart="32dp"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/toggle_button_on"
+            android:visibility="gone" >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/account_password_again"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/cabin"
+                android:hint="@string/new_password_again"
+                android:inputType="textPassword"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+
+        <Button
+            android:id="@+id/save_changes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/toggle_button_style_on"
+            android:textColor="@color/toggle_button_off_background"
+            style="@style/toggle_button"
+            android:text="@string/save"/>
+
+    </LinearLayout>
 
 </LinearLayout>

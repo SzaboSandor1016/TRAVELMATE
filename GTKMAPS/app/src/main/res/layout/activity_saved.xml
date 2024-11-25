@@ -7,12 +7,7 @@
     android:orientation="vertical"
     tools:context=".SavedActivity">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:textSize="24dp"
-        android:text="@string/add_search"/>
+
     <ListView
         android:id="@+id/savedLV"
         android:layout_width="match_parent"

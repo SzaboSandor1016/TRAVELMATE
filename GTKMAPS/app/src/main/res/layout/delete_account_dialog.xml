@@ -1,73 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:background="@drawable/toggle_button_style_on"
     android:gravity="center_horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/DialogLayoutBackground"
-        android:orientation="vertical">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:layout_marginHorizontal="10dp"
-        android:text="@string/delete_account"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="25dp"
+            style="@style/delete_text_view_style"
+            android:text="@string/delete_account"/>
 
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_marginBottom="10dp"
-        app:dividerColor="#997CA2CA"/>
 
-    <EditText
-        android:id="@+id/confirmDeleteEmailET"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textEmailAddress"
-        android:layout_marginHorizontal="10dp"
-        style="@style/edit_text_standard"
-        android:hint="@string/email"/>
-    <EditText
-        android:id="@+id/confirmDeletePasswordET"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:layout_marginHorizontal="10dp"
-        style="@style/edit_text_standard"
-        android:hint="@string/password"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:layout_marginHorizontal="10dp"
-        android:text="@string/confirm_delete_account_message"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginHorizontal="10dp"
+            style="@style/delete_text_view_style"
+            android:text="@string/confirm_delete_account_message"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="25dp"
+            style="@style/delete_text_view_style"
+            android:text="@string/confirm_delete"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="end">
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginBottom="20dp"
+        android:gravity="center">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusBottomEnd="32dp"
+            app:boxCornerRadiusBottomStart="32dp"
+            app:boxCornerRadiusTopEnd="32dp"
+            app:boxCornerRadiusTopStart="32dp"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/toggle_button_on"
+            style="@style/auto_complete_text_view_style"
+            android:layout_weight="1">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/delete_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/cabin"
+                android:hint="@string/password"
+                android:inputType="textPassword"
+                android:imeOptions="actionDone"
+                android:visibility="visible" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
         <Button
             android:id="@+id/confirmDeleteBTN"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
-            android:text="@string/ok"
-            style="@android:style/Widget.Holo.Button.Borderless"
-            android:backgroundTint="#00FFFFFF"
-            android:textColor="#2A3F75"
+            android:layout_marginStart="5dp"
+            android:text="@string/delete"
+            android:background="@drawable/toggle_button_style_on"
+            style="@style/toggle_button"
+            android:textColor="@color/edit_text_hint"
             />
     </LinearLayout>
-
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:background="@drawable/fade"/>
 
 </LinearLayout>

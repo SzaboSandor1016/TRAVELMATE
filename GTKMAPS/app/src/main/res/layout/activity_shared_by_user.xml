@@ -17,10 +17,10 @@
         android:layout_marginStart="3dp"
         android:text="@string/shared_by_me"
         />
-    <ListView
-        android:id="@+id/mySharesLV"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/shared_by_me"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginHorizontal="7dp"
         />
 

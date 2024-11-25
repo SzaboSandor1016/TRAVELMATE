@@ -1,61 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="bottom|center_horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_gravity="bottom"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+
     <org.osmdroid.views.MapView
         android:id="@+id/map"
-        tilesource="Mapnik"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <LinearLayout
+        android:id="@+id/main_title_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:paddingVertical="5dp"
+        android:paddingHorizontal="10dp"
+        android:gravity="center"
+        android:background="@drawable/new_save_style"
+        android:orientation="vertical">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/newlogo"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                style="@style/text_view_style"
+                android:gravity="center_vertical"
+                android:text="@string/app_name"
+                android:layout_weight="1"/>
+            <ImageButton
+                android:id="@+id/userBTN2"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/user_main"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/search_details_layout"
+            android:layout_width="match_parent"
+            android:layout_height="36sp"
+            android:paddingBottom="3dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/transport_image"
+                android:layout_width="24sp"
+                android:layout_height="24sp"
+                android:layout_marginHorizontal="10dp"
+                android:contentDescription="@string/transporte_form" />
+
+            <ImageView
+                android:layout_width="24sp"
+                android:layout_height="24sp"
+                android:src="@drawable/distance"
+                android:contentDescription="@string/distance" />
+            
+            <TextView
+                android:id="@+id/within_text"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:gravity="center_vertical"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="4dp"
+                style="@style/text_view_style"/>
+
+            <HorizontalScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@+id/categories_chip_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"/>
+
+            </HorizontalScrollView>
+            
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <AutoCompleteTextView
+        android:id="@+id/map_autocomplete_text_field"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/main_title_layout"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:dropDownWidth="wrap_content"
+        android:hint="@string/search_place"
+        android:imeOptions="actionDone"
+        style="@style/auto_complete_text_view_style"
+        android:inputType="text"
+        android:visibility="gone"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/route_plan_action_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="left|center_vertical"
-        android:background="#00FFFFFF"
-        android:orientation="vertical">
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/menu_layout"
+        android:src="@drawable/route_plan"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="40dp"
+        app:fabSize="normal"
+        android:visibility="gone"
+        android:contentDescription="@string/route" />
 
-        <ImageButton
-            android:id="@+id/menuBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="1"
-            android:background="@drawable/menu" />
+    <LinearLayout
+        android:id="@+id/item_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/menu_layout"
+        android:translationY="535dp"
+        android:orientation="vertical"> <!-- Kezdetben a képernyőn kívül -->
 
-        <ImageButton
-            android:id="@+id/addSaveBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="1"
-            android:background="@drawable/save"
-            android:visibility="invisible" />
-        <ImageButton
-            android:id="@+id/shareSearchBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="1"
-            android:background="@drawable/share"
-            android:visibility="invisible" />
+    <!-- Fogantyú (csík) -->
+    <LinearLayout
+        android:id="@+id/handle"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:background="@drawable/handle_style" >
 
+        <View
+            android:id="@+id/handle_arrow"
+            android:layout_width="48dp"
+            android:layout_height="24dp"
+            android:background="@drawable/handle_arrow"
+            />
 
-        <ImageButton
-            android:id="@+id/routeBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="1"
-            android:background="@drawable/route_plan"
-            android:visibility="invisible" />
     </LinearLayout>
 
 
-</RelativeLayout>
+    <FrameLayout
+        android:id="@+id/menu_item_layout"
+        android:layout_width="match_parent"
+        android:layout_height="535dp" />
+
+    </LinearLayout>
+
+
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/menu_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/layout_color"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,7 +1,6 @@
 package com.example.gtk_maps;
 
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -10,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.osmdroid.views.overlay.Marker;
 
 public class CategoryManager extends AppCompatActivity {
 
@@ -23,7 +21,7 @@ public class CategoryManager extends AppCompatActivity {
     }
 
     public String getCategoryFromTags(JSONObject tags) {
-        String[] categories = {"tourism", "historic", "building", "amenity", "leisure", "boundary", "shop", "route", "sport", "boat"};
+        String[] categories = {"castle_type","highway","tourism", "historic", "building", "amenity", "leisure", "boundary", "shop", "route", "sport", "boat","landuse"};
 
         for (String categoryKey : categories) {
             if (tags.has(categoryKey)) {
@@ -34,13 +32,17 @@ public class CategoryManager extends AppCompatActivity {
                     throw new RuntimeException(e);
                 }
                 if (!value.isEmpty()) {
-                    if ("building".equals(categoryKey) && ("retail".equals(value)|| "commercial".equals(value))) {
+                    if ("building".equals(categoryKey) && ("retail".equals(value)|| "commercial".equals(value) || "civic".equals(value) || "public".equals(value))) {
 
                     }else if (!"boat".equals(categoryKey) && "yes".equals(value)) {
 
                     }else if ("boat".equals(categoryKey) && "yes".equals(value)) {
                         return "boat";
-                    } else {
+                    }else if(categoryKey.equals("tourism") && value.equals("attraction")){
+
+                    }else if(categoryKey.equals("historic") && value.equals("heritage")){
+
+                    }else {
                         return value;
                     }
                 }
@@ -58,6 +60,11 @@ public class CategoryManager extends AppCompatActivity {
             case "monument":
             case "temple":
             case "church":
+            case "basilica":
+            case "monastery":
+            case "place_of_worship":
+            case "cathedral":
+            case "memorial":
                 return resources.getDrawable(R.drawable.church);
             case "museum":
                 return resources.getDrawable(R.drawable.museum);
@@ -66,6 +73,10 @@ public class CategoryManager extends AppCompatActivity {
             case "exhibition_centre":
                 return resources.getDrawable(R.drawable.palette);
             case "park":
+            case "fountain":
+            case "recreation_ground":
+            case "pedestrian":
+            case "zoo":
                 return resources.getDrawable(R.drawable.park);
             case "national_park":
                 return resources.getDrawable(R.drawable.national_park);
@@ -73,6 +84,7 @@ public class CategoryManager extends AppCompatActivity {
                 return resources.getDrawable(R.drawable.theme_park);
             case "fort":
             case "castle":
+            case "palace":
                 return resources.getDrawable(R.drawable.castle);
             case "camp_site":
             case "summer_camp":
@@ -118,6 +130,8 @@ public class CategoryManager extends AppCompatActivity {
             case "biergarten":
                 return resources.getDrawable(R.drawable.bar);
             case "cafe":
+            case "confectionery":
+            case "pastry":
                 return resources.getDrawable(R.drawable.cafe);
             case "casino":
                 return resources.getDrawable(R.drawable.casino);
@@ -145,7 +159,7 @@ public class CategoryManager extends AppCompatActivity {
             case "sports_centre":
                 return resources.getDrawable(R.drawable.sports);
 
-            default: return resources.getDrawable(R.drawable.green_marker);
+            default: return resources.getDrawable(R.drawable.other_marker);
         }
 
     }
@@ -158,6 +172,11 @@ public class CategoryManager extends AppCompatActivity {
             case "monument":
             case "temple":
             case "church":
+            case "basilica":
+            case "monastery":
+            case "place_of_worship":
+            case "cathedral":
+            case "memorial":
                 return resources.getString(R.string.church);
             case "museum":
             case "gallery":
@@ -165,6 +184,10 @@ public class CategoryManager extends AppCompatActivity {
             case "exhibition_centre":
                 return resources.getString(R.string.museum);
             case "park":
+            case "fountain":
+            case "recreation_ground":
+            case "pedestrian":
+            case "zoo":
                 return resources.getString(R.string.park);
             case "national_park":
                 return resources.getString(R.string.national_park);
@@ -172,6 +195,7 @@ public class CategoryManager extends AppCompatActivity {
                 return resources.getString(R.string.adventure_park);
             case "fort":
             case "castle":
+            case "palace":
                 return resources.getString(R.string.castle);
             case "camp_site":
             case "summer_camp":
@@ -212,6 +236,8 @@ public class CategoryManager extends AppCompatActivity {
             case "pub":
             case "bar":
             case "biergarten":
+            case "confectionery":
+            case "pastry":
                 return resources.getString(R.string.hotel);
             case "casino":
             case "cinema":
@@ -225,11 +251,11 @@ public class CategoryManager extends AppCompatActivity {
             case "beach_resort":
                 return resources.getString(R.string.beach);
             case "events_venue":
+            case "stadium":
+            case "sports_hall":
                 return resources.getString(R.string.sport_event);
             case "music_venue":
             case "community_centre":
-            case "stadium":
-            case "sports_hall":
             case "sports_centre":
                 return resources.getString(R.string.festival);
 

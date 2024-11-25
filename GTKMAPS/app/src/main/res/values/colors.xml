@@ -13,4 +13,45 @@
     <color name="night_dialog">#424242</color>
     <color name="transparent">#00000000</color>
     <color name="red">#FFFF0000</color>
+
+    <color name="bar">#1A2C53</color>
+    <color name="beach">#38A643</color>
+    <color name="beach_resort">#38A643</color>
+    <color name="beach_resort_alt">#197022</color>
+    <color name="boat">#1E5714</color>
+    <color name="cafe">#1A2C53</color>
+    <color name="camp_site">#1F3461</color>
+    <color name="caravan_site">#1F3461</color>
+    <color name="casino">#385BA6</color>
+    <color name="castle">#38A65D</color>
+    <color name="church">#38A65D</color>
+    <color name="cinema">#385BA6</color>
+    <color name="community">#256E2C</color>
+    <color name="community_alt">#1E8528</color>
+    <color name="cycling">#28731A</color>
+    <color name="farm">#42BF2C</color>
+    <color name="gallery">#2B4783</color>
+    <color name="guest_house">#1F3461</color>
+    <color name="hiking">#2F851F</color>
+    <color name="hotel">#1F3461</color>
+    <color name="mall">#38A67A</color>
+    <color name="massage">#2B8034</color>
+    <color name="museum">#2B4783</color>
+    <color name="music">#31913B</color>
+    <color name="music_alt">#1E8528</color>
+    <color name="national_park">#12350C</color>
+    <color name="nightclub">#385BA6</color>
+    <color name="palette">#2B4783</color>
+    <color name="park">#25A131</color>
+    <color name="restaurant">#1A2C53</color>
+    <color name="sailing">#1E5714</color>
+    <color name="shop">#38A67A</color>
+    <color name="sports">#256E2C</color>
+    <color name="store">#38A67A</color>
+    <color name="surfing">#197022</color>
+    <color name="theatre">#385BA6</color>
+    <color name="theatre_alt">#389DA6</color>
+    <color name="theme_park">#2CBF3A</color>
+    <color name="viewpoint">#369A24</color>
+
 </resources>

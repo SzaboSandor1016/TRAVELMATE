@@ -8,7 +8,7 @@ import android.os.Handler;
 
 public class LoadingActivity extends AppCompatActivity {
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

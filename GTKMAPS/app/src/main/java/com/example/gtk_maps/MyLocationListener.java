@@ -18,17 +18,19 @@ import org.osmdroid.util.GeoPoint;
 public class MyLocationListener implements LocationListener {
 
     private final Context context;
-    private Location CurrentLocation;
+    private final Location currentLocation;
     private double latitude, longitude;
 
     protected LocationManager locationManager;
 
     public MyLocationListener(Context context) {
         this.context=context;
-        getLocation();
+        this.currentLocation = getLocation();
     }
 
     private Location getLocation(){
+        Location currentLocation = null;
+
         locationManager = (LocationManager) context
                 .getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -44,28 +46,29 @@ public class MyLocationListener implements LocationListener {
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     2);
         }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1, 0.1F, this);
         if (locationManager != null) {
             Location location = locationManager
                     .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (location != null) {
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
+                currentLocation= new Location(location);
             }
         }
-        return CurrentLocation;
+        return currentLocation;
     }
 
     public double getLongitude() {
-        if (CurrentLocation != null) {
-            longitude = CurrentLocation.getLongitude();
+        if (currentLocation != null) {
+            longitude = currentLocation.getLongitude();
         }
         return longitude;
     }
 
     public double getLatitude() {
-        if (CurrentLocation != null) {
-            latitude = CurrentLocation.getLatitude();
+        if (currentLocation != null) {
+            latitude = currentLocation.getLatitude();
         }
         return latitude;
     }

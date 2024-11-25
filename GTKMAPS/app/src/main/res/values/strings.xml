@@ -7,7 +7,6 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-
     <string name="ok">Ok</string>
     <string name="select_all">Összes kijelölése</string>
     <string name="church">Műemlékek, templomok</string>
@@ -33,13 +32,16 @@
     <string name="theatre">Színházak</string>
     <string name="sport_event">Sportrendezvények, létesítmények</string>
     <string name="other"> Egyéb</string>
+    <string name="within_15">15 percen belül</string>
+    <string name="within_30">30 percen belül</string>
+    <string name="within_45">45 percen belül</string>
 
-    <string name="scan">QR kód beolvasása</string>
-    <string name="current_location">Tartózkodási hely \n használata a kereséshez </string>
+    <string name="current_location">Tartózkodási hely használata a kereséshez </string>
+    <string name="current_location_off">Nem sikerült meghatározni az Ön jelenlegi helyzetét \n Kérjük próbálja meg később!</string>
     <string name="current">Tartózkodási hely</string>
-    <string name="search_place">Kiindulási hely...</string>
-    <string name="distance">"Távolság (Perc)..."</string>
-    <string name="categories">Kategóriák</string>
+    <string name="search_place">Kiindulási hely</string>
+    <string name="distance">"Távolság (Perc):"</string>
+    <string name="categories">Kategóriák:</string>
     <string name="search_button">Keresés</string>
     <string name="add_search">Mentett keresések</string>
     <string name="something_happened">Hiba történt az adatok lekérése során!</string>
@@ -48,7 +50,8 @@
     <string name="please_choose_transport_mode">Válasszon egy közlekedési formát!</string>
     <string name="empty_category_list">Válassza ki a keresni kívánt kategóriákat!</string>
     <string name="category_selection_error">Hiba lépett fel a kategóriák kiválasztása során!</string>
-    <string name="route_planning_error">Hiba lépett fel az útvonalak lekérése során! \n Kérjük próbálja újra később!</string>
+    <string name="route_empty_place_list">Válasszon ki legalább egy érinteni kívánt helyet!</string>
+    <string name="route_planning_error">Nem sikerült a kívánt útvonal meghatározása! \n Kérjük próbálja újra később!</string>
 
     <string name="load_current_location">Tartózkodási hely megjelenítése betöltéskor</string>
     <!--<string name="save_options">Mentse az előző keresés adatait</string>-->
@@ -58,12 +61,14 @@
     <string name="transporte_form">Közlekedési forma:</string>
     <string name="walk">Gyalog</string>
     <string name="car">Autó</string>
-    <string name="public_transport">Tömegközlekedés</string>
+    <string name="more_categories"> Több kategória</string>
 
     <string name="detailed">Részletes keresés</string>
     <string name="city">Város...</string>
     <string name="street">Utca...</string>
     <string name="housenumber">Házszám...</string>
+
+    <string name="from">Innen:</string>
 
     <string name="route">Útvonal tervezés</string>
 
@@ -71,42 +76,50 @@
     <string name="delete_message">Törli a keresést?</string>
     <string name="positive"> Igen</string>
     <string name="negative">Nem</string>
-    <string name="search_title">Cím...</string>
-    <string name="new_search_title">Új cím...(nem kötelező)</string>
+    <string name="search_title">Cím </string>
+    <string name="new_search_title">Új cím (nem kötelező)</string>
     <string name="save">Mentés</string>
     <string name="dismiss">Mégse</string>
     <string name="select">Kiválaszt</string>
     <string name="delete">Törlés</string>
     <string name="save_as">Mentés ... ként</string>
     <string name="save_title_empty">Kérjük adjon címet a mentésnek!</string>
-    <string name="QR">QR kódból beolvasva</string>
+
     <string name="unknown">Ismeretlen</string>
 
     <string name="start">Kezdőpont</string>
     <string name="provide_start">A kereséshez adjon meg egy kiindulási helyet!</string>
 
-    <string name="email">E-mail cím...</string>
-    <string name="email_2">E-mail cím:</string>
-    <string name="username">Felhasználónév...</string>
-    <string name="username_2">Felhasználónév:</string>
-    <string name="password">Jelszó...</string>
-    <string name="password_2">Jelszó:</string>
-    <string name="new_password">Új jelszó...</string>
-    <string name="password_again">Jelszó ismét...</string>
-    <string name="password_again_2">Jelszó ismét:</string>
-    <string name="new_password_again">Új jelszó ismét...</string>
-    <string name="birthdate">Születési dátum... </string>
-    <string name="birthdate_year">Év...</string>
-    <string name="birthdate_month">Hónap...</string>
-    <string name="birthdate_day">Nap...</string>
-    <string name="family_name">Családnév...</string>
-    <string name="family_name_2">Családnév:</string>
-    <string name="given_name">Keresztnév...</string>
-    <string name="given_name_2">Keresztnév:</string>
+    <string name="email">E-mail cím </string>
+    <string name="email_2">E-mail cím: </string>
+    <string name="username">Felhasználónév </string>
+    <string name="username_2">Felhasználónév: </string>
+    <string name="forgot_password">Elfelejtett jelszó</string>
+    <string name="reset_password"> Jelszó visszaállítása</string>
+    <string name="confirm_forgot_password"> Adja meg a fiókjához tartozó E-mail címét, kattintson a \n \"Jelszó visszaállítása\" gombra, majd kövesse az E-mailben kapott utasításokat! </string>
+    <string name="email_sent">E-mail elküldve!</string>
+    <string name="email_not_sent">Az e-mail nem lett elküldve!</string>
+    <string name="password">Jelszó </string>
+    <string name="password_2">Jelszó: </string>
+    <string name="new_password">Új jelszó </string>
+    <string name="old_password">Régi jelszó</string>
+    <string name="password_again">Jelszó ismét </string>
+    <string name="password_again_2">Jelszó ismét: </string>
+    <string name="new_password_again">Új jelszó ismét </string>
+    <string name="birthdate">Születési dátum </string>
+    <string name="birthdate_year">Év </string>
+    <string name="birthdate_month">Hónap </string>
+    <string name="birthdate_day">Nap </string>
+    <string name="family_name">Családnév </string>
+    <string name="family_name_2">Családnév: </string>
+    <string name="given_name">Keresztnév </string>
+    <string name="given_name_2">Keresztnév: </string>
     <string name="empty_log_in">Az e-mail cím és/vagy a jelszó mező üres! </string>
 
     <string name="login">Bejelentkezés</string>
+    <string name="please_login">Kérjük jelentkezzen be a megosztáshoz!</string>
     <string name="register">Regisztráció</string>
+    <string name="new_user">Új felhasználó vagyok.</string>
     <string name="logout">Kijelentkezés</string>
     <string name="change_data">Felhasználói adat változtatás</string>
     <string name="change_success">Az adatváltoztatás sikeres!</string>
@@ -119,6 +132,7 @@
     <string name="new_password_mismatch">Az új jelszavak nem egyeznek!</string>
     <string name="used_username">Ez a felhasználónév már foglalt!</string>
     <string name="share_title_empty">Kérjük adjon címet a megosztásnak!</string>
+    <string name="share_empty_place_list">Válasszon ki legalább egy megosztani kívánt helyet!</string>
     <string name="empty_addressee">A címzett mező üres!</string>
     <string name="empty_addressee_list">A címzett lista üres!</string>
     <string name="share_success">A megosztás sikeres!</string>
@@ -126,14 +140,18 @@
     <string name="logged_as">Bejelentkezve mint: </string>
     <string name="delete_account">Fiók törlése</string>
     <string name="change_password">Jelszó változtatás</string>
-    <string name="confirm_delete_account_message">A törléshez erősítse meg e-mail címét és jelszavát.\n Megjegyzés: A törlés végleges, és visszavonhatatlan!</string>
+    <string name="confirm_delete_account_message">A fiók törlése eltávolít minden Ön által tárolt információt az adatbázisunkból. \n Ezt nem lehet visszavonni.</string>
+    <string name="confirm_delete"> A megerősítéshez adja meg a jelszavát</string>
     <string name="delete_successful">A fiók törlése sikeres!</string>
     <string name="delete_unsuccessful">A fiók törlése sikertelen!</string>
     <string name="update_username_unsuccess"> A felhasználónév módosítása sikertelen!</string>
 
-    <string name="confirm_password_change_message">A jelszó megváltoztatásához erősítse meg jelenlegi jelszavát!</string>
+    <string name="confirm_password_change_message">Erősítse meg az új jelszót!</string>
     <string name="change_successful">A jelszó változtatás sikeres!</string>
     <string name="change_unsuccessful">A jelszó változtatás sikertelen!</string>
+
+    <string name="personal">Személyes</string>
+    <string name="email_and_password">E-mail és jelszó</string>
 
 
     <string name="delete_share_message">Törli a megosztást?</string>
@@ -150,6 +168,7 @@
         <item>Megosztásaim</item>
     </array>
     <string name="account">Fiók</string>
+    <string name="edit_account">Fiók szerkesztése</string>
     <array name="account_data">
         <item>Felhasználói adatok</item>
         <item>További beállítások</item>
@@ -161,18 +180,24 @@
 
     <string name="share"> Megosztás </string>
     <string name="update"> Módosítás </string>
+    <string name="update_share_success"> A megosztás módosítása sikeres!</string>
     <string name="shared_with_me"> Velem megosztottak </string>
     <string name="shared_by_me"> Megosztásaim </string>
     <string name="shared_with">Megosztva vele: </string>
+    <string name="note">Megjegyzés </string>
 
-    <string name="recent_addressees"> Korábbi címzettek</string>
+    <string name="share_message">
+        Adjon hozzá címzetteket a gomb segítségével, vagy válasszon az alábbi listából.
+    </string>
+    <string name="save_message"> Adja meg az új mentés címét.</string>
+
+    <string name="contacts"> Kapcsolatok/ korábbi címzettek</string>
     <string name="addressees"> Címzettek:</string>
     <string name="updated_addressees_success">A korábbi címzettek listája \n sikeresen frissítve!</string>
     <string name="updated_addressees_unsuccess">A korábbi címzettek listájának \n frissítése sikertelen!</string>
 
+
     <string name="delete_shared_with_me_warning">Nem fogja látni többet ezt a megosztást, hacsak nem osztják meg újból Önnel! </string>
-    <string name="wait_warning"> Egy hely lekérése hosszabb időbe telhet, \n amennyiben a közelmúltban nem történt keresés
-    ugyanezzel a kifejezéssel!  </string>
 
     <string name="accept_privacy_policy">A regisztrációval elfogadja az Adatkezelési Nyilatkozatot</string>
     <string name="privacy_policy">Adatkezelési Nyilatkozat</string>
@@ -202,5 +227,7 @@
 \n\nKérjük, vegye figyelembe, hogy az adatvédelmi gyakorlatunk időszakosan frissülhet, ezért javasoljuk, hogy rendszeresen ellenőrizze az alkalmazásban található adatvédelmi nyilatkozatot az esetleges változásokért.
 
 \n\nKöszönjük, hogy az PANNON-MAPS mobilalkalmazást választotta!</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

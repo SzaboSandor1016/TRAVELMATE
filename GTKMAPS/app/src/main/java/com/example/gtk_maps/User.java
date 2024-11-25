@@ -7,14 +7,14 @@ import java.util.Map;
 
 public class User extends AppCompatActivity {
 
-    private String email;
-    private String family;
-    private String given;
-    private String year;
-    private String month;
-    private String day;
-    private String birthDate;
-    private String username;
+    private final String email;
+    private final String family;
+    private final String given;
+    private final String year;
+    private final String month;
+    private final String day;
+    private final String birthDate;
+    private final String username;
 
 
     public User(String email,String username,String family, String given, String year, String month, String day){

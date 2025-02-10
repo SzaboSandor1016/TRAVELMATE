@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.GTKMAPS" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.GTKMAPS" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">#3C558E</item>
         <item name="colorPrimaryVariant">#3C558E</item>
@@ -18,7 +18,7 @@
     </style>
 
     <style name="DialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/slide_down</item>
+        <item name="android:windowEnterAnimation">@anim/anim_open_layout</item>
         <item name="android:windowExitAnimation">@anim/close_slide_down</item>
     </style>
 
@@ -80,6 +80,10 @@
         <item name="android:textColorHint">#9E9E9E</item>
         <item name="backgroundTint">#1A2C53</item>
     </style>
+    <style name="style_auto_complete_text_view_dropdown_item">
+        <item name="android:fontFamily">@font/cabin</item>
+        <item name="android:textColor">#9E9E9E</item>
+    </style>
     <style name="check_box_style">
         <item name="android:fontFamily">@font/cabin</item>
         <item name="android:textColor">#404040</item>
@@ -115,7 +119,7 @@
     <color name="search_text_field">
         #9E9E9E
     </color>
-    <color name="search_text_field_background">#E0E0E0</color>
+    <color name="search_text_field_background">#CAC4D0</color>
     <color name="toggle_button">
         #1A2C53
     </color>
@@ -147,7 +151,7 @@
         #F2F2F2
     </color>
     <color name="item_layout_color">
-        #F2F2F2
+        #F7F2FA
     </color>
     <color name="category_layout_color">
         #9E9E9E
@@ -161,6 +165,36 @@
     </color>
     <color name="details_color">#E2E2E2</color>
 
+    <style name="TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxStrokeWidth">1.5dp</item>
+        <item name="boxBackgroundColor">#F7F2FA</item>
+        <item name="boxStrokeColor">#E8DEF8</item>
+        <item name="hintEnabled">false</item>
+    </style>
+
+    <style name="material3_Chip" parent="Theme.GTKMAPS"/>
+
+    <style name="style_text_input_editText">
+        <item name="boxStrokeWidth">1.5dp</item>
+        <item name="android:layout_margin">16dp</item>
+        <item name="android:padding">6dp</item>
+        <item name="hintEnabled">true</item>
+        <item name="helperTextEnabled">true</item>
+        <item name="errorEnabled">true</item>
+        <item name="android:enabled">true</item>
+    </style>
+
+
+    <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="iconPadding">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:backgroundTint">@color/color_filter_button_active</item>
+    </style>
 
     <style name="Theme.GTKMAPS.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

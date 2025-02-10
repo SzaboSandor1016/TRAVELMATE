@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PANNON-MAPS</string>
+    <string name="app_name">TravelMate</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -10,13 +10,19 @@
 
     <string name="ok">OK</string>
     <string name="select_all">Select all</string>
+
+    <string name="hospitality">Hospitality venues</string>
+    <string name="programs">Things to do</string>
+    <string name="accommodation">Accommodations</string>
+    <string name="landmarks">Landmarks</string>
+    <string name="aquatics">Aquatic activities</string>
+
     <string name="church">Monuments, churches</string>
     <string name="museum">Museums, exhibitions</string>
     <string name="park">Parks</string>
     <string name="national_park">National parks</string>
     <string name="adventure_park">Adventure and thematic parks</string>
     <string name="castle">Castles, forts</string>
-    <string name="accommodation">Accommodations</string>
     <string name="shopping">Shopping</string>
     <string name="farmers_market">Farmer\'s markets</string>
     <string name="beach">Beach</string>
@@ -24,19 +30,16 @@
     <string name="hiking">Hiking</string>
     <string name="bicycle">Cycling</string>
     <string name="sailing">Boat, sailing</string>
-    <string name="aquatics">Aquatics</string>
-    <string name="hotel">Restaurants</string>
-    <string name="nightclub">Entertainment, night life</string>
     <string name="spa">Spa, wellness</string>
     <string name="festival">Music festivals</string>
     <string name="concert">Concerts</string>
     <string name="theatre">Theatres</string>
-    <string name="sport_event">Sport events</string>
+    <string name="sport">Sport</string>
     <string name="other"> Other</string>
 
-    <string name="within_15">Within 15 minutes</string>
-    <string name="within_30">Within 30 minutes</string>
-    <string name="within_45">Within 45 minutes</string>
+    <string name="within_15">15 minutes</string>
+    <string name="within_30">30 minutes</string>
+    <string name="within_45">45 minutes</string>
 
     <string name="current_location">Use your current location for searching</string>
     <string name="current_location_off">Your current location is cannot be determined right now. \n Please ty again later!</string>
@@ -79,7 +82,7 @@
     <string name="delete_message">Delete search?</string>
     <string name="positive"> Yes</string>
     <string name="negative">No</string>
-    <string name="search_title">Title </string>
+    <string name="search_title">"Title* "</string>
     <string name="new_search_title">New title (optional)</string>
     <string name="save">Save</string>
     <string name="dismiss">Back</string>
@@ -193,7 +196,7 @@
     <string name="save_message"> Please type the title of the new save.</string>
 
     <string name="contacts"> Contacts/ recent addressees</string>
-    <string name="addressees"> Addressees</string>
+    <string name="contributors"> Contributors</string>
     <string name="updated_addressees_success">The list of the recent addressees \n has been successfully updated!</string>
     <string name="updated_addressees_unsuccess">Update of the list of the recent addressees has been unsuccessful!</string>
 
@@ -228,5 +231,27 @@
 \n\nPlease note that our privacy practices may be updated periodically, so we recommend that you regularly check the privacy statement in the application for any changes.
 
 \n\nThank you for choosing the PANNON-MAPS mobile application!</string>
+    <string name="restaurant">Restaurants</string>
+    <string name="add_to_trip">Add to trip</string>
+    <string name="add_to_tour">Add to route</string>
+    <string name="create_trip">Create trip</string>
+    <string name="save_trip">Save trip</string>
+    <string name="optimize_route">Suggested route</string>
+    <string name="relax">Relaxation</string>
+    <string name="cafe">Cafes</string>
+    <string name="fast_food">Fast food restaurants</string>
+    <string name="pub_bar">Bars and pubs</string>
+    <string name="casino">Casinos</string>
+    <string name="cinema">Cinemas</string>
+    <string name="nightclub">Nightclubs</string>
+    <string name="others">Others</string>
+    <string name="beach_resort">Beach</string>
+    <string name="zoo">Zoo</string>
+    <string name="remove_from_trip">Remove from trip</string>
+    <string name="remove_from_tour">Remove from route</string>
+    <string name="required">*required</string>
+    <string name="date">Date</string>
+    <string name="date_format">YYYY/MM/DD</string>
+    <string name="day_of_trip">Day of the trip</string>
 
 </resources>

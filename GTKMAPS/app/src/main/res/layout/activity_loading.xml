@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/layout_color"
     android:orientation="vertical"
-    tools:context=".LoadingActivity">
+    tools:context=".ActivityLoading">
 
     <pl.droidsonroids.gif.GifImageView
         android:layout_width="match_parent"

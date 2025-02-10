@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PANNON-MAPS</string>
+    <string name="app_name">TravelMate</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -9,13 +9,21 @@
 
     <string name="ok">Ok</string>
     <string name="select_all">Összes kijelölése</string>
+
+    <string name="hospitality">Vendéglátóhelyek</string>
+    <string name="programs">Programok</string>
+    <string name="accommodation">Szálláshelyek</string>
+    <string name="landmarks">Látványosságok</string>
+    <string name="aquatics">Vízi tevékenységek</string>
+
+    <string name="restaurant">Éttermek</string>
+
     <string name="church">Műemlékek, templomok</string>
     <string name="museum">Múzeumok, kiállítások</string>
     <string name="park">Parkok</string>
     <string name="national_park">Nemzeti parkok</string>
     <string name="adventure_park">Kalandparkok, vidámparkok</string>
     <string name="castle">Várak, kastélyok</string>
-    <string name="accommodation">Szálláshelyek</string>
     <string name="shopping">Vásárlás</string>
     <string name="farmers_market">Termelői piacok</string>
     <string name="beach">Strandolás</string>
@@ -23,18 +31,15 @@
     <string name="hiking">Túrázás, túra útvonalak</string>
     <string name="bicycle">Kerékpározás, kerékpárutak</string>
     <string name="sailing">Hajózás, vitorlázás</string>
-    <string name="aquatics">Vízisportok</string>
-    <string name="hotel">Vendéglátóhelyek</string>
-    <string name="nightclub">Szórakozás, szórakozóhelyek</string>
     <string name="spa">Gyógy- és wellnessfürdők</string>
     <string name="festival">Zenei, művészeti fesztiválok</string>
     <string name="concert">Koncertek</string>
     <string name="theatre">Színházak</string>
-    <string name="sport_event">Sportrendezvények, létesítmények</string>
+    <string name="sport">Sport</string>
     <string name="other"> Egyéb</string>
-    <string name="within_15">15 percen belül</string>
-    <string name="within_30">30 percen belül</string>
-    <string name="within_45">45 percen belül</string>
+    <string name="within_15">15 perc</string>
+    <string name="within_30">30 perc</string>
+    <string name="within_45">45 perc</string>
 
     <string name="current_location">Tartózkodási hely használata a kereséshez </string>
     <string name="current_location_off">Nem sikerült meghatározni az Ön jelenlegi helyzetét \n Kérjük próbálja meg később!</string>
@@ -76,7 +81,7 @@
     <string name="delete_message">Törli a keresést?</string>
     <string name="positive"> Igen</string>
     <string name="negative">Nem</string>
-    <string name="search_title">Cím </string>
+    <string name="search_title">"Cím* "</string>
     <string name="new_search_title">Új cím (nem kötelező)</string>
     <string name="save">Mentés</string>
     <string name="dismiss">Mégse</string>
@@ -192,7 +197,7 @@
     <string name="save_message"> Adja meg az új mentés címét.</string>
 
     <string name="contacts"> Kapcsolatok/ korábbi címzettek</string>
-    <string name="addressees"> Címzettek:</string>
+    <string name="contributors"> Résztvevők </string>
     <string name="updated_addressees_success">A korábbi címzettek listája \n sikeresen frissítve!</string>
     <string name="updated_addressees_unsuccess">A korábbi címzettek listájának \n frissítése sikertelen!</string>
 
@@ -227,7 +232,26 @@
 \n\nKérjük, vegye figyelembe, hogy az adatvédelmi gyakorlatunk időszakosan frissülhet, ezért javasoljuk, hogy rendszeresen ellenőrizze az alkalmazásban található adatvédelmi nyilatkozatot az esetleges változásokért.
 
 \n\nKöszönjük, hogy az PANNON-MAPS mobilalkalmazást választotta!</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_to_trip">Hozzáadás utazáshoz</string>
+    <string name="add_to_tour">Hozzáadás körúthoz</string>
+    <string name="create_trip">Utazás létrehozása</string>
+    <string name="save_trip">Utazás mentése</string>
+    <string name="optimize_route">Javasolt körút</string>
+    <string name="relax">Kikapcsolódás</string>
+    <string name="cafe">Kávézók</string>
+    <string name="fast_food">Gyorséttermek</string>
+    <string name="pub_bar">Kocsmák</string>
+    <string name="casino">Kaszinók</string>
+    <string name="cinema">Mozik</string>
+    <string name="nightclub">Szórakozóhelyek</string>
+    <string name="others">Egyebek</string>
+    <string name="beach_resort">Strand</string>
+    <string name="zoo">Állatkert</string>
+    <string name="remove_from_trip">Eltávolítás az utazásból</string>
+    <string name="remove_from_tour">Eltávolítás a körútból</string>
+    <string name="required">*kötelező</string>
+    <string name="date">Dátum</string>
+    <string name="date_format">ÉÉÉÉ/HH/NN</string>
+    <string name="day_of_trip">Az utazás napja</string>
 
 </resources>

@@ -240,7 +240,7 @@
     <string name="relax">Kikapcsolódás</string>
     <string name="cafe">Kávézók</string>
     <string name="fast_food">Gyorséttermek</string>
-    <string name="pub_bar">Kocsmák</string>
+    <string name="pub_bar">Bárok</string>
     <string name="casino">Kaszinók</string>
     <string name="cinema">Mozik</string>
     <string name="nightclub">Szórakozóhelyek</string>
@@ -253,5 +253,13 @@
     <string name="date">Dátum</string>
     <string name="date_format">ÉÉÉÉ/HH/NN</string>
     <string name="day_of_trip">Az utazás napja</string>
+    <!-- Strings used for fragments for navigation -->
+
+    <string name="not_signed_in">Nincs bejelentkezve</string>
+    <string name="my_trips">Saját utazásaim</string>
+    <string name="shared_by_others">Mások által megosztva</string>
+    <string name="shared_with_others">Másokkal megosztva</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

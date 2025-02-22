@@ -54,6 +54,8 @@
     <color name="theme_park">#2CBF3A</color>
     <color name="viewpoint">#369A24</color>
 
+    <color name="chip_background_night">#1D1B20</color>
+    <color name="chip_background_light">#F7F2FA</color>
 
 
 </resources>

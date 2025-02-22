@@ -253,5 +253,9 @@
     <string name="date">Date</string>
     <string name="date_format">YYYY/MM/DD</string>
     <string name="day_of_trip">Day of the trip</string>
+    <string name="not_signed_in">Not signed in</string>
+    <string name="my_trips">My trips</string>
+    <string name="shared_with_others">Shared with others</string>
+    <string name="shared_by_others">Shared by others</string>
 
 </resources>

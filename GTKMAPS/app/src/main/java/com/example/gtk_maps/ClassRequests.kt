@@ -2,9 +2,6 @@ package com.example.gtk_maps
 
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-/*import okhttp3.OkHttpClient.Builder.addInterceptor
-import okhttp3.OkHttpClient.Builder.build
-import okhttp3.Request.Builder.build*/
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -12,32 +9,32 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 class ClassRequests{
-    private val photonApi: PhotonApi
-    private val overpassApi: OverpassApi
+    /*private val photonApi: PhotonApi
+    private val overpassApi: OverpassApi*/
 
     interface PhotonApi {
         @GET("api/")
         suspend fun getAutocomplete(
             @Query("q") query: String?,
             @Query("limit") limit: String?
-        ): PhotonResponse
+        ): ResponsePhoton
 
         @GET("reverse")
         suspend fun getReverseGeoCode(
             @Query("lat") latitude: String?,
             @Query("lon") longitude: String?
-        ): PhotonResponse
+        ): ResponsePhoton
     }
     interface OverpassApi {
 
         @GET("/api/interpreter")
         suspend fun getNearbyPlaces(
             @Query("data") query: String
-        ): OverpassResponse
+        ): ResponseOverpass
     }
 
 
-    interface NearbyVolleyCallback {
+    /*interface NearbyVolleyCallback {
         fun onResponse(results: ArrayList<ClassPlace>?)
         fun onFailure(error: String?)
     }
@@ -55,9 +52,9 @@ class ClassRequests{
     interface RouteCallback {
         fun onRouteReceived(result: String?)
         fun onRouteFailure()
-    }
+    }*/
 
-    var client: OkHttpClient = OkHttpClient().newBuilder()
+    /*var client: OkHttpClient = OkHttpClient().newBuilder()
         .addInterceptor(Interceptor { chain: Interceptor.Chain ->
             val original = chain.request()
             val request = original.newBuilder()
@@ -87,7 +84,7 @@ class ClassRequests{
     init {
         photonApi = photonRetrofit.create(PhotonApi::class.java)
         overpassApi = overpassRetrofit.create(OverpassApi::class.java)
-    }
+    }*/
 
     /*fun findNearbyPlacesRequest(query: String,category: String, callback: NearbyVolleyCallback) {
         overpassApi.getNearbyPlaces(query).enqueue(object : Callback<OverpassResponse?> {
@@ -194,65 +191,65 @@ class ClassRequests{
     }*/
 }
 
-    /*companion object {
-        private const val API_KEY = "5b3ce3597851110001cf624822732185f95b41bbadd3ad38afd95ef0"
-        private const val API_URL = "https://api.openrouteservice.org/v2/directions/"
-        private val usefulTags = arrayOf("name", "cuisine", "opening_hours", "charge")
-        private val toReturn = arrayOf("placeNames", "cuisines", "openingHours", "charges")
-        fun getRoute(
-            startLat: Double,
-            startLon: Double,
-            endLat: Double,
-            endLon: Double,
-            mode: String,
-            routeCallback: RouteCallback?
-        ) {
-            object : AsyncTask<Void?, Void?, String?>() {
-                protected override fun doInBackground(vararg voids: Void): String? {
-                    var result: String? = null
+/*companion object {
+    private const val API_KEY = "5b3ce3597851110001cf624822732185f95b41bbadd3ad38afd95ef0"
+    private const val API_URL = "https://api.openrouteservice.org/v2/directions/"
+    private val usefulTags = arrayOf("name", "cuisine", "opening_hours", "charge")
+    private val toReturn = arrayOf("placeNames", "cuisines", "openingHours", "charges")
+    fun getRoute(
+        startLat: Double,
+        startLon: Double,
+        endLat: Double,
+        endLon: Double,
+        mode: String,
+        routeCallback: RouteCallback?
+    ) {
+        object : AsyncTask<Void?, Void?, String?>() {
+            protected override fun doInBackground(vararg voids: Void): String? {
+                var result: String? = null
+                try {
+                    // A hálózati kérés elvégzése
+                    val url = URL(
+                        API_URL + mode + "?api_key=" + API_KEY +
+                                "&start=" + startLon + "," + startLat +
+                                "&end=" + endLon + "," + endLat
+                    )
+                    Log.d("openUrl", url.toString())
+                    val urlConnection = url.openConnection() as HttpURLConnection
                     try {
-                        // A hálózati kérés elvégzése
-                        val url = URL(
-                            API_URL + mode + "?api_key=" + API_KEY +
-                                    "&start=" + startLon + "," + startLat +
-                                    "&end=" + endLon + "," + endLat
-                        )
-                        Log.d("openUrl", url.toString())
-                        val urlConnection = url.openConnection() as HttpURLConnection
-                        try {
-                            val `in` = urlConnection.inputStream
-                            val reader = BufferedReader(InputStreamReader(`in`))
-                            val resultStringBuilder = StringBuilder()
-                            var line: String?
-                            while (reader.readLine().also { line = it } != null) {
-                                resultStringBuilder.append(line).append("\n")
-                            }
-                            result = resultStringBuilder.toString()
-                        } finally {
-                            urlConnection.disconnect()
+                        val `in` = urlConnection.inputStream
+                        val reader = BufferedReader(InputStreamReader(`in`))
+                        val resultStringBuilder = StringBuilder()
+                        var line: String?
+                        while (reader.readLine().also { line = it } != null) {
+                            resultStringBuilder.append(line).append("\n")
                         }
-                    } catch (e: IOException) {
-                        e.printStackTrace()
+                        result = resultStringBuilder.toString()
+                    } finally {
+                        urlConnection.disconnect()
                     }
-                    return result
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 }
+                return result
+            }
 
-                override fun onPostExecute(result: String?) {
-                    super.onPostExecute(result)
+            override fun onPostExecute(result: String?) {
+                super.onPostExecute(result)
 
-                    // Ellenőrizd, hogy a result nem null és van-e hossza
-                    if (result != null && result.length > 0) {
-                        // További feldolgozás
-                        routeCallback?.onRouteReceived(result)
-                            ?: // Hibakezelés: RouteCallback null esetén
-                            Log.e("OpenRouteServiceAPI", "RouteCallback is null")
-                    } else {
-                        // Hibakezelés, pl. üres vagy null válasz esetén
-                        routeCallback?.onRouteFailure()
-                            ?: // Hibakezelés: RouteCallback null esetén
-                            Log.e("OpenRouteServiceAPI", "RouteCallback is null")
-                    }
+                // Ellenőrizd, hogy a result nem null és van-e hossza
+                if (result != null && result.length > 0) {
+                    // További feldolgozás
+                    routeCallback?.onRouteReceived(result)
+                        ?: // Hibakezelés: RouteCallback null esetén
+                        Log.e("OpenRouteServiceAPI", "RouteCallback is null")
+                } else {
+                    // Hibakezelés, pl. üres vagy null válasz esetén
+                    routeCallback?.onRouteFailure()
+                        ?: // Hibakezelés: RouteCallback null esetén
+                        Log.e("OpenRouteServiceAPI", "RouteCallback is null")
                 }
-            }.execute()
-        }
-    }*/
+            }
+        }.execute()
+    }
+}*/

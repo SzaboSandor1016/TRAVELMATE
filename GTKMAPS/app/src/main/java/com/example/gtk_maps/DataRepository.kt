@@ -34,10 +34,10 @@ class DataRepository{
         return Gson().toJson(classToConvert)
     }
 
-    private fun <T> processReadString(readString: String, classType: Class<T>): ArrayList<T> {
+    private fun <T> processReadString(readString: String, classType: Class<T>): List<T> {
         val gson = Gson()
         val type = TypeToken.getParameterized(ArrayList::class.java, classType).type
-        return gson.fromJson(readString, type)
+        return gson.fromJson<ArrayList<T>?>(readString, type).toList()
     }
 
     suspend fun checkFileExists(fileName: String): Boolean{
@@ -67,7 +67,7 @@ class DataRepository{
             }
         }
     }
-    suspend fun <T> readStorage(fileName: String, classType: Class<T>): ArrayList<T>{
+    suspend fun <T> readStorage(fileName: String, classType: Class<T>): List<T> {
 
         return withContext(Dispatchers.IO) {
             val file = File(MyApplication.appContext.filesDir, fileName)

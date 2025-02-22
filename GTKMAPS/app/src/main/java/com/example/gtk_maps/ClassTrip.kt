@@ -1,6 +1,8 @@
 package com.example.gtk_maps
 
+import android.os.Build
 import android.os.Parcel
+import androidx.annotation.RequiresApi
 import java.util.UUID
 
 class ClassTrip() : android.os.Parcelable {
@@ -9,20 +11,26 @@ class ClassTrip() : android.os.Parcelable {
     private var startPlace: ClassPlace? = null
     private var places: ArrayList<ClassPlace> = ArrayList()
     private var contributors: ArrayList<String> = ArrayList()
-    private var date: String? = null
-    private var title: String? = null
-    private var note: String? = null
+    private var date: String = ""
+    private var title: String = ""
+    private var note: String = ""
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     constructor(parcel: Parcel) : this() {
         uuid = parcel.readString()
         startPlace = parcel.readParcelable(ClassPlace::class.java.classLoader)
-        date = parcel.readString()
-        title = parcel.readString()
-        note = parcel.readString()
+        places = parcel.readValue(ClassPlace::class.java.classLoader) as ArrayList<ClassPlace>
+        date = parcel.readString().toString()
+        title = parcel.readString().toString()
+        note = parcel.readString().toString()
     }
 
     fun setUUID(){
         this.uuid = UUID.randomUUID().toString()
+    }
+
+    fun setUUIDFromOtherTrip(uuid: String) {
+        this.uuid = uuid
     }
 
     fun getUUID(): String? {
@@ -50,19 +58,19 @@ class ClassTrip() : android.os.Parcelable {
     fun setDate(date: String){
         this.date = date
     }
-    fun getDate(): String?{
+    fun getDate(): String{
         return this.date
     }
     fun setTitle(title: String){
         this.title = title
     }
-    fun getTitle(): String?{
+    fun getTitle(): String{
         return this.title
     }
     fun setNote(note: String){
         this.note = note
     }
-    fun getNote(): String?{
+    fun getNote(): String{
         return this.note
     }
     fun addContributors(contributors: ArrayList<String>){
@@ -91,15 +99,16 @@ class ClassTrip() : android.os.Parcelable {
         this.contributors = ArrayList()
         this.startPlace = null
         this.places = ArrayList()
-        this.note = null
-        this.title = null
-        this.date = null
+        this.note = ""
+        this.title = ""
+        this.date = ""
     }
 
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(uuid)
         parcel.writeParcelable(startPlace, flags)
+        parcel.writeValue(places)
         parcel.writeString(date)
         parcel.writeString(title)
         parcel.writeString(note)
@@ -110,6 +119,7 @@ class ClassTrip() : android.os.Parcelable {
     }
 
     companion object CREATOR : android.os.Parcelable.Creator<ClassTrip> {
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         override fun createFromParcel(parcel: Parcel): ClassTrip {
             return ClassTrip(parcel)
         }

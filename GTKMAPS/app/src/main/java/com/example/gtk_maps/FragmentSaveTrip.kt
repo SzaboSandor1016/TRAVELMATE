@@ -37,14 +37,14 @@ class FragmentSaveTrip : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModelSave: ViewModelSave by activityViewModels()
-    private val viewModelTrip: ViewModelTrip by activityViewModels()
+    private val viewModelMain: ViewModelMain by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             //this.trip = it.getParcelable(TRIP)!!
         }
-        trip = viewModelTrip.getCurrentTrip()
+        trip = viewModelMain.getCurrentTrip()
     }
 
     override fun onCreateView(
@@ -72,11 +72,12 @@ class FragmentSaveTrip : Fragment() {
             if (title.equals("")){
                 binding.saveTitleLayout.error = resources.getString(R.string.required)
             }else {
-                viewModelTrip.setTripTitle(title)
-                viewModelTrip.setTripDate(binding.saveDate.getText().toString())
-                viewModelTrip.setTripNote(binding.saveNote.getText().toString())
+                viewModelMain.setUUID()
+                viewModelMain.setTripTitle(title)
+                viewModelMain.setTripDate(binding.saveDate.getText().toString())
+                viewModelMain.setTripNote(binding.saveNote.getText().toString())
 
-                viewModelSave.writeTripToFile(requireContext(),this.trip)
+                viewModelSave.writeTripToFile(this.trip)
             }
 
         }
@@ -112,7 +113,7 @@ class FragmentSaveTrip : Fragment() {
 
     fun updateSaveTrip(){
 
-        this.trip = viewModelTrip.getCurrentTrip()
+        this.trip = viewModelMain.getCurrentTrip()
 
     }
 

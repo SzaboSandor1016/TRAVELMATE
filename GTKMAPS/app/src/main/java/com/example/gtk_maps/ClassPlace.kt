@@ -12,6 +12,7 @@ class ClassPlace() : android.os.Parcelable {
     private var address: ClassAddress? = null
     private var coordinates: ClassCoordinates? = null
     private var category: String? = null
+    private var containedByTrip: Boolean = false
 
     constructor(parcel: Parcel) : this() {
         name = parcel.readString()
@@ -21,7 +22,9 @@ class ClassPlace() : android.os.Parcelable {
         address = parcel.readParcelable(ClassAddress::class.java.classLoader)
         coordinates = parcel.readParcelable(ClassCoordinates::class.java.classLoader)
         category = parcel.readString()
+        containedByTrip = parcel.readByte() != 0.toByte()
     }
+
 
     fun setName( name: String){
         this.name = name
@@ -66,6 +69,13 @@ class ClassPlace() : android.os.Parcelable {
         return this.coordinates
     }
 
+    fun setContained(contained: Boolean) {
+        this.containedByTrip = contained
+    }
+    fun isContained(): Boolean {
+        return this.containedByTrip
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(name)
         parcel.writeString(cuisine)
@@ -74,6 +84,7 @@ class ClassPlace() : android.os.Parcelable {
         parcel.writeParcelable(address, flags)
         parcel.writeParcelable(coordinates, flags)
         parcel.writeString(category)
+        parcel.writeByte(if (containedByTrip) 1 else 0)
     }
 
     override fun describeContents(): Int {
@@ -89,5 +100,6 @@ class ClassPlace() : android.os.Parcelable {
             return arrayOfNulls(size)
         }
     }
+
 
 }

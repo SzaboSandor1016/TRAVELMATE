@@ -17,8 +17,8 @@ import com.example.gtk_maps.databinding.FragmentPlaceDetailsBinding
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 
-private const val PLACE = "place"
-private const val CONTAINED = "contained"
+/*private const val PLACE = "place"
+private const val CONTAINED = "contained"*/
 
 /**
  * A simple [Fragment] subclass.
@@ -38,9 +38,9 @@ class FragmentPlaceDetails : Fragment(){
     private var isOpen: Boolean = false
     private var isContainedByTrip: Boolean = false
 
-    private lateinit var place: ClassPlace
-    private val viewModelDetails: ViewModelFragmentPlaceDetails by activityViewModels()
-    private val viewModelTrip: ViewModelTrip by activityViewModels()
+    private lateinit var place: ClassPlace/*
+    private val viewModelDetails: ViewModelFragmentPlaceDetails by activityViewModels()*/
+    private val viewModelMain: ViewModelMain by activityViewModels()
 
     private var listener: PlaceDetailsListener? = null
 
@@ -54,8 +54,8 @@ class FragmentPlaceDetails : Fragment(){
         super.onCreate(savedInstanceState)
         arguments?.let {
             //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                place = it.getParcelable(PLACE)!!
-                isContainedByTrip = it.getBoolean(CONTAINED)
+                /*place = it.getParcelable(PLACE)!!
+                isContainedByTrip = it.getBoolean(CONTAINED)*/
             //}
         }
     }
@@ -63,36 +63,33 @@ class FragmentPlaceDetails : Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setPlaceDetails(place)
-
-        updateTripButtons(isContainedByTrip,isOpen)
+        /*updateTripButtons(isContainedByTrip,isOpen)
 
         view.post {
 
             handleContainerHeightMeasurement()
 
+        }*/
+
+        viewModelMain.containerState.observe(viewLifecycleOwner) { state ->
+
+            handleContainerState(state)
+
         }
 
-        viewModelDetails.containerState.observe(viewLifecycleOwner) { state ->
+        viewModelMain.currentPlace.observe(viewLifecycleOwner) { place ->
 
-            when (state) {
-                "collapsed" -> {
-                    setClosedConstraints()
-                    this.isOpen = false
-                    updateTripButtons(isContainedByTrip,isOpen)
-                }
-                "expanded" -> {
-                    setOpenedConstraints()
-                    this.isOpen = true
-                    updateTripButtons(isContainedByTrip,isOpen)
-                }
+            isContainedByTrip = place!!.isContained()
+
+            handleContainerState(viewModelMain.containerState.value.toString())
+
+            this.place = place
+
+            setPlaceDetails(place)
+
+            view.post {
+                handleContainerHeightMeasurement()
             }
-
-        }
-        viewModelTrip.tripPlaces.observe(viewLifecycleOwner) { places ->
-
-            isContainedByTrip = viewModelTrip.isPlaceContainedByTrip(place)
-            updateTripButtons(isContainedByTrip,isOpen)
         }
 
 
@@ -100,12 +97,18 @@ class FragmentPlaceDetails : Fragment(){
 
             when (isContainedByTrip){
                 true -> {
-                    viewModelTrip.removePlaceFromTrip(place)
+                    viewModelMain.removePlaceFromTrip(place)
+                    this.place.setContained(false)
+                    viewModelMain.setCurrentPlaceState(false)
                 }
                 else -> {
-                    viewModelTrip.addPlaceToTrip(place)
+                    viewModelMain.addPlaceToTrip(place)
+                    this.place.setContained(true)
+                    viewModelMain.setCurrentPlaceState(true)
                 }
             }
+            viewModelMain.setCurrentPlace(this.place)
+            viewModelMain.isTripPlaceEmpty()
 
         }
         binding.placeAddRemoveRoute.setOnClickListener { l ->
@@ -141,16 +144,16 @@ class FragmentPlaceDetails : Fragment(){
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(place: ClassPlace, isPlaceContainedByTrip: Boolean) =
+        fun newInstance(/*place: ClassPlace, isPlaceContainedByTrip: Boolean*/) =
             FragmentPlaceDetails().apply {
                 arguments = Bundle().apply {
-                    putParcelable(PLACE, place)
-                    putBoolean(CONTAINED, isPlaceContainedByTrip)
+                    /*putParcelable(PLACE, place)
+                    putBoolean(CONTAINED, isPlaceContainedByTrip)*/
                 }
             }
     }
 
-    fun updatePlaceDetails(place: ClassPlace, isPlaceContainedByTrip: Boolean){
+    /*fun updatePlaceDetails(*//*place: ClassPlace, isPlaceContainedByTrip: Boolean*//*){
         if (this.place == place && this.isContainedByTrip == isPlaceContainedByTrip) {
             return // Nincs változás, nincs szükség frissítésre
         }
@@ -168,6 +171,23 @@ class FragmentPlaceDetails : Fragment(){
         view?.post {
             handleContainerHeightMeasurement()
         }
+    }*/
+
+    fun handleContainerState(state: String) {
+
+        when (state) {
+            "collapsed" -> {
+                setClosedConstraints()
+                this.isOpen = false
+                updateTripButtons(isContainedByTrip,isOpen)
+            }
+            "expanded" -> {
+                setOpenedConstraints()
+                this.isOpen = true
+                updateTripButtons(isContainedByTrip,isOpen)
+            }
+        }
+
     }
 
 
@@ -276,7 +296,8 @@ class FragmentPlaceDetails : Fragment(){
     private fun handleContainerHeightMeasurement(){
         if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             val totalHeight = binding.dragHandle.height + binding.placeTitleContainer.height
-            listener?.onTitleContainerMeasured(totalHeight)
+
+            viewModelMain.setFragmentContainerHeight(totalHeight + 0.0)
         }
     }
 

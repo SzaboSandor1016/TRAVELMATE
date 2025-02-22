@@ -1,7 +1,9 @@
 package com.example.gtk_maps
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowInsetsController
 import androidx.activity.enableEdgeToEdge
@@ -31,6 +33,11 @@ class ActivityUser : AppCompatActivity(), FragmentUser.Selected {
     private lateinit var viewModelSave: ViewModelSave
 
     private lateinit var firebaseAuth: FirebaseAuth
+
+    companion object {
+        const val USER_ACTIVITY_RESULT_CODE = 1
+        const val USER_ACTIVITY_BUNDLE_ID = "TRIP"
+    }
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -133,7 +140,13 @@ class ActivityUser : AppCompatActivity(), FragmentUser.Selected {
         }
     }
 
-    override fun onSelect() {
+    override fun onSelect(trip: ClassTrip) {
+
+        Log.d("test4user", trip.getSize().toString())
+
+        val intent = Intent(this,ActivityMain::class.java)
+        intent.putExtra(USER_ACTIVITY_BUNDLE_ID, trip)
+        setResult(RESULT_OK,intent)
         finish()
     }
 

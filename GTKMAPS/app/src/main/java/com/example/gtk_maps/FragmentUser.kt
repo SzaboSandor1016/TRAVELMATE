@@ -40,12 +40,12 @@ class FragmentUser : Fragment() {
 
     var selected: Selected? = null
 
-    private var viewModelFirebase: ViewModelFirebase? = null
-    private var viewModelSave: ViewModelSave? = null
-    private var viewModelTrip: ViewModelTrip? = null
+    private lateinit var viewModelFirebase: ViewModelFirebase
+    private lateinit var viewModelSave: ViewModelSave
+    private lateinit var viewModelMain: ViewModelMain
 
     interface Selected{
-        fun onSelect()
+        fun onSelect(trip: ClassTrip)
     }
 
     override fun onAttach(context: Context) {
@@ -60,18 +60,18 @@ class FragmentUser : Fragment() {
 
         viewModelFirebase = ViewModelProvider(viewModelStore,MyApplication.factory)[ViewModelFirebase::class.java]
         viewModelSave =  ViewModelProvider(viewModelStore,MyApplication.factory)[ViewModelSave::class.java]
-        viewModelTrip = ViewModelProvider(viewModelStore,MyApplication.factory)[ViewModelTrip::class.java]
+        viewModelMain = ViewModelProvider(viewModelStore,MyApplication.factory)[ViewModelMain::class.java]
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        user = viewModelFirebase?.getCurrentUser()
+        user = viewModelFirebase.getCurrentUser()
 
         //this may cause some problems in that case check this first
         //uiControllerUser = UiControllerFragmentUser(binding, requireContext(), this)
 
-        viewModelSave?.readSavedTrips()
+        viewModelSave.readSavedTrips()
 
         tripsAdapter = AdapterTripRecyclerView(ArrayList())
         binding.tripsRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -81,13 +81,17 @@ class FragmentUser : Fragment() {
 
         standardBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
-        viewModelSave?.trips?.observe(viewLifecycleOwner) { trips ->
+        viewModelSave.trips.observe(viewLifecycleOwner) { trips ->
 
             this.trips.clear()
             this.trips.addAll(trips)
 
-            tripsAdapter = AdapterTripRecyclerView(trips.map { it.getTitle()!! }.toList())
+            Log.d("trips2", trips[1].getTitle())
+
+            tripsAdapter = AdapterTripRecyclerView(trips.map { it.getTitle() }.toList())
             binding.tripsRecyclerView.adapter = tripsAdapter
+
+            Log.d("trips3", tripsAdapter.itemCount.toString())
 
             tripsAdapter.setOnClickListener(object : AdapterTripRecyclerView.OnClickListener{
                 override fun onClick(position: Int) {
@@ -97,8 +101,9 @@ class FragmentUser : Fragment() {
 
                     binding.selectTrip.setOnClickListener { l ->
 
-                        viewModelTrip?.setCurrentTrip(trips[position])
-                        selected?.onSelect()
+                        //viewModelMain.setupNewTrip(trips[position])
+                        Log.d("trips3.5", trips[position].getSize().toString())
+                        selected?.onSelect(trips[position])
                     }
 
                     standardBottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED

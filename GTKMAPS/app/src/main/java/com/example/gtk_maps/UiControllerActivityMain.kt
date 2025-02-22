@@ -229,7 +229,9 @@ class ActivityMainUIController(
                 //val state = m.relatedObject as? MarkerState
                 val relatedPlace = m.relatedObject as ClassPlace
 
-                activity.initDetailsFragment(relatedPlace)
+                viewModelMain.setCurrentPlace(relatedPlace)
+
+                activity.initDetailsFragment()
 
                 /*if (state?.isDetailsVisible!!){
 
@@ -308,6 +310,16 @@ class ActivityMainUIController(
 
     fun handleUiChangesForSave(){
         activity.initSaveFragment()
+    }
+
+    fun updateCurrentPlace(currentPlace: ClassPlace) {
+
+        val marker = allMarkers.find { (it.relatedObject as ClassPlace).getCoordinates() == currentPlace.getCoordinates() }
+        val index = allMarkers.indexOf(marker)
+        marker?.relatedObject = currentPlace
+        if (marker != null) {
+            allMarkers.set(index,marker)
+        }
     }
 
     //Completely useless functions at the moment but it could be useful in the future / related to the visibility of
@@ -486,7 +498,7 @@ class ActivityMainUIController(
 
     fun resetSearchParameters() {
 
-        showMarkersOnMap(ArrayList())
+        showMarkersOnMap(viewModelMain.getTripPlaces())
 
         resetSearchedCategories()
 

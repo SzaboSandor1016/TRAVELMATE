@@ -20,6 +20,9 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.FrameLayout
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -54,7 +57,7 @@ private operator fun <E> Set<E>.get(i: Int): Any {
 // | markCoordinatesOnMap                                                                                      |
 // -------------------------------------------------------------------------------------------------------------
 
-class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListener {
+class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsListener */{
 
     interface BottomSheetStateListener {
         fun onStateExpanded()
@@ -125,6 +128,16 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
     private var searchDao: SearchDao? = null*/
     private var routeMarkers: ArrayList<Marker>? = null
     private var nameMarkers: ArrayList<Marker>? = null
+
+    /*@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private val startUserActivityForResultLauncher: ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult: ActivityResult ->
+            if (activityResult.resultCode == ActivityUser.USER_ACTIVITY_RESULT_CODE) {
+                activityResult.data?.getParcelableExtra(ActivityUser.USER_ACTIVITY_BUNDLE_ID, ClassTrip::class.java)?.let {
+                    viewModelMain.setupNewTrip(it)
+                }
+            }
+        }*/
 
     companion object {
         private const val PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1
@@ -251,12 +264,6 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
 
         binding.placeSearch.onItemClickListener = OnItemClickListener { parent, view, position, id ->
 
-            binding.placeSearch.setText(suggestions[position])
-
-            viewModelTrip.clearTrip()
-
-            viewModelTrip.setUUID()
-
             viewModelMain.setStartPlace(startPlaces[position])
 
             val inputMethodManager: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -288,7 +295,12 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
 
         binding.userBTN2.setOnClickListener(View.OnClickListener { v ->
             animateImageButton(v)
-            startActivity(Intent(this@ActivityMain, ActivityUser::class.java))
+
+            val intent = Intent(this, ActivityUser::class.java)
+            startActivityForResult(
+                intent,
+                REQUEST_CODE
+            )
 
         })
 
@@ -325,7 +337,7 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
 
                 uiController?.resetUiOnLocationClicked()
 
-                viewModelMain.resetSearchDetails()
+                viewModelMain.resetDetails()
             }
         }
 
@@ -344,15 +356,16 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
 
         viewModelMain.startPlace.observe(this@ActivityMain) { startPlace ->
 
-            uiController?.prepareForNewSearch(startPlace!!)
+            //uiController?.prepareForNewSearch(startPlace!!)
 
-            viewModelTrip.clearTrip()
+            val stringBuilder = StringBuilder()
 
-            viewModelTrip.setUUID()
+            stringBuilder.append(startPlace?.getName() + " ")
+            stringBuilder.append(startPlace?.getAddress()?.getFullAddress())
 
-            viewModelTrip.setTripStartPlace(startPlace!!)
+            binding.placeSearch.setText(stringBuilder.toString())
 
-            Log.d("test5", startPlace.getName().toString())
+            Log.d("test5", startPlace?.getName().toString())
         }
 
         viewModelMain.transportMode.observe(this@ActivityMain) { transportMode ->
@@ -374,9 +387,19 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
             }
         }
 
-        viewModelTrip.tripPlaces.observe(this@ActivityMain) { places ->
+        viewModelMain.fragmentContainerHeight.observe(this@ActivityMain) { height ->
 
-            handleTripChips(places.isEmpty())
+            val standardBottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheetContainer)
+            standardBottomSheetBehavior.peekHeight = height!!.toInt()
+        }
+
+        viewModelMain.currentPlaceState.observe(this@ActivityMain) {
+            uiController?.updateCurrentPlace(viewModelMain.currentPlace.value!!)
+        }
+
+        viewModelMain.tripState.observe(this@ActivityMain) { isEmpty ->
+
+            handleTripChips(isEmpty)
         }
 
         viewModelPhoton.autoCompleteResults.observe(this@ActivityMain) { results ->
@@ -395,11 +418,22 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
 
         }
 
+    }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            (data?.getParcelableExtra(ActivityUser.USER_ACTIVITY_BUNDLE_ID) as? ClassTrip)?.let {
+                viewModelMain.setupNewTrip(it)
+            }
+
+        }
     }
 
     public override fun onResume() {
         super.onResume()
+
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
 
@@ -439,12 +473,12 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
             when (newState) {
                 BottomSheetBehavior.STATE_COLLAPSED -> {
                     // Bezárt állapot
-                    viewModelPlaceDetails.setContainerState("collapsed")
+                    viewModelMain.setContainerState("collapsed")
 
                 }
                 BottomSheetBehavior.STATE_EXPANDED -> {
                     // Kinyitott állapot
-                    viewModelPlaceDetails.setContainerState("expanded")
+                    viewModelMain.setContainerState("expanded")
                 }
                 // További állapotok kezelése...
                 BottomSheetBehavior.STATE_DRAGGING -> {
@@ -484,11 +518,11 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
 
 
 
-    override fun onTitleContainerMeasured(height: Int) {
+    /*override fun onTitleContainerMeasured(height: Int) {
 
         val standardBottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheetContainer)
         standardBottomSheetBehavior.peekHeight = height
-    }
+    }*/
 
     private fun handleTripChips(isTripPlacesEmpty: Boolean){
 
@@ -561,7 +595,7 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
     }
 
     private fun clearSearchAndUi(){
-        viewModelMain.resetSearchDetails()
+        viewModelMain.resetDetails()
 
         uiController?.resetSearchParameters()
     }
@@ -590,8 +624,6 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
         if (startPlaces.size < 2 && isFromLocation) {
 
             viewModelMain.setStartPlace(startPlaces[0])
-
-            binding.placeSearch.setText(suggestions[0])
 
 
             //todo if further ui changes become necessary create a separate func.
@@ -623,7 +655,7 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
         }
         binding.dismissTrip.setOnClickListener { l ->
 
-            viewModelTrip.clearTrip()
+            viewModelMain.clearTrip()
         }
     }
 
@@ -634,25 +666,25 @@ class ActivityMain : AppCompatActivity(), FragmentPlaceDetails.PlaceDetailsListe
         binding.dismissTrip.setOnClickListener(null)
     }
 
-    fun initDetailsFragment(place: ClassPlace) {
+    fun initDetailsFragment() {
         val tag = "PLACE_DETAILS_FRAGMENT"
-
-        val isPlaceContainedByTrip = viewModelTrip.isPlaceContainedByTrip(place)
 
         val existingFragment = supportFragmentManager.findFragmentByTag(tag)
 
         if (existingFragment == null) {
 
-            val fragment = FragmentPlaceDetails.newInstance(place, isPlaceContainedByTrip)
+            val fragment = FragmentPlaceDetails.newInstance()
 
             supportFragmentManager.beginTransaction()
                 .replace(R.id.bottom_sheet_container, fragment, tag)
                 .commit()
-        } else {
+        }/* else {
             (existingFragment as FragmentPlaceDetails).updatePlaceDetails(place, isPlaceContainedByTrip)
-        }
+        }*/
 
         standardBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
+        viewModelMain.setContainerState("collapsed")
     }
 
     fun initSaveFragment() {

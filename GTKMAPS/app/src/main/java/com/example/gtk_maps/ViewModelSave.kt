@@ -40,7 +40,7 @@ class ViewModelSave (private val repository: DataRepository): ViewModel() {
         viewModelScope.launch {
             try {
                 val actualContent = repository.readStorage(SAVED_TRIPS_FILE_NAME, TRIP_CLASS_TYPE)
-                actualContent.addAll(tripsToWrite)
+                (actualContent as ArrayList<ClassTrip>).addAll(tripsToWrite)
                 repository.writeStorage(actualContent , SAVED_TRIPS_FILE_NAME)
             }catch (e: Exception){
                 Log.e("FileWriter", "Error writing to file: saved_trips.json \n error:", e)
@@ -48,7 +48,7 @@ class ViewModelSave (private val repository: DataRepository): ViewModel() {
             }
         }
     }
-    fun writeTripToFile(context: Context, tripToWrite: ClassTrip){
+    fun writeTripToFile(tripToWrite: ClassTrip){
 
         viewModelScope.launch {
             try {
@@ -71,7 +71,9 @@ class ViewModelSave (private val repository: DataRepository): ViewModel() {
         viewModelScope.launch {
             try {
                 val trips = repository.readStorage( SAVED_TRIPS_FILE_NAME, TRIP_CLASS_TYPE)
-                _trips.postValue(trips)
+
+                Log.d("trips", trips[1].getTitle())
+                _trips.postValue(trips as ArrayList<ClassTrip>?)
             }catch (e: Exception){
                 Log.e("FileReader", "Error reading file: saved_trips.json \n error:", e)
                 _readErrorMessage.postValue("Error reading file")

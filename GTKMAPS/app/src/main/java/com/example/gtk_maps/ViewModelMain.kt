@@ -7,6 +7,21 @@ import androidx.lifecycle.ViewModel
 
 class ViewModelMain: ViewModel() {
 
+    private val _containerState: MutableLiveData<String> = MutableLiveData<String>()
+    val containerState: LiveData<String> = _containerState
+
+    private val _fragmentContainerHeight = MutableLiveData<Double?>()
+    val fragmentContainerHeight: LiveData<Double?> = _fragmentContainerHeight
+
+    private val _tripState: MutableLiveData<Boolean> = MutableLiveData<Boolean>()
+    val tripState: LiveData<Boolean> = _tripState
+
+    private val _currentPlace = MutableLiveData<ClassPlace?>()
+    val currentPlace: LiveData<ClassPlace?> = _currentPlace
+
+    private val _currentPlaceState = MutableLiveData<Boolean>()
+    val currentPlaceState: LiveData<Boolean> = _currentPlaceState
+
     private val _startPlace = MutableLiveData<ClassPlace?>()
     val startPlace: LiveData<ClassPlace?> = _startPlace
 
@@ -21,11 +36,20 @@ class ViewModelMain: ViewModel() {
 
     private val search = ClassSearch()
 
+    private val trip = ClassTrip()
+
+    fun setContainerState(state: String){
+        this._containerState.postValue(state)
+    }
+
     fun getCurrentSearch(): ClassSearch = search
+
+    fun getCurrentTrip(): ClassTrip = trip
 
     fun setStartPlace(startPlace: ClassPlace){
 
         search.setStartPlace(startPlace).also {
+            trip.setStartPlace(startPlace)
             _startPlace.postValue(startPlace)
         }
     }
@@ -35,24 +59,24 @@ class ViewModelMain: ViewModel() {
         return search.getStartPlace()
     }
 
-    fun setPlaces(places: ArrayList<ClassPlace>){
+/*    fun setPlaces(places: ArrayList<ClassPlace>){
 
         search.setPlaces(places).also{
 
             _places.postValue(places)
         }
-    }
+    }*/
 
     fun getPlaces(): ArrayList<ClassPlace>{
 
         return search.getPlaces()
     }
 
-    fun addPlace(place: ClassPlace){
+/*    fun addPlace(place: ClassPlace){
 
         search.addPlace(place)
         _places.postValue(search.getPlaces())
-    }
+    }*/
 
     fun addPlaces(places: ArrayList<ClassPlace>){
 
@@ -64,7 +88,7 @@ class ViewModelMain: ViewModel() {
 
     }
 
-    fun removePlace(place: ClassPlace){
+    /*fun removePlace(place: ClassPlace){
 
         search.removePlace(place)
         _places.postValue(search.getPlaces())
@@ -74,7 +98,7 @@ class ViewModelMain: ViewModel() {
 
         search.removePlaces(places)
         _places.postValue(search.getPlaces())
-    }
+    }*/
 
     fun setTransportMode(optionIndex: Int){
 
@@ -123,9 +147,11 @@ class ViewModelMain: ViewModel() {
         return search.getDistance()
     }
 
-    fun resetSearchDetails(){
+    fun resetDetails(){
 
         search.resetSearchDetails(). also {
+
+            trip.clear()
 
             _minute.postValue(null)
             _transportMode.postValue(null)
@@ -138,6 +164,111 @@ class ViewModelMain: ViewModel() {
         search.removePlacesByCategory(category)
         _places.postValue(search.getPlaces())
     }
+
+    fun setupNewTrip(trip: ClassTrip) {
+
+        this.search.setStartPlace(trip.getStartPlace()!!)
+        this.search.setPlaces(trip.getPlaces())
+        this.trip.setPlaces(trip.getPlaces())
+
+        _startPlace.postValue(trip.getStartPlace())
+        _places.postValue(trip.getPlaces())
+        Log.d("test4vm", trip.getSize().toString())
+
+        this.trip.setUUIDFromOtherTrip(trip.getUUID()!!)
+        this.trip.setNote(trip.getNote())
+        this.trip.setDate(trip.getDate())
+        this.trip.setTitle(trip.getTitle())
+
+    }
+
+    fun setUUID(){
+        trip.setUUID()
+    }
+
+    fun getUUID(): String? {
+        return trip.getUUID()
+    }
+
+    /*fun setTripStartPlace(startPlace: ClassPlace){
+        trip.setStartPlace(startPlace)
+    }
+    fun getTripStartPlace(): ClassPlace?{
+        return trip.getStartPlace()
+    }
+    fun setTripPlaces(places: ArrayList<ClassPlace>){
+
+        trip.setPlaces(places)
+    }*/
+    fun getTripPlaces(): ArrayList<ClassPlace>{
+        return trip.getPlaces()
+    }
+    fun addPlaceToTrip(place: ClassPlace){
+
+        trip.addPlace(place)
+
+    }
+    fun removePlaceFromTrip(place: ClassPlace){
+
+        trip.removePlace(place)
+    }
+    fun setTripDate(date: String){
+        trip.setDate(date)
+    }
+    fun getTripDate(): String{
+        return trip.getDate()
+    }
+    fun setTripTitle(title: String){
+        trip.setTitle(title)
+    }
+    fun getTripTitle(): String{
+        return trip.getTitle()
+    }
+    fun setTripNote(note: String){
+        trip.setNote(note)
+    }
+    fun getTripNote(): String{
+        return trip.getNote()
+    }
+    fun addTripContributors(contributors: ArrayList<String>){
+        trip.addContributors(contributors)
+    }
+    fun addTripContributor(contributor: String){
+        trip.addContributor(contributor)
+    }
+    fun removeTripContributors(contributors: ArrayList<String>){
+        trip.removeContributors(contributors)
+    }
+    fun removeTripContributor(contributor: String){
+        trip.removeContributor(contributor)
+    }
+
+    fun isTripPlaceEmpty(){
+        _tripState.value = trip.isPlacesEmpty()
+    }
+    /*fun isTripPlacesEmpty(): Boolean{
+        return trip.isPlacesEmpty()
+    }*/
+
+    fun getTripPlaceCount(): Int{
+        return trip.getSize()
+    }
+    fun clearTrip() {
+        trip.clear()
+    }
+
+    fun setCurrentPlace(place: ClassPlace) {
+        _currentPlace.value = place
+    }
+
+    fun setCurrentPlaceState(isAdded: Boolean) {
+        _currentPlaceState.value = isAdded
+    }
+
+    fun setFragmentContainerHeight(height :Double) {
+        _fragmentContainerHeight.value = height
+    }
+
 
     /*fun searchAutocomplete(query: String) {
 

@@ -20,9 +20,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.FrameLayout
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -31,7 +28,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.gtk_maps.databinding.ActivityMainBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.firebase.auth.FirebaseAuth
@@ -39,6 +39,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.views.overlay.Marker
 
@@ -70,7 +71,7 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
 
     private lateinit var binding: ActivityMainBinding
 
-    private var suggestionsAdapter: AdapterSuggestion? = null
+    private lateinit var suggestionsAdapter: AdapterSuggestion
 
     private lateinit var standardBottomSheetBehavior: BottomSheetBehavior<FrameLayout>
 
@@ -231,8 +232,8 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
 
         //fragmentsViewModel = ViewModelProvider(this).get(FragmentsViewModel::class.java)
         //navigation = Navigation(Volley.newRequestQueue(applicationContext), applicationContext)
-        places = ArrayList()
-        isUpdatedFromActivity = false
+        /*places = ArrayList()
+        isUpdatedFromActivity = false*/
         isNavi = false
 
 
@@ -259,12 +260,62 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
         searchDao = appDatabase!!.searchDao()
         fragmentsViewModel!!.searchDao = searchDao*/
 
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModelMain.uiState.collect {
+
+                    uiController?.updateCurrentPlace(it.currentPlace)
+                    Log.d("countMain", it.places.size.toString())
+                    uiController?.showMarkersOnMap(it.places)
+
+                    if (it.startPlace != null) {
+                        binding.chipGroupChips.visibility = View.VISIBLE
+                    } else {
+                        binding.chipGroupChips.visibility = View.GONE
+                    }
+
+                    if (it.currentChipGroup != null && it.currentChipGroupContent != null) {
+                        uiController?.createChipGroupDialog(
+                            it.currentChipGroup,
+                            it.currentChipGroupContent
+                        )
+                        uiController?.showDialog()
+                        Log.d("content", it.currentChipGroupContent[0].title.toString())
+                    } else {
+                        uiController?.dismissDialog()
+                    }
+
+                    //uiController?.setChipsChecked(it.selectedChips)
+
+                    uiController?.handleUiChangesForExtendedSearch(it.extendedSearchVisible && !it.extendedSearchSelected)
+
+                    val hasChecked = it.transportMode != null
+
+                    uiController?.updateUiOnTransportModeSelected(hasChecked)
+
+                    /*uiController?.handleMinuteChanged()
+
+                    if (it.minute != null){
+
+                        calculateSearchDistance()
+                    }*/
+
+                    handleTripChips(it.tripEmpty)
+
+                    standardBottomSheetBehavior.peekHeight = it.containerHeight
+
+                }
+            }
+        }
+
 
         binding.placeSearch.setDropDownBackgroundDrawable(ContextCompat.getDrawable(this,R.drawable.shape_autocomplete_dropdown))
 
         binding.placeSearch.onItemClickListener = OnItemClickListener { parent, view, position, id ->
 
             viewModelMain.setStartPlace(startPlaces[position])
+
+            binding.placeSearch.setText(suggestions[position])
 
             val inputMethodManager: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             val currentFocusView = currentFocus
@@ -283,6 +334,7 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
                 if (s.length >= 4) {
 
                     viewModelPhoton.searchAutoComplete(s.toString())
@@ -306,7 +358,7 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
 
         binding.openExtended.addOnCheckedChangeListener { button, isChecked ->
 
-            uiController?.handleUiChangesForExtendedSearch(isChecked)
+            viewModelMain.setExtendedSearch(isChecked)
 
             if (isChecked) {
                 setExtendedSearchListeners()
@@ -314,10 +366,16 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
 
                 if (viewModelMain.getCalculatedDistance()!=null) {
 
+                    uiController?.resetUiExtendedSearch()
+
                     removeExtendedSearchListeners()
 
-                    clearSearchAndUi()
+                    viewModelMain.resetDetails()
+
+                    uiController?.resetSearchParameters()
                 }
+
+                viewModelMain.resetExtendedSearch()
             }
         }
 
@@ -346,8 +404,7 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
         standardBottomSheetBehavior.addBottomSheetCallback(bottomSheetCallback)
 
 
-
-        viewModelMain.places.observe(this@ActivityMain) { places ->
+        /*viewModelMain.places.observe(this@ActivityMain) { places ->
 
             uiController?.showMarkersOnMap(places)
 
@@ -400,7 +457,7 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
         viewModelMain.tripState.observe(this@ActivityMain) { isEmpty ->
 
             handleTripChips(isEmpty)
-        }
+        }*/
 
         viewModelPhoton.autoCompleteResults.observe(this@ActivityMain) { results ->
 
@@ -425,6 +482,14 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
 
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             (data?.getParcelableExtra(ActivityUser.USER_ACTIVITY_BUNDLE_ID) as? ClassTrip)?.let {
+
+                val stringBuilder = StringBuilder()
+
+                stringBuilder.append(it.getStartPlace()?.getName() + " ")
+                stringBuilder.append(it.getStartPlace()?.getAddress()?.getFullAddress())
+
+                binding.placeSearch.setText(stringBuilder.toString())
+
                 viewModelMain.setupNewTrip(it)
             }
 
@@ -451,17 +516,16 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
     override fun onDestroy() {
         super.onDestroy()
 
-        viewModelMain.places.removeObservers(this)
+        /*viewModelMain.places.removeObservers(this)
         viewModelMain.startPlace.removeObservers(this)
         viewModelMain.transportMode.removeObservers(this)
-        viewModelMain.minute.removeObservers(this)
+        viewModelMain.minute.removeObservers(this)*/
         viewModelTrip.tripPlaces.removeObservers(this)
         viewModelPhoton.autoCompleteResults.removeObservers(this)
         viewModelPhoton.reverseGeoCodeResults.removeObservers(this)
         viewModelOverpass.overpassResponse.removeObservers(this)
         uiController?.clearDialog()
         locationListener = null
-        suggestionsAdapter = null
 
         resources!!.flushLayoutCache()
     }
@@ -594,12 +658,6 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
         viewModelMain.calculateDistance()
     }
 
-    private fun clearSearchAndUi(){
-        viewModelMain.resetDetails()
-
-        uiController?.resetSearchParameters()
-    }
-
     private fun handleOverpassObserve(places: ArrayList<ClassPlace>){
 
         viewModelMain.addPlaces(places)
@@ -613,7 +671,7 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
 
         startPlaces.addAll(places)
 
-        for (place in places) {
+        for (place in startPlaces) {
             val suggestion = StringBuilder()
             suggestion.append(place.getName()).append(" ")
             suggestion.append(place.getAddress()?.getFullAddress() ?: "")
@@ -625,11 +683,15 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
 
             viewModelMain.setStartPlace(startPlaces[0])
 
+            binding.placeSearch.setText(suggestions[0])
+
 
             //todo if further ui changes become necessary create a separate func.
             binding.chipGroups.visibility = View.VISIBLE
 
-            clearSearchAndUi()
+            viewModelMain.resetDetails()
+
+            uiController?.resetSearchParameters()
 
         }else {
 
@@ -641,9 +703,11 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
             binding.placeSearch.setAdapter(
                 suggestionsAdapter
             )
+
+            suggestionsAdapter.notifyDataSetChanged()
         }
 
-        suggestionsAdapter?.notifyDataSetChanged()
+
     }
 
 

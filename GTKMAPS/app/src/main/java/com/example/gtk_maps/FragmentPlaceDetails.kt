@@ -12,7 +12,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.withCreated
 import com.example.gtk_maps.databinding.FragmentPlaceDetailsBinding
+import kotlinx.coroutines.launch
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -71,7 +75,27 @@ class FragmentPlaceDetails : Fragment(){
 
         }*/
 
-        viewModelMain.containerState.observe(viewLifecycleOwner) { state ->
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModelMain.uiState.collect {
+                    handleContainerState(it.containerState)
+
+                    isContainedByTrip = it.currentPlace.isContained()
+
+                    handleContainerState(it.containerState)
+
+                    place = it.currentPlace
+
+                    setPlaceDetails(place)
+
+                    view.post {
+                        handleContainerHeightMeasurement()
+                    }
+                }
+            }
+        }
+
+        /*viewModelMain.containerState.observe(viewLifecycleOwner) { state ->
 
             handleContainerState(state)
 
@@ -90,7 +114,7 @@ class FragmentPlaceDetails : Fragment(){
             view.post {
                 handleContainerHeightMeasurement()
             }
-        }
+        }*/
 
 
         binding.placeAddRemoveTrip.setOnClickListener{ l ->
@@ -297,7 +321,7 @@ class FragmentPlaceDetails : Fragment(){
         if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             val totalHeight = binding.dragHandle.height + binding.placeTitleContainer.height
 
-            viewModelMain.setFragmentContainerHeight(totalHeight + 0.0)
+            viewModelMain.setFragmentContainerHeight(totalHeight)
         }
     }
 

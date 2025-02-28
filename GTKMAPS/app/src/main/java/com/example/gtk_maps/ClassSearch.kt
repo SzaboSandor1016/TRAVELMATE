@@ -41,8 +41,9 @@ class ClassSearch() : android.os.Parcelable {
     fun getDistance(): Double?{
         return this.distance
     }
-    fun addPlaces(places: ArrayList<ClassPlace>){
+    fun addPlaces(places: ArrayList<ClassPlace>): ArrayList<ClassPlace> {
         this.places.addAll(places.toSet())
+        return this.places
     }
     fun removePlaces(places: ArrayList<ClassPlace>){
         this.places.removeAll(places.toSet())
@@ -78,11 +79,13 @@ class ClassSearch() : android.os.Parcelable {
         this.places = ArrayList()
     }
 
-    fun removePlacesByCategory(category: String){
+    fun removePlacesByCategory(category: String): ArrayList<ClassPlace>{
 
         var placesToRemove = places.filter { it.getCategory().equals(category) }
 
         places.removeAll(placesToRemove.toSet())
+
+        return this.places
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

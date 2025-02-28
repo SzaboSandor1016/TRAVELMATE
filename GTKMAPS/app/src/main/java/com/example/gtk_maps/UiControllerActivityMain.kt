@@ -11,6 +11,7 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
+import androidx.core.view.get
 import com.example.gtk_maps.databinding.ActivityMainBinding
 import com.google.android.material.chip.Chip
 import org.osmdroid.api.IMapController
@@ -32,19 +33,19 @@ class ActivityMainUIController(
     private val binding: ActivityMainBinding
 ) {
 
-    private val chipGroupCategories: Map<Int, Array<ChipCategory>> = mapOf(
-        0 to arrayOf(
+    private val chipGroupCategories: Map<Int, List<ChipCategory>> = mapOf(
+        0 to listOf(
             ChipCategory(1,"\"amenity\"=\"restaurant\"",R.drawable.ic_restaurant,R.string.restaurant, false,"restaurant"),
             ChipCategory(2,"\"amenity\"=\"cafe\"", R.drawable.ic_cafe,R.string.cafe,false,"cafe"),
             ChipCategory(3,"\"amenity\"=\"fast_food\"",R.drawable.ic_fast_food,R.string.fast_food, false,"fast_food"),
             ChipCategory(4,"\"amenity\"=\"pub\";\"amenity\"=\"bar\"",R.drawable.ic_bar,R.string.pub_bar,false,"pub_bar")
         ),
-        3 to arrayOf(
+        3 to listOf(
             ChipCategory(1,"\"amenity\"=\"cinema\"", R.drawable.ic_cinema,R.string.cinema, false,"cinema"),
             ChipCategory(2,"\"amenity\"=\"theatre\"", R.drawable.ic_theatre,R.string.theatre, false,"theatre"),
             ChipCategory(3,"\"amenity\"=\"nightclub\"", R.drawable.ic_nightclub, R.string.nightclub, false,"nightclub"),
             ChipCategory(4,"\"amenity\"=\"casino\"",R.drawable.ic_casino, R.string.casino, false,"casino")
-        ), 5 to arrayOf(
+        ), 5 to listOf(
             ChipCategory(1,"\"tourism\"=\"theme_park\"",R.drawable.ic_theme_park,R.string.adventure_park,false,"theme_park"),
             ChipCategory(2,"\"leisure\"=\"water_park\"", R.drawable.ic_beach_resort,R.string.spa,false,"water_park"),
             ChipCategory(3,"\"leisure\"=\"beach_resort\"", R.drawable.ic_beach,R.string.beach_resort,false,"beach_resort"),
@@ -79,7 +80,7 @@ class ActivityMainUIController(
             "\"amenity\"=\"exhibition_centre\"" //; + add
         ,null,null,null,"exhibition")
 
-    private var dialog: Dialog? = null
+    private var dialog: Dialog
     private var prevChip: Chip? = null
 
     private val mapController: IMapController = binding.map.controller
@@ -87,6 +88,7 @@ class ActivityMainUIController(
     private var markerClusterer: RadiusMarkerClusterer?= null
     private val categoryManager: ClassCategoryManager = ClassCategoryManager(context)
     private var allMarkers: ArrayList<Marker> = ArrayList()
+    private var popupView: View
 
     init {
         binding.map.setTileSource(TileSourceFactory.MAPNIK)
@@ -114,12 +116,23 @@ class ActivityMainUIController(
             }
         })
 
+        val inflater = LayoutInflater.from(context)
+        popupView = inflater.inflate(R.layout.layout_popup_menu,null)
+
+        dialog = Dialog(popupView.context)
+        dialog.setContentView(popupView)
+        dialog.setCancelable(false)
+
+        dialog.show()
+
         binding.chipGroups.setOnScrollChangeListener{ _, _, _, _, _ ->
 
-            dialog?.dismiss()
+            /*dialog?.dismiss()
             dialog = null
 
-            prevChip?.isChecked = false
+            prevChip?.isChecked = false*/
+
+            viewModelMain.resetCurrentChipGroup()
 
         }
 
@@ -135,32 +148,41 @@ class ActivityMainUIController(
                     if (groupIndex in chipGroupCategories.keys){
 
                         if (!isChecked){
-                            if (dialog!=null) {
+                            /*if (dialog!=null) {
                                 dialog!!.dismiss()
                                 dialog = null
-                            }
-                        }else{
+                            }*/
 
-                            prevChip = groupChip
+                            Log.d("check", "uncheck")
+
+                            viewModelMain.resetCurrentChipGroup()
+
+                        }else{
+                            Log.d("check", "check")
+
+                            //prevChip = groupChip
 
                             val chipGroupContent = chipGroupCategories[groupIndex]
 
-                            createChipGroupDialog(groupChip,chipGroupContent)
+                            //createChipGroupDialog(groupChip,chipGroupContent)
+
+                            if (chipGroupContent != null) {
+                                viewModelMain.setCurrentChipGroup(l.id,chipGroupContent)
+                            }
 
                         }
 
 
                     }else if (groupIndex == 1){
 
-                        handleCategoryFiltererChipCheckChange(accommodationChip.content,accommodationChip.category, isChecked)
-
+                        handleCategoryFiltererChipCheckChange(accommodationChip.content,accommodationChip.category, isChecked/*, l.id*/)
                     }else if (groupIndex == 2){
 
-                        handleCategoryFiltererChipCheckChange(exhibitionChip.content,exhibitionChip.category, isChecked)
+                        handleCategoryFiltererChipCheckChange(exhibitionChip.content,exhibitionChip.category, isChecked/*, l.id*/)
 
                     }else {
 
-                        handleCategoryFiltererChipCheckChange(landmarkChip.content,landmarkChip.category, isChecked)
+                        handleCategoryFiltererChipCheckChange(landmarkChip.content,landmarkChip.category, isChecked/*, l.id*/)
 
                     }
 
@@ -202,14 +224,14 @@ class ActivityMainUIController(
         resetSearchParameters()
     }
 
-    fun showMarkersOnMap(places: ArrayList<ClassPlace>){
+    fun showMarkersOnMap(places: List<ClassPlace>){
 
         val mapControllerOnResume = binding.map.controller
         mapControllerOnResume.setZoom(15.0)
 
         val startPlace = viewModelMain.getStartPlace()
 
-        showStart(startPlace)
+        if (startPlace!= null) showStart(startPlace)
 
         for (place in places){
             val marker: Marker = Marker(binding.map)
@@ -340,22 +362,19 @@ class ActivityMainUIController(
         return place
     }*/
 
-    private fun createChipGroupDialog(groupChip: Chip, chipGroupContent :Array<ChipCategory>?){
-        val inflater = LayoutInflater.from(context)
-        val popupView = inflater.inflate(R.layout.layout_popup_menu,null)
+    fun createChipGroupDialog(id: Int, chipGroupContent :List<ChipCategory>){
 
-        dialog = Dialog(context)
-        dialog?.setContentView(popupView)
-        dialog?.setCancelable(false)
+        val groupChip: Chip = binding.chipGroupChips.findViewById(id)
 
         groupChip.post {
             // Get chip position on screen
+
             val location = IntArray(2)
             groupChip.getLocationOnScreen(location)
             val chipHeight = groupChip.height * 0.5
 
             // Position the dialog under the chip
-            dialog?.window?.apply {
+            dialog.window?.apply {
                 val params = this.attributes
                 params.gravity = Gravity.TOP or Gravity.START
                 params.x = location[0] // Set X position to chip's left edge
@@ -368,17 +387,28 @@ class ActivityMainUIController(
 
             val layout = popupView.findViewById<LinearLayout>(R.id.popup_menu_content)
 
-            for (content in chipGroupContent!!){
+            layout.removeAllViews()
+
+            for (content in chipGroupContent){
 
                 val chip = createSearchChip(content)
 
                 layout.addView(chip)
 
             }
+
+            dialog.show()
         }
 
 
-        dialog?.show()
+
+    }
+
+    fun showDialog() {
+    }
+
+    fun dismissDialog() {
+        dialog.dismiss()
     }
 
     private fun createSearchChip(chipCategory: ChipCategory): Chip{
@@ -420,12 +450,16 @@ class ActivityMainUIController(
         return chip
     }
 
-    private fun handleCategoryFiltererChipCheckChange(content: String, category: String, checked: Boolean){
+    private fun handleCategoryFiltererChipCheckChange(content: String, category: String, checked: Boolean, id: Int? = null){
 
         if (checked){
             handleCategoryFilterChipChecked(content,category)
+            if (id != null)
+                viewModelMain.addSelectedChip(id)
         }else{
             handleCategoryFilterChipUnchecked(category)
+            if (id != null)
+                viewModelMain.removeSelectedChip(id)
         }
 
     }
@@ -450,17 +484,34 @@ class ActivityMainUIController(
     fun handleUiChangesForExtendedSearch(isChecked: Boolean) {
 
         if (isChecked) {
-            handleExtendedSearchChecked()
+            //handleExtendedSearchChecked()
+
+            binding.transportGroup.visibility = View.VISIBLE
+            binding.distanceGroup.visibility = View.VISIBLE
+
+            binding.chipGroups.visibility = View.GONE
+
         }else {
-            handleExtendedSearchUnchecked()
+            //handleExtendedSearchUnchecked()
+
+            binding.transportGroup.visibility = View.GONE
+            binding.distanceGroup.visibility = View.GONE
+
+            binding.chipGroups.visibility = View.VISIBLE
         }
 
-        binding.distanceGroup.isEnabled = false
+
 
         clearDialog()
     }
 
-    private fun handleExtendedSearchChecked(){
+    fun resetUiExtendedSearch() {
+        binding.transportGroup.clearChecked()
+        binding.distanceGroup.clearChecked()
+        binding.distanceGroup.isEnabled = false
+    }
+
+    /*private fun handleExtendedSearchChecked(){
         binding.transportGroup.visibility = View.VISIBLE
         binding.distanceGroup.visibility = View.VISIBLE
 
@@ -475,7 +526,7 @@ class ActivityMainUIController(
         binding.distanceGroup.clearChecked()
 
         binding.chipGroups.visibility = View.VISIBLE
-    }
+    }*/
 
     fun updateUiOnTransportModeSelected(hasChecked: Boolean){
 
@@ -488,13 +539,13 @@ class ActivityMainUIController(
         }
     }
 
-    fun handleMinuteChanged(){
+    /*fun handleMinuteChanged(){
 
         binding.transportGroup.visibility = View.GONE
         binding.distanceGroup.visibility = View.GONE
 
         binding.chipGroups.visibility = View.VISIBLE
-    }
+    }*/
 
     fun resetSearchParameters() {
 
@@ -503,9 +554,19 @@ class ActivityMainUIController(
         resetSearchedCategories()
 
     }
+
+    fun setChipsChecked(currentIds: List<Int>) {
+
+        for (id in currentIds) {
+
+            val item: Chip = binding.chipGroupChips.findViewById(id)
+            item.isChecked = true
+        }
+    }
+
     private fun resetSearchedCategories(){
 
-        chipGroupCategories.values.flatMap { it.asList() }.forEach { it.checked = false }
+        chipGroupCategories.values.flatMap { it }.forEach { it.checked = false }
 
         listOf(accommodationChip, landmarkChip, exhibitionChip).forEach { it.checked = false }
 
@@ -552,11 +613,14 @@ class ActivityMainUIController(
     }
 
     fun clearDialog(){
-        if (dialog!=null) {
-            dialog?.dismiss()
+
+        dialog.dismiss()
+
+        /*if (dialog!=null) {
+
             dialog = null
             binding.chipGroupChips.clearCheck()
-        }
+        }*/
     }
 
 

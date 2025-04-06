@@ -2,14 +2,15 @@ plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
 }
 
 android {
-    namespace = "com.example.gtk_maps"
+    namespace = "com.example.travel_mate"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.gtk_maps"
+        applicationId = "com.example.travel_mate"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
@@ -27,14 +28,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         viewBinding = true
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 }
 
@@ -49,16 +50,16 @@ dependencies {
     implementation("org.osmdroid:osmdroid-android:6.1.18")
     implementation("pl.droidsonroids.gif:android-gif-drawable:1.2.29")
 
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.recyclerview:recyclerview:1.4.0")
 
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.4")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
 
     implementation("com.google.code.gson:gson:2.10.1")
 
-    implementation("androidx.activity:activity:1.8.0")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.8.6")
-    implementation("androidx.navigation:navigation-ui-ktx:2.8.6")
+    implementation("androidx.activity:activity-ktx:1.10.1")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.8.9")
+    implementation("androidx.navigation:navigation-ui-ktx:2.8.9")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
@@ -78,11 +79,11 @@ dependencies {
     val room_version = "2.6.1"
 
     implementation("androidx.room:room-runtime:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
 
-    val fragment_version = "1.8.5"
+
+    val fragment_version = "1.8.6"
     // Kotlin
     implementation("androidx.fragment:fragment-ktx:$fragment_version")
-
-
 }

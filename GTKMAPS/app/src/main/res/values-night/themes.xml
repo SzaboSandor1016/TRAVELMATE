@@ -127,11 +127,11 @@
         #F2F2F2
     </color>
 
-    <color name="toggle_button_on_background">#1A2C53</color> <!-- Dark Gray Background -->
+    <color name="toggle_button_on_background">#8CFFFFFF</color> <!-- Dark Gray Background -->
     <color name="toggle_button_on_outline">#4C7DA5</color> <!-- Teal Outline -->
 
     <!-- Colors for the off state -->
-    <color name="toggle_button_off_background">#B0BEC5</color> <!-- Light Gray Background B0BEC5 -->
+    <color name="toggle_button_off_background">#1AB0BEC5</color> <!-- Light Gray Background B0BEC5 -->
     <color name="toggle_button_off_outline">#4C7DA5</color> <!-- Cool Gray Outline -->
 
     <color name="start_icon_color">
@@ -163,6 +163,8 @@
     </color>
     <color name="details_color">#1A2C53</color>
 
+    <color name="recycler_view_item_color"> #4C7DA5</color>
+
     <style name="TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
         <item name="boxStrokeWidth">1.5dp</item>
         <item name="boxBackgroundColor">@color/chip_background_night</item>
@@ -190,7 +192,6 @@
         <item name="android:paddingRight">12dp</item>
         <item name="android:minWidth">48dp</item>
         <item name="android:minHeight">48dp</item>
-        <item name="android:backgroundTint">@color/color_filter_button_active</item>
     </style>
 
     <style name="Theme.GTKMAPS.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />

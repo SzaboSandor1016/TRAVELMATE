@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/chip_background_night"
     tools:context=".FragmentUser">
 
     <com.google.android.material.button.MaterialButton
@@ -14,7 +13,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         style="?attr/materialIconButtonFilledStyle"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="66dp"
         android:layout_marginHorizontal="16dp"
         app:icon="@drawable/ic_go_back"/>
 
@@ -29,6 +28,7 @@
         android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/signed_in"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/text_view_style"
@@ -36,13 +36,35 @@
             android:text="@string/not_signed_in"/>
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/sign_in"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_marginHorizontal="16dp"
+            android:visibility="gone"
             android:text="@string/login"/>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/sign_out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_marginHorizontal="16dp"
+            android:visibility="gone"
+            android:text="@string/logout"/>
+
     </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        style="?attr/materialIconButtonFilledStyle"
+        android:layout_marginTop="66dp"
+        android:layout_marginHorizontal="16dp"
+        app:icon="@drawable/ic_settings"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/edit_profile"
@@ -117,97 +139,123 @@
                     android:layout_width="match_parent"
                     app:layout_constraintTop_toTopOf="parent"/>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/trip_title_layout"
-                    android:layout_width="match_parent"
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/trip_title"
+                    android:layout_width="0dp"
                     android:minWidth="88dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@+id/bottom_sheet_handle"
+                    app:layout_constraintTop_toBottomOf="@id/bottom_sheet_handle"
+                    app:layout_constraintRight_toLeftOf="@id/update_trip"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:textSize="36sp"
+                    android:layout_margin="16dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/update_trip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/bottom_sheet_handle"
+                    app:layout_constraintRight_toRightOf="parent"
+                    style="?attr/materialIconButtonOutlinedStyle"
                     android:layout_margin="16dp"
-                    app:hintEnabled="true"
-                    android:hint="@string/search_title"
-                    app:endIconDrawable="@drawable/ic_edit"
-                    app:endIconMode="custom"
-                    app:endIconCheckable="true">
+                    app:icon="@drawable/ic_edit"/>
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/trip_title"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="text"
-                        android:imeOptions="actionDone"
-                        android:enabled="false"/>
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/trip_date_layout"
-                    android:layout_width="match_parent"
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/trip_date_text"
+                    android:layout_width="0dp"
                     android:minWidth="88dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@+id/trip_title_layout"
-                    android:layout_margin="16dp"
-                    app:hintEnabled="true"
-                    android:hint="@string/date"
-                    app:endIconDrawable="@drawable/ic_edit_date"
-                    app:endIconMode="custom"
-                    app:endIconCheckable="true">
+                    app:layout_constraintTop_toBottomOf="@id/trip_title"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:textSize="24sp"
+                    style="@style/text_view_style"
+                    android:text="@string/day_of_trip"
+                    android:layout_margin="16dp"/>
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/trip_date"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"/>
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/trip_note_layout"
-                    android:layout_width="match_parent"
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/trip_date"
+                    android:layout_width="0dp"
                     android:minWidth="88dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@+id/trip_date_layout"
+                    app:layout_constraintBaseline_toBaselineOf="@id/trip_date_text"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/trip_date_text"
+                    android:textSize="16sp"
+                    style="@style/text_view_style"
+                    android:layout_margin="16dp"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/contributors_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/trip_date_text"
+                    android:textSize="24sp"
+                    style="@style/text_view_style"
                     android:layout_margin="16dp"
-                    app:hintEnabled="true"
-                    android:hint="@string/note"
-                    app:endIconDrawable="@drawable/ic_edit"
-                    app:endIconMode="custom"
-                    app:endIconCheckable="true">
+                    android:text="@string/contributors" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/trip_note"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textMultiLine"
-                        android:imeOptions="actionDone"
-                        android:enabled="false" />
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/contributors_list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintLeft_toRightOf="@id/contributors_text"
+                    app:layout_constraintBaseline_toBaselineOf="@id/contributors_text"
+                    style="@style/text_view_style"
+                    android:layout_margin="16dp"
+                    android:layout_marginHorizontal="6dp" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/trip_note_text"
+                    android:layout_width="0dp"
+                    android:minWidth="88dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/contributors_text"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    style="@style/text_view_style"
+                    android:textSize="24sp"
+                    android:layout_margin="16dp"
+                    android:text="@string/note"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/trip_note"
+                    android:layout_width="0dp"
+                    android:minWidth="88dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBaseline_toBaselineOf="@id/trip_note_text"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/trip_note_text"
+                    android:textSize="24sp"
+                    android:layout_margin="16dp"/>
+
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/delete_trip"
                     android:layout_width="wrap_content"
                     android:minWidth="88dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/trip_note_layout"
+                    app:layout_constraintTop_toBottomOf="@id/trip_note"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    android:layout_marginHorizontal="36dp"
+                    app:layout_constraintRight_toLeftOf="@id/select_trip"
                     android:layout_marginVertical="16dp"
+                    android:layout_marginStart="16dp"
+                    style="?attr/materialButtonOutlinedStyle"
                     app:icon="@drawable/ic_delete_account"
                     android:text="@string/delete"/>
+
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/select_trip"
                     android:layout_width="wrap_content"
                     android:minWidth="88dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/trip_note_layout"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/delete_trip"
                     app:layout_constraintRight_toRightOf="parent"
-                    android:layout_marginHorizontal="36dp"
+                    app:layout_constraintLeft_toRightOf="@id/delete_trip"
+                    app:layout_constraintTop_toBottomOf="@id/trip_note"
                     android:layout_marginVertical="16dp"
-                    app:icon="@drawable/ic_done"
-                    android:text="@string/select"/>
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/select"
+                    app:icon="@drawable/ic_done" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

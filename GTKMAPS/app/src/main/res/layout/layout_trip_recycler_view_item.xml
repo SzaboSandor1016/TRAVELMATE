@@ -9,9 +9,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         style="@style/text_view_style"
+        android:background="@drawable/shape_recycler_view_item"
         android:textSize="26sp"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"/>
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginVertical="4dp"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,6 +14,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "GTK-MAPS"
+rootProject.name = "TRAVELMATE"
 include(":app")
  

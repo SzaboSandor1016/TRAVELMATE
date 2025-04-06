@@ -95,22 +95,22 @@
     <string name="start">Kezdőpont</string>
     <string name="provide_start">A kereséshez adjon meg egy kiindulási helyet!</string>
 
-    <string name="email">E-mail cím </string>
+    <string name="email">"E-mail cím* "</string>
     <string name="email_2">E-mail cím: </string>
-    <string name="username">Felhasználónév </string>
+    <string name="username">Felhasználónév*</string>
     <string name="username_2">Felhasználónév: </string>
     <string name="forgot_password">Elfelejtett jelszó</string>
     <string name="reset_password"> Jelszó visszaállítása</string>
     <string name="confirm_forgot_password"> Adja meg a fiókjához tartozó E-mail címét, kattintson a \n \"Jelszó visszaállítása\" gombra, majd kövesse az E-mailben kapott utasításokat! </string>
     <string name="email_sent">E-mail elküldve!</string>
     <string name="email_not_sent">Az e-mail nem lett elküldve!</string>
-    <string name="password">Jelszó </string>
+    <string name="password">Jelszó*</string>
     <string name="password_2">Jelszó: </string>
-    <string name="new_password">Új jelszó </string>
+    <string name="new_password">Új jelszó* </string>
     <string name="old_password">Régi jelszó</string>
-    <string name="password_again">Jelszó ismét </string>
+    <string name="password_again">Jelszó ismét*</string>
     <string name="password_again_2">Jelszó ismét: </string>
-    <string name="new_password_again">Új jelszó ismét </string>
+    <string name="new_password_again">Új jelszó ismét* </string>
     <string name="birthdate">Születési dátum </string>
     <string name="birthdate_year">Év </string>
     <string name="birthdate_month">Hónap </string>
@@ -132,7 +132,7 @@
     <string name="login_unsuccess">Sikertelen bejelentkezés!</string>
     <string name="signup_unsuccess">Sikertelen regisztráció!</string>
     <string name="empty_message">Kérjük töltse ki az összes mezőt!</string>
-    <string name="password_mismatch">A jelszavak nem egyeznek!</string>
+    <string name="password_mismatch">*a jelszavak nem egyeznek</string>
     <string name="old_password_mismatch">A régi jelszavak nem egyeznek!</string>
     <string name="new_password_mismatch">Az új jelszavak nem egyeznek!</string>
     <string name="used_username">Ez a felhasználónév már foglalt!</string>
@@ -236,7 +236,7 @@
     <string name="add_to_tour">Hozzáadás körúthoz</string>
     <string name="create_trip">Utazás létrehozása</string>
     <string name="save_trip">Utazás mentése</string>
-    <string name="optimize_route">Javasolt körút</string>
+    <string name="optimize_route">Javasolt útvonal</string>
     <string name="relax">Kikapcsolódás</string>
     <string name="cafe">Kávézók</string>
     <string name="fast_food">Gyorséttermek</string>
@@ -260,6 +260,14 @@
     <string name="shared_by_others">Mások által megosztva</string>
     <string name="shared_with_others">Másokkal megosztva</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="fragment_main_label">FragmentMain</string>
+    <string name="fragment_user_label">FragmentUser</string>
+    <string name="fragment_sign_in_label">FragmentSignIn</string>
+    <string name="fragment_sign_up_label">FragmentSignUp</string>
+    <string name="done">Kész</string>
+    <string name="add_contributor">Résztvevő hozzáadása</string>
+    <string name="duration_string">perc</string>
+    <string name="distance_string">méter</string>
+    <!-- TODO: Remove or change this placeholder text -->
 
 </resources>

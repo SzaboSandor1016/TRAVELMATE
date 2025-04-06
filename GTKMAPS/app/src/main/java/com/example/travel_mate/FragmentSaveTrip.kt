@@ -170,8 +170,8 @@ class FragmentSaveTrip : Fragment() {
 
         binding.addContributors.setOnClickListener { l ->
 
-
-            findNavController().navigate(R.id.action_fragmentSaveTrip_to_fragmentSelectContributors)
+            if (viewModelUser.userUiState.value.username != null)
+                findNavController().navigate(R.id.action_fragmentSaveTrip_to_fragmentSelectContributors)
         }
     }
 

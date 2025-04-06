@@ -484,15 +484,17 @@ class FragmentMain : Fragment() {
                     Log.d("DragTest","DRAGGGING start");
                 }
                 if(actionState == ItemTouchHelper.ACTION_STATE_IDLE && drag) {
-                    Log.d("DragTest","DRAGGGING stop");
+                    Log.d("DragTest", "DRAGGGING stop");
 
-                    val routeNode = routeStops[draggedIndex]
+                    if (draggedIndex != targetIndex) {
 
-                    viewModelMain.reorderRoute(
-                        newPosition = targetIndex,
-                        nodeToMove = routeNode
-                    )
+                        val routeNode = routeStops[draggedIndex]
 
+                        viewModelMain.reorderRoute(
+                            newPosition = targetIndex,
+                            nodeToMove = routeNode
+                        )
+                    }
                     drag = false
                 }
 

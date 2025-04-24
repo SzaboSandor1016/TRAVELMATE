@@ -1,5 +1,6 @@
 package com.example.travel_mate
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.res.Resources
@@ -101,6 +102,8 @@ class FragmentMain : Fragment() {
     var dist: Double = 0.0
     var startPlace: Place = Place()
 
+    private var locationMarker: Marker? = null
+
     private var startPlaces: ArrayList<Place> = ArrayList()
     private var suggestions: ArrayList<String> = ArrayList()
     private var routeStops: ArrayList<RouteNode> = ArrayList()
@@ -108,8 +111,6 @@ class FragmentMain : Fragment() {
     private var unContainedMarkers: ArrayList<Marker> = ArrayList()
     private var containedMarkers: ArrayList<Marker> = ArrayList()
     private var routePolyLines: ArrayList<Polyline> = ArrayList()
-
-    private var locationListener: ClassLocationListener? = null
 
     private var categoryManager: ClassCategoryManager? = null
     private var resources: Resources? = null
@@ -273,6 +274,8 @@ class FragmentMain : Fragment() {
 
         viewModelUser.checkCurrentUser()
 
+        viewModelMain.getInitialCurrentLocation()
+
 /**Observe the [ViewModelMain.chipsState], [ViewModelMain.placeState] and the [ViewModelMain.mainSearchState] located in [viewModelMain]
  *
  **/
@@ -346,16 +349,8 @@ class FragmentMain : Fragment() {
                         )
 
                     showMapContent(
-                        places = it.places,
-                        routeNodes = it.route.getRouteNodes(),
-                        mode = it.route.getTransportMode()
+                        places = it.places
                     )
-
-                    handleRouteStopsChange(
-                        route = it.route
-                    )
-
-                    Log.d("routePolysFragment",  it.route.getRouteNodes().size.toString())
 
                     if (it.currentPlaceUUID != null)
                         viewModelMain.getCurrentPlaceByUUID(
@@ -401,6 +396,33 @@ class FragmentMain : Fragment() {
                     handleStartPlaceChange(
                         startPlace = it.startPlace
                     )
+
+                    Log.d("refresh", "refresh")
+                }
+
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                viewModelMain.mainRouteNavigationState.collect {
+
+                    showNavigationData(
+                        coordinates = it.currentLocation,
+                        prevRouteStep = it.prevRouteStep,
+                        currentRouteStep = it.currentRouteStep
+                    )
+
+                    handleRouteStopsChange(
+                        route = it.route
+                    )
+                    handleRouteNavigationChange(
+                        route = it.route,
+                        navigationRouteNode = it.navigationRouteNode
+                    )
+
+                    Log.d("routePolysFragment",  it.route.getRouteNodes().size.toString())
 
                     Log.d("refresh", "refresh")
                 }
@@ -563,6 +585,19 @@ class FragmentMain : Fragment() {
 
         binding.optimizeRoute.setOnClickListener { l ->
             viewModelMain.optimizeRoute()
+        }
+
+        binding.startNavigation.setOnClickListener { l ->
+            viewModelMain.startNavigation()
+
+            handleNavigationOnOff(true)
+        }
+        binding.cancelNavigation.setOnClickListener { l ->
+
+            viewModelMain.stopNavigation()
+
+            handleNavigationOnOff(false)
+
         }
 //_________________________________________________________________________________________________________________________
 // END OF ROUTE METHODS BLOCK
@@ -745,12 +780,7 @@ class FragmentMain : Fragment() {
 
             if (isChecked) {
 
-                val currentCoordinates = getCurrentLocation()
-
-                if (currentCoordinates.getLatitude() != 0.0 && currentCoordinates.getLongitude() != 0.0) {
-
-                    viewModelMain.searchReverseGeoCode(currentCoordinates)
-                }
+                viewModelMain.searchReverseGeoCode()
 
                 binding.placeSearch.isEnabled = false
             } else {
@@ -840,14 +870,11 @@ class FragmentMain : Fragment() {
         Log.d("FragmentLifecycle", "Parent/Child Fragment Destroyed")
 
         dismissDialog()
-        locationListener = null
 
         binding.distanceGroup.clearOnButtonCheckedListeners()
         binding.transportGroup.clearOnButtonCheckedListeners()
 
         resources!!.flushLayoutCache()
-
-        locationListener?.stopListener()
 
         _binding = null
     }
@@ -968,16 +995,6 @@ class FragmentMain : Fragment() {
         binding.placeSearch.setText("")
     }
 
-    /** [getCurrentLocation]
-     *  ask for a location update, generate a [Coordinates] from it and return
-     */
-    private fun getCurrentLocation(): Coordinates{
-
-        locationListener = ClassLocationListener(requireContext())
-
-        return Coordinates(locationListener!!.getLatitude(),locationListener!!.getLongitude())
-    }
-
     /** [handlePhotonObserve]
      *  handle the potential start places change received from the autocomplete service
      *  refresh the text view's adapter with the name + address string received
@@ -1007,6 +1024,20 @@ class FragmentMain : Fragment() {
         binding.placeSearch.setAdapter(suggestionsAdapter)
 
         suggestionsAdapter.notifyDataSetChanged()
+    }
+
+    /** [resetUiOnStartPlaceChange]
+     * reset the UI elements related to searching when the start[Place] is changed
+     */
+    private fun resetUiOnStartPlaceChange(){
+
+        binding.map.overlays.removeAll(binding.map.overlays)
+
+        binding.map.invalidate()
+
+        clearChips()
+
+        dismissDialog()
     }
 //_________________________________________________________________________________________________________________________
 // END OF METHODS FOR SEARCH TEXT FIELD
@@ -1286,34 +1317,20 @@ class FragmentMain : Fragment() {
      *  to the map too
      */
     private fun showMapContent(
-        places: List<ViewModelMain.PlaceProcessed>,
-        routeNodes: List<RouteNode>?,
-        mode: String?
+        places: List<ViewModelMain.PlaceProcessed>
     ) {
 
         binding.map.overlays.removeAll(unContainedMarkers)
         binding.map.overlays.removeAll(containedMarkers)
-        binding.map.overlays.removeAll(routePolyLines)
 
         unContainedMarkers.clear()
         containedMarkers.clear()
-        routePolyLines.clear()
+
 
         unContainedMarkers.addAll(showMarkersOnMap(places = places.filter { !it.containedByRoute }))
         containedMarkers.addAll(showMarkersOnMap(places = places.filter { it.containedByRoute }))
 
-        if (routeNodes != null)
-            when(mode) {
-                "foot-walking" -> for (polyline in routeNodes.mapNotNull { it.walkPolyLine }) {
-                    routePolyLines.add(polyline)
-                }
-                "driving-car" -> for (polyline in routeNodes.mapNotNull { it.carPolyLine }) {
-                    routePolyLines.add(polyline)
-                }
-            }
 
-
-        binding.map.overlays.addAll(routePolyLines)
         binding.map.overlays.addAll(containedMarkers)
 
         binding.map.invalidate()
@@ -1558,15 +1575,185 @@ class FragmentMain : Fragment() {
 // END OF TRIP METHODS
 //_________________________________________________________________________________________________________________________
 
-    private fun resetUiOnStartPlaceChange(){
+    private fun handleRouteNavigationChange(
+        route: Route,
+        navigationRouteNode: RouteNode?) {
 
-        binding.map.overlays.removeAll(binding.map.overlays)
+        if (navigationRouteNode != null) {
 
-        binding.map.invalidate()
+            showRouteDataOnMap(
+                routeNodes = listOf(navigationRouteNode),
+                mode = route.getTransportMode()
+            )
 
-        clearChips()
+            /*showNavigationStart(
+                navigationRouteNode = navigationRouteNode,
+                mode = route.getTransportMode()
+            )*/
 
-        dismissDialog()
+        } else {
+
+            showRouteDataOnMap(
+                routeNodes = route.getRouteNodes(),
+                mode = route.getTransportMode()
+            )
+        }
+
     }
 
+    /*private fun showNavigationStart(navigationRouteNode: RouteNode, mode: String) {
+
+        val geo = when (mode) {
+            "foot-walking" -> GeoPoint(
+                navigationRouteNode.walkRouteSteps[0].coordinates.getLatitude(),
+                navigationRouteNode.walkRouteSteps[0].coordinates.getLongitude()
+            )
+
+            else -> GeoPoint(
+                navigationRouteNode.carRouteSteps[0].coordinates.getLatitude(),
+                navigationRouteNode.carRouteSteps[0].coordinates.getLongitude()
+            )
+        }
+        mapController.setCenter(geo)
+        locationMarker = Marker(binding.map)
+        locationMarker?.position = geo
+        locationMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+
+        binding.map.overlays.add(locationMarker)
+        locationMarker?.icon = ResourcesCompat.getDrawable(
+            requireContext().resources,
+            R.drawable.ic_instruction_depart,
+            requireContext().theme
+        )
+        binding.map.invalidate()
+    }*/
+
+    private fun showRouteDataOnMap(
+        routeNodes: List<RouteNode>?,
+        mode: String?
+    ) {
+
+        binding.map.overlays.removeAll(routePolyLines)
+
+        routePolyLines.clear()
+
+        if (routeNodes != null) {
+            when (mode) {
+                "foot-walking" -> for (polyline in routeNodes.mapNotNull { it.walkPolyLine }) {
+                    routePolyLines.add(polyline)
+                }
+
+                "driving-car" -> for (polyline in routeNodes.mapNotNull { it.carPolyLine }) {
+                    routePolyLines.add(polyline)
+                }
+            }
+
+        }
+
+        binding.map.overlays.addAll(routePolyLines)
+
+        binding.map.invalidate()
+    }
+
+    private fun handleNavigationOnOff(isActive: Boolean) {
+
+        when(isActive) {
+
+            true -> {
+                binding.routeInfoLayout.visibility = View.GONE
+                binding.navigationInfoLayout.visibility = View.VISIBLE
+            }
+            false -> {
+                binding.routeInfoLayout.visibility = View.VISIBLE
+                binding.navigationInfoLayout.visibility = View.GONE
+            }
+        }
+
+    }
+
+    private fun handleSecondaryRouteStepVisibility(isSecondary: Boolean) {
+
+        when(isSecondary) {
+
+            true -> {
+                binding.navigationSecondaryInfoLayout.visibility = View.VISIBLE
+            }
+            false -> {
+                binding.navigationSecondaryInfoLayout.visibility = View.GONE
+            }
+        }
+
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private fun showNavigationData(coordinates: Coordinates?,prevRouteStep: RouteStep?, currentRouteStep: RouteStep?) {
+
+
+        if (locationMarker!= null) {
+            binding.map.overlays.remove(locationMarker)
+        }
+
+        if (coordinates !=null && currentRouteStep != null) {
+
+            val geo = GeoPoint(
+                coordinates.getLatitude(),
+                coordinates.getLongitude()
+            )
+            mapController.setCenter(geo)
+            locationMarker = Marker(binding.map)
+            locationMarker?.position = geo
+            locationMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+
+            binding.map.overlays.add(locationMarker)
+            locationMarker?.icon = ResourcesCompat.getDrawable(
+                requireContext().resources,
+                R.drawable.ic_current_location,
+                requireContext().theme
+            )
+            binding.map.invalidate()
+
+            showCurrentRouteStepData(
+                currentRouteStep = currentRouteStep
+            )
+        }
+
+        if ( prevRouteStep != null && prevRouteStep.name != null ) {
+
+            handleSecondaryRouteStepVisibility( isSecondary = true)
+
+            showPreviousRouteStepData(
+                prevRouteStep = prevRouteStep
+            )
+        } else {
+            handleSecondaryRouteStepVisibility(isSecondary = false)
+        }
+
+    }
+
+    private fun showCurrentRouteStepData(currentRouteStep: RouteStep?) {
+
+        if (currentRouteStep != null) {
+
+            if (currentRouteStep.name != null && currentRouteStep.instruction != null) {
+
+                binding.routeStopName.text = currentRouteStep.instruction
+
+                binding.directionImage.setImageDrawable(categoryManager?.getInstructionImage(currentRouteStep.type!!))
+
+            }
+        }
+
+    }
+    private fun showPreviousRouteStepData(prevRouteStep: RouteStep) {
+
+        if (prevRouteStep.instruction != null) {
+
+            val secondaryContent = prevRouteStep.name ?: prevRouteStep.instruction
+
+            binding.routeSecondaryStopName.text = secondaryContent
+
+            binding.directionSecondaryImage.setImageDrawable(categoryManager?.getInstructionImage(prevRouteStep.type!!))
+
+        }
+    }
 }

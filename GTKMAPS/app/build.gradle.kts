@@ -47,6 +47,8 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
     implementation("org.osmdroid:osmdroid-android:6.1.18")
     implementation("pl.droidsonroids.gif:android-gif-drawable:1.2.29")
 

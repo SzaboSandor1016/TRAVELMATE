@@ -12,13 +12,17 @@ import kotlinx.coroutines.launch
 
 //@HiltViewModel
 class ViewModelMain /*@Inject*/ constructor(
-    private val searchRepository: SearchRepository
+    private val searchRepository: SearchRepository,
+    private val routeRepository: RouteRepository
 ): ViewModel() {
 
     private var tripId: String? = null
 
     private val _mainSearchState = MutableStateFlow(MainSearchState())
     val mainSearchState: StateFlow<MainSearchState> = _mainSearchState.asStateFlow()
+
+    private val _mainRouteNavigationState = MutableStateFlow(MainRouteNavigationState())
+    val mainRouteNavigationState: StateFlow<MainRouteNavigationState> = _mainRouteNavigationState.asStateFlow()
 
     private val _mainStartPlaceState = MutableStateFlow(MainStartPlaceState())
     val mainStartPlaceState: StateFlow<MainStartPlaceState> = _mainStartPlaceState.asStateFlow()
@@ -47,8 +51,7 @@ class ViewModelMain /*@Inject*/ constructor(
                             containedByTrip = place.isContainedByTrip(),
                             containedByRoute = place.isContainedByRoute()
                         )
-                    },
-                    route = search.route
+                    }
                 )
 
             }.collect { newState ->
@@ -108,6 +111,29 @@ class ViewModelMain /*@Inject*/ constructor(
             }
 
         }
+
+        viewModelScope.launch {
+
+            combine(
+                routeRepository.routeState,
+                routeRepository.navigationState,
+                _mainRouteNavigationState
+            ) {  routeState, navigationState, mainRouteNavigationState ->
+
+                mainRouteNavigationState.copy(
+                    route = routeState.route,
+                    navigationRouteNode = navigationState.navigationGoal,
+                    prevRouteStep = navigationState.prevRouteStep,
+                    currentLocation = navigationState.currentLocation,
+                    currentRouteStep = navigationState.currentRouteStep
+                )
+
+            }.collect { newState ->
+
+                _mainRouteNavigationState.value = newState
+            }
+
+        }
     }
 
     fun setContainerState(state: String){
@@ -136,6 +162,9 @@ class ViewModelMain /*@Inject*/ constructor(
             searchRepository.setTransportMode(
                 index = optionIndex
             )
+            routeRepository.setRouteTransportMode(
+                index = optionIndex
+            )
         }
     }
 
@@ -152,13 +181,16 @@ class ViewModelMain /*@Inject*/ constructor(
     fun resetDetails(){
 
         viewModelScope.launch {
+
             searchRepository.resetSearchDetails()
+            routeRepository.resetRouteDetails()
         }
     }
     fun resetFullDetails(){
 
         viewModelScope.launch {
             searchRepository.resetFullSearchDetails()
+            routeRepository.resetRoute()
         }
     }
 
@@ -167,6 +199,9 @@ class ViewModelMain /*@Inject*/ constructor(
         viewModelScope.launch {
             Log.d("viewModelStartPlaceTest2", startPlace.getName().toString())
             searchRepository.initNewSearch(
+                startPlace = startPlace
+            )
+            routeRepository.initNewRoute(
                 startPlace = startPlace
             )
 
@@ -194,6 +229,9 @@ class ViewModelMain /*@Inject*/ constructor(
             searchRepository.initNewSearchFromTrip(
                 startPlace = startPlace,
                 places = places
+            )
+            routeRepository.initNewRoute(
+                startPlace = startPlace
             )
         }
 
@@ -354,11 +392,16 @@ class ViewModelMain /*@Inject*/ constructor(
         }
     }
 
-    fun searchReverseGeoCode(coordinates: Coordinates){
+    fun searchReverseGeoCode(){
 
         viewModelScope.launch {
 
-            searchRepository.getReverseGeoCode(coordinates)
+            val place = searchRepository.getReverseGeoCode()
+
+            if (place != null)
+                routeRepository.initNewRoute(
+                    startPlace = place
+                )
         }
     }
 
@@ -386,7 +429,7 @@ class ViewModelMain /*@Inject*/ constructor(
 
         viewModelScope.launch {
 
-            searchRepository.setRouteTransportMode(
+            routeRepository.setRouteTransportMode(
                 index = index
             )
         }
@@ -397,6 +440,7 @@ class ViewModelMain /*@Inject*/ constructor(
         viewModelScope.launch {
 
             searchRepository.resetRouteDetails()
+            routeRepository.resetRouteDetails()
         }
     }
 
@@ -404,8 +448,12 @@ class ViewModelMain /*@Inject*/ constructor(
 
         viewModelScope.launch {
 
-            searchRepository.addRemovePlaceToRoute(
+            val place = searchRepository.addRemovePlaceToRoute(
                 uuid = uuid
+            )
+
+            routeRepository.addRemovePlaceToRoute(
+                place = place
             )
         }
     }
@@ -414,7 +462,7 @@ class ViewModelMain /*@Inject*/ constructor(
 
         viewModelScope.launch {
 
-            searchRepository.reorderRoute(
+            routeRepository.reorderRoute(
                 newPosition = newPosition,
                 nodeToMove = nodeToMove
             )
@@ -426,7 +474,27 @@ class ViewModelMain /*@Inject*/ constructor(
 
         viewModelScope.launch {
 
-            searchRepository.optimizeRoute()
+            routeRepository.optimizeRoute()
+        }
+    }
+
+    fun startNavigation() {
+
+        routeRepository.startNavigation()
+    }
+
+    fun stopNavigation() {
+
+        routeRepository.stopNavigation()
+
+        routeRepository.stopExtrapolationLoop()
+    }
+
+    fun getInitialCurrentLocation() {
+
+        viewModelScope.launch {
+
+            routeRepository.getCurrentLocation()
         }
     }
 
@@ -450,12 +518,18 @@ class ViewModelMain /*@Inject*/ constructor(
         val startPlaces: List<Place> = emptyList(),
         val currentPlaceUUID: String? = null,
         val places: List<PlaceProcessed> = emptyList(),
-        val route: Route = Route()
     ) {
         val isTripEmpty: Boolean = places.none { it.containedByTrip == true }
         val isRouteEmpty: Boolean = places.none { it.containedByRoute == true }
     }
 
+    data class MainRouteNavigationState(
+        val route: Route = Route(),
+        val navigationRouteNode: RouteNode? = null,
+        val currentLocation: Coordinates? = null,
+        val prevRouteStep: RouteStep? = null,
+        val currentRouteStep: RouteStep? = null
+    )
 
     data class PlaceProcessed(val uuid: String,
                               val title: String,

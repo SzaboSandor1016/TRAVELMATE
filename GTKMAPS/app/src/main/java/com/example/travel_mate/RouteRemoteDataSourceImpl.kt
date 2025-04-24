@@ -4,10 +4,15 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import okhttp3.Interceptor
+import okhttp3.Interceptor.Companion.invoke
+import okhttp3.OkHttpClient
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Polyline
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
+
 
 class RouteRemoteDataSourceImpl: RouteRemoteDataSource {
 
@@ -31,17 +36,20 @@ class RouteRemoteDataSourceImpl: RouteRemoteDataSource {
 
         return withContext(Dispatchers.IO) {
 
+            val request = DirectionsRequest(
+                coordinates = listOf(
+                    listOf(pointStart.getLongitude(),pointStart.getLatitude()),
+                    listOf(pointEnd.getLongitude(),pointEnd.getLatitude())))
+
             val routeResponseWalk = async { routeServiceRetrofit.getRoute(
-                profile = "foot-walking",
                 apiKey = API_KEY,
-                start = pointStart.getLongitude().toString() + "," + pointStart.getLatitude().toString(),
-                end = pointEnd.getLongitude().toString() + "," + pointEnd.getLatitude().toString()
+                profile = "foot-walking",
+                request = request
             ) }
             val routeResponseCar = async {  routeServiceRetrofit.getRoute(
-                profile = "driving-car",
                 apiKey = API_KEY,
-                start = pointStart.getLongitude().toString() + "," + pointStart.getLatitude().toString(),
-                end = pointEnd.getLongitude().toString() + "," + pointEnd.getLatitude().toString()
+                profile = "driving-car",
+                request = request
             ) }
 
             requestCounter = requestCounter + 2
@@ -60,37 +68,94 @@ class RouteRemoteDataSourceImpl: RouteRemoteDataSource {
         val walkRoutePolyLine = Polyline()
         val carRoutePolyLine = Polyline()
 
+        var walkSteps: ArrayList<RouteStep> = ArrayList()
+        var carSteps: ArrayList<RouteStep> = ArrayList()
+
         var distanceWalk = 0
         var distanceCar = 0
 
         var durationWalk = 0
         var durationCar = 0
 
-        routeResponseWalk.features.forEach {
+        routeResponseWalk.routes.forEach {
 
-            it.geometry.coordinates.forEach {
-                walkRoutePolyLine.addPoint(GeoPoint(it[1],it[0]))
+            val points: MutableList<MutableList<Double>> =
+                decodeGeometry(it.geometry)
 
-                Log.d("routePolysPoints", it[1] .toString()+ "," +it[0].toString())
+            Log.d("count", points.size.toString())
+
+            for (point in points) {
+                val lat: Double = point[0]
+                val lon: Double = point[1]
+                walkRoutePolyLine.addPoint(GeoPoint(lat, lon))
+                walkSteps.add(
+                    RouteStep(
+                        coordinates = Coordinates(
+                            latitude = lat,
+                            longitude = lon
+                        )
+                    )
+                )
             }
 
-            distanceWalk = it.properties.summary.distance.toInt()
+            for (step in it.segments[0].steps) {
 
-            durationWalk = (it.properties.summary.duration / 60).toInt()
+                walkSteps[step.wayPoints[0]!!] = walkSteps[step.wayPoints[0]!!].copy(
+                    distance = step.distance.toInt(),
+                    duration = step.duration.toInt(),
+                    name = step.name,
+                    instruction = step.instruction,
+                    type = step.type
+                )
+
+            }
+
+            distanceWalk = it.summary.distance.toInt()
+
+            durationWalk = (it.summary.duration / 60).toInt()
 
         }
 
-        routeResponseCar.features.forEach {
+        routeResponseCar.routes.forEach {
 
-            it.geometry.coordinates.forEach {
-                carRoutePolyLine.addPoint(GeoPoint(it[1],it[0]))
+            /*it.properties.segments.forEach {
+                it.steps.forEach {
+                    it.
+                }
+            }*/
 
-                Log.d("routePolysPoints", it[1] .toString()+ "," +it[0].toString())
+            val points: MutableList<MutableList<Double>> =
+                decodeGeometry(it.geometry)
+
+            Log.d("count", points.size.toString())
+
+            for (point in points) {
+                val lat: Double = point[0]
+                val lon: Double = point[1]
+                carRoutePolyLine.addPoint(GeoPoint(lat, lon))
+                carSteps.add(
+                    RouteStep(
+                        coordinates = Coordinates(
+                            latitude = lat,
+                            longitude = lon
+                        )
+                    )
+                )
+            }
+            for (step in it.segments[0].steps) {
+                carSteps[step.wayPoints[0]] = carSteps[step.wayPoints[0]].copy(
+                    distance = step.distance.toInt(),
+                    duration = step.duration.toInt(),
+                    name = step.name,
+                    instruction = step.instruction,
+                    type = step.type
+                )
+
             }
 
-            distanceCar = it.properties.summary.distance.toInt()
+            distanceCar = it.summary.distance.toInt()
 
-            durationCar = (it.properties.summary.duration / 60).toInt()
+            durationCar = (it.summary.duration / 60).toInt()
 
         }
 
@@ -101,9 +166,64 @@ class RouteRemoteDataSourceImpl: RouteRemoteDataSource {
             walkDuration = durationWalk,
             carDistance = distanceCar,
             carDuration = durationCar,
-            coordinate = coordinates
+            coordinate = coordinates,
+            carRouteSteps = carSteps.toList(),
+            walkRouteSteps = walkSteps.toList()
         )
     }
+
+    /** [decodeGeometry]
+     * decodes the geometry "encoded polyline" [String]
+     * containing the coordinates of the [Route]'s polyline returned
+     * by the [getRouteNode] request.
+     *
+     */
+    private fun decodeGeometry(encodedGeometry: String): MutableList<MutableList<Double>> {
+
+        val geometry: MutableList<MutableList<Double>> = ArrayList<MutableList<Double>>()
+        var index = 0
+        val len = encodedGeometry.length
+        var lat = 0
+        var lng = 0
+
+        while (index < len) {
+            var result = 1
+            var shift = 0
+            var b: Int
+            do {
+                b = encodedGeometry[index++].code - 63 - 1
+                result += b shl shift
+                shift += 5
+            } while (b >= 0x1f)
+            lat += if ((result and 1) != 0) (result shr 1).inv() else (result shr 1)
+
+            result = 1
+            shift = 0
+            do {
+                b = encodedGeometry[index++].code - 63 - 1
+                result += b shl shift
+                shift += 5
+            } while (b >= 0x1f)
+            lng += if ((result and 1) != 0) (result shr 1).inv() else (result shr 1)
+
+            val point: MutableList<Double> = ArrayList<Double>()
+            point.add(lat / 1E5)
+            point.add(lng / 1E5)
+            geometry.add(point)
+            Log.d("coordinates", point[0].toString() + " , " + point[1].toString())
+        }
+
+        return geometry
+    }
+
+    /** [DirectionsRequest]
+     *  Body data class for retrofit,
+     *  where one may specify extra query options for ORSM
+     */
+    data class DirectionsRequest(
+        val coordinates: List<List<Double>>,
+        val language: String = "hu-hu"
+    )
 
     companion object {
         private const val API_KEY: String =

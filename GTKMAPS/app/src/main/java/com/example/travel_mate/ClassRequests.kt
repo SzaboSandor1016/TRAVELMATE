@@ -1,6 +1,10 @@
 package com.example.travel_mate
 
+import com.example.travel_mate.RouteRemoteDataSourceImpl.DirectionsRequest
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -48,12 +52,11 @@ class ClassRequests{
         /** [getRoute]
          *  get the route between two places
          */
-        @GET("v2/directions/{profile}")
+        @POST("v2/directions/{profile}")
         suspend fun getRoute(
+            @Header("Authorization") apiKey: String,
             @Path("profile") profile: String,
-            @Query("api_key") apiKey: String,
-            @Query("start") start: String,
-            @Query("end") end: String
+            @Body request: DirectionsRequest
         ): RouteResponse
     }
 

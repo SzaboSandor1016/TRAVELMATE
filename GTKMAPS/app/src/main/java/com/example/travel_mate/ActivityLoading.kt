@@ -1,3 +1,4 @@
+/*
 package com.example.travel_mate
 
 import android.content.Intent
@@ -59,4 +60,4 @@ class ActivityLoading : AppCompatActivity() {
         // Remove any pending delayed actions to prevent memory leaks
         handler.removeCallbacksAndMessages(null)
     }
-}
+}*/

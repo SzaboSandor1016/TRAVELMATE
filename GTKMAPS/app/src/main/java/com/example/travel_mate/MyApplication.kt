@@ -30,11 +30,25 @@ class MyApplication: Application() {
             name = "trip_local_database"
         ).build()
 
-        val searchRepository = SearchRepository(OverpassRemoteDataSourceImpl(), PhotonRemoteDataSourceImpl(),
-            RouteRemoteDataSourceImpl())
-        val tripRepository = TripRepository(RoomLocalDataSourceImpl(appDatabase),FirebaseAuthenticationSourceImpl(),FirebaseRemoteDataSourceImpl())
+        val routeRepository = RouteRepository(
+            RouteRemoteDataSourceImpl(),
+            LocationLocalDataSource(appContext)
+        )
 
-        factory = ViewModelFactory(tripRepository,searchRepository)
+        val searchRepository = SearchRepository(
+            OverpassRemoteDataSourceImpl(),
+            PhotonRemoteDataSourceImpl(),
+            LocationLocalDataSource(appContext))
+
+        val tripRepository = TripRepository(
+            RoomLocalDataSourceImpl(appDatabase),
+            FirebaseAuthenticationSourceImpl(),
+            FirebaseRemoteDataSourceImpl())
+
+        factory = ViewModelFactory(
+            tripRepository = tripRepository,
+            searchRepository = searchRepository,
+            routeRepository = routeRepository)
     }
 
 }

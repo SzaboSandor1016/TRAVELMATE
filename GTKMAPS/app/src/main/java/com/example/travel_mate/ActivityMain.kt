@@ -3,6 +3,7 @@ package com.example.travel_mate
 //import com.example.gtk_maps.AppDatabase.SearchDao
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -120,12 +121,18 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             )
+            != PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
             != PackageManager.PERMISSION_GRANTED
         ) {
 
             // Permission is not granted, request it
             ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION),
                 PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
             )
         }

@@ -1,5 +1,6 @@
 package com.example.travel_mate
 
+import java.util.concurrent.TimeUnit
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,6 +20,10 @@ class PhotonRemoteDataSourceImpl: PhotonRemoteDataSource {
      * ps. feel free to try it just comment the .client() part from [photonRetrofit] builder
      */
     private var client: OkHttpClient = OkHttpClient().newBuilder()
+        .connectTimeout(25, TimeUnit.SECONDS)
+        .readTimeout(25, TimeUnit.SECONDS)
+        .callTimeout(25, TimeUnit.SECONDS)
+        .writeTimeout(25,TimeUnit.SECONDS)
         .addInterceptor(Interceptor { chain: Interceptor.Chain ->
             val original = chain.request()
             val request = original.newBuilder()

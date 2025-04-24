@@ -1,19 +1,12 @@
 package com.example.travel_mate;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class RouteResponse {
-    private String type;
     private List<Double> bBox;
-    private List<Feature> features;
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
+    private List<Routes> routes;
 
     public List<Double> getBBox() {
         return bBox;
@@ -23,19 +16,20 @@ public class RouteResponse {
         this.bBox = bBox;
     }
 
-    public List<Feature> getFeatures() {
-        return features;
+    public List<Routes> getRoutes() {
+        return routes;
     }
 
-    public void setFeatures(List<Feature> features) {
-        this.features = features;
+    public void setRoutes(List<Routes> routes) {
+        this.routes = routes;
     }
 
-    public static class Feature {
+    public static class Routes {
         private List<Double> bBox;
-        private String type;
-        private Properties properties;
-        private Geometry geometry;
+        private List<Double> wayPoints;
+        private List<Segment> segments;
+        private String geometry;
+        private Summary summary;
 
         public List<Double> getBBox() {
             return bBox;
@@ -45,35 +39,13 @@ public class RouteResponse {
             this.bBox = bBox;
         }
 
-        public String getType() {
-            return type;
+        public List<Double> getWayPoints() {
+            return wayPoints;
         }
 
-        public void setType(String type) {
-            this.type = type;
+        public void setWayPoints(List<Double> wayPoints) {
+            this.wayPoints = wayPoints;
         }
-
-        public Properties getProperties() {
-            return properties;
-        }
-
-        public void setProperties(Properties properties) {
-            this.properties = properties;
-        }
-
-        public Geometry getGeometry() {
-            return geometry;
-        }
-
-        public void setGeometry(Geometry geometry) {
-            this.geometry = geometry;
-        }
-    }
-
-    public static class Properties {
-        private List<Segment> segments;
-        private List<Integer> wayPoints;
-        private Summary summary;
 
         public List<Segment> getSegments() {
             return segments;
@@ -83,12 +55,12 @@ public class RouteResponse {
             this.segments = segments;
         }
 
-        public List<Integer> getWayPoints() {
-            return wayPoints;
+        public String getGeometry() {
+            return geometry;
         }
 
-        public void setWayPoints(List<Integer> wayPoints) {
-            this.wayPoints = wayPoints;
+        public void setGeometry(String geometry) {
+            this.geometry = geometry;
         }
 
         public Summary getSummary() {
@@ -136,6 +108,7 @@ public class RouteResponse {
         private int type;
         private String instruction;
         private String name;
+        @SerializedName("way_points")
         private List<Integer> wayPoints;
 
         public double getDistance() {
@@ -205,27 +178,6 @@ public class RouteResponse {
 
         public void setDuration(double duration) {
             this.duration = duration;
-        }
-    }
-
-    public static class Geometry {
-        private List<List<Double>> coordinates;
-        private String type;
-
-        public List<List<Double>> getCoordinates() {
-            return coordinates;
-        }
-
-        public void setCoordinates(List<List<Double>> coordinates) {
-            this.coordinates = coordinates;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
         }
     }
 }

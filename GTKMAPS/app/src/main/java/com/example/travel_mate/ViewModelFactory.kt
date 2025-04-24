@@ -4,7 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
 
-class ViewModelFactory(private val tripRepository: TripRepository, private val searchRepository: SearchRepository): ViewModelProvider.Factory {
+class ViewModelFactory(
+    private val tripRepository: TripRepository,
+    private val searchRepository: SearchRepository,
+    private val routeRepository: RouteRepository
+): ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -13,7 +17,7 @@ class ViewModelFactory(private val tripRepository: TripRepository, private val s
                 ViewModelUser(tripRepository) as T
             }
             modelClass.isAssignableFrom(ViewModelMain::class.java) -> {
-                ViewModelMain(searchRepository) as T
+                ViewModelMain(searchRepository, routeRepository) as T
             }
             else -> throw IllegalArgumentException("Unknown fragment type")
         }

@@ -12,11 +12,13 @@ data class RouteNode(var walkPolyLine: Polyline? = null,
                      var walkDuration: Int = 0,
                      var carDistance: Int = 0,
                      var carDuration: Int = 0,
-                     var placeUUID: String? = null) {
+                     var placeUUID: String? = null,
+                     var walkRouteSteps: List<RouteStep> = emptyList(),
+                     var carRouteSteps: List<RouteStep> = emptyList()
+) {
 
     /*
         var prev: RouteNode? = null,
         var next: RouteNode? = null,*/
-
 
 }

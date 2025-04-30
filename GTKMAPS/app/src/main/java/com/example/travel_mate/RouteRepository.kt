@@ -149,7 +149,7 @@ class RouteRepository constructor(
 
                 val lastNode = _routeState.value.route.getLastRouteNode()
 
-                val newRoute = routeRemoteDataSource.getRouteNode(
+                val newRoute = getRouteNode(
                     pointStart = lastNode?.coordinate!!,
                     pointEnd = coordinates
                 )
@@ -274,7 +274,7 @@ class RouteRepository constructor(
     suspend fun getRouteNode(stop1: RouteNode, stop2: RouteNode): RouteNode {
 
         return withContext(Dispatchers.IO) {
-            return@withContext routeRemoteDataSource.getRouteNode(
+            return@withContext getRouteNode(
                 pointStart = stop1.coordinate!!,
                 pointEnd = stop2.coordinate!!
             )
@@ -383,10 +383,9 @@ class RouteRepository constructor(
 
                         //find the first segment after the current one that has a
                         //instruction attached to it
-                        val nextInstructionStepIndex =
-                            findNextInstruction(targetSegmentIndex, currentRoute)
+                        val nextInstructionStepIndex = findNextInstruction(targetSegmentIndex, currentRoute)
 
-                        if (nextInstructionStepIndex - 1 == targetSegmentIndex) {
+                        //if (nextInstructionStepIndex - 1 == targetSegmentIndex) {
 
                             //update the StateFlow with the found instruction
                             //update the previous instruction with the current
@@ -398,7 +397,7 @@ class RouteRepository constructor(
                                     currentRouteStep = currentRoute[nextInstructionStepIndex]
                                 )
                             }
-                        }
+                        //}
 
                         // Move to next segment
                         targetSegmentIndex++
@@ -623,7 +622,7 @@ class RouteRepository constructor(
                 if (index>0) {
                     val lastNode = newRoute.getLastRouteNode()
 
-                    val plusRoute = routeRemoteDataSource.getRouteNode(
+                    val plusRoute = getRouteNode(
                         pointStart = lastNode?.coordinate!!,
                         pointEnd = node.coordinate!!
                     )
@@ -765,6 +764,28 @@ class RouteRepository constructor(
                 )
             }
             return@withContext null
+        }
+    }
+
+    suspend fun getRouteNode(
+    pointStart: Coordinates,
+    pointEnd: Coordinates
+    ): RouteNode {
+
+        return withContext(Dispatchers.IO) {
+
+            try {
+
+                return@withContext routeRemoteDataSource.getRouteNode(
+                    pointStart = pointStart,
+                    pointEnd = pointEnd
+                )
+
+            } catch (e: Exception) {
+                Log.e("getRouteNode", "getting route node: error, exception",e)
+            }
+
+            return@withContext RouteNode()
         }
     }
 

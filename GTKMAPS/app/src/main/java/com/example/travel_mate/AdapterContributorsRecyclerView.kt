@@ -13,13 +13,17 @@ import com.example.travel_mate.databinding.LayoutContributorsRecyclerViewItemBin
  *
  * Accepts a [List] of multiple [ViewModelUser.Contributor]
  */
-class AdapterContributorsRecyclerView(private val contributors: List<ViewModelUser.Contributor>):
+class AdapterContributorsRecyclerView(private val contributors: List<Contributor>):
     RecyclerView.Adapter<AdapterContributorsRecyclerView.ViewHolder>() {
 
     private var onClickListener: OnClickListener? = null
+    private var onItemLongClickListener: OnItemLongClickListener? = null
 
     interface OnClickListener{
-        fun onClick(position: Int)
+        fun onClick(uid: String)
+    }
+    interface OnItemLongClickListener{
+        fun onItemLongClick(uid: String)
     }
 
     class ViewHolder(val binding: LayoutContributorsRecyclerViewItemBinding): RecyclerView.ViewHolder(binding.root)
@@ -37,15 +41,22 @@ class AdapterContributorsRecyclerView(private val contributors: List<ViewModelUs
 
         val item = contributors[position]
 
-        holder.binding.contributorUsername.isChecked = item.selected
+        holder.binding.contributorUsername.isChecked = item.selected!!
 
-        holder.binding.contributorUsername.setText(item.data.second)
+        holder.binding.contributorUsername.setText(item.username)
 
         holder.binding.contributorUsername.setOnClickListener{ l ->
 
             onClickListener?.onClick(
-                position = position
+                uid = item.uid.toString()
             )
+        }
+        holder.binding.contributorUsername.setOnLongClickListener { l ->
+
+            onItemLongClickListener?.onItemLongClick(
+                uid = item.uid.toString()
+            )
+            return@setOnLongClickListener true
         }
     }
 
@@ -53,5 +64,9 @@ class AdapterContributorsRecyclerView(private val contributors: List<ViewModelUs
 
     fun setOnClickListener(listener: OnClickListener?) {
         this.onClickListener = listener
+    }
+
+    fun setOnItemLongClickListener(listener: OnItemLongClickListener?) {
+        this.onItemLongClickListener = listener
     }
 }

@@ -53,7 +53,7 @@ class FragmentSettings : Fragment() {
     private lateinit var deleteView: View
     private lateinit var changePasswordView: View
 
-    private val viewModelUser: ViewModelUser by activityViewModels{ MyApplication.factory }
+    private val viewModelUser: ViewModelUser by activityViewModels{ Application.factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

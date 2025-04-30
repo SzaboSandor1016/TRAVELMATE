@@ -269,6 +269,10 @@
     <string name="duration_string">perc</string>
     <string name="distance_string">méter</string>
     <string name="start_navigation">Navigáció indítása</string>
+    <string name="can_update_trip">Módosíthatja az utazást</string>
+    <string name="created_by">Készítő</string>
+    <string name="trip_title">Utazás címe</string>
+    <string name="edit_places">Helyek szerkesztése</string>
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>

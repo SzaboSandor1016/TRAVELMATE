@@ -84,6 +84,52 @@
             app:layout_constraintTop_toBottomOf="@+id/add_contributor_layout"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/trip_item_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <FrameLayout
+                android:id="@+id/trip_details_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                style="@style/Widget.Material3.BottomSheet"
+                app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent">
+
+                    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+                        android:id="@+id/bottom_sheet_handle"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/username"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/bottom_sheet_handle"
+                        android:layout_margin="16dp"
+                        style="@style/text_view_style"/>
+
+                    <CheckBox
+                        android:id="@+id/can_update"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/username"
+                        android:text="@string/can_update_trip"
+                        android:textAlignment="viewEnd"
+                        android:layout_margin="16dp"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </FrameLayout>
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

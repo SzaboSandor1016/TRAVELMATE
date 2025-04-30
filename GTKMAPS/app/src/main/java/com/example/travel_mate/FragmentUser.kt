@@ -44,8 +44,8 @@ class FragmentUser : Fragment() {
 
     //private lateinit var uiControllerUser: UiControllerFragmentUser
 
-    private val viewModelUser: ViewModelUser by activityViewModels { MyApplication.factory }
-    private val viewModelMain: ViewModelMain by activityViewModels { MyApplication.factory }
+    private val viewModelUser: ViewModelUser by activityViewModels { Application.factory }
+    private val viewModelMain: ViewModelMain by activityViewModels { Application.factory }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -82,6 +82,8 @@ class FragmentUser : Fragment() {
 
                 viewModelUser.userUiState.collect{
 
+                    user = it.user
+
                     updateUiOnSignedStateChange(it.username)
 
                     /*
@@ -108,13 +110,16 @@ class FragmentUser : Fragment() {
 
                 viewModelUser.currentTripUiState.collect {
 
-                    currentTrip = it.currentTrip
-                    currentTripIdentifier = it.tripIdentifier
+                    if (it.currentTrip != null && it.tripIdentifier != null) {
 
-                    updateTripDetails(
-                        trip = currentTrip!!,
-                        tripIdentifier = currentTripIdentifier!!
-                    )
+                        currentTrip = it.currentTrip
+                        currentTripIdentifier = it.tripIdentifier
+
+                        updateTripDetails(
+                            trip = it.currentTrip,
+                            tripIdentifier = it.tripIdentifier
+                        )
+                    }
                 }
             }
         }
@@ -159,11 +164,17 @@ class FragmentUser : Fragment() {
 
             //viewModelMain.setupNewTrip(trips[position])
 
-            viewModelMain.setupNewTrip(
+            /*viewModelMain.setupNewTrip(
                 tripId = this.currentTrip!!.uUID.toString(),
                 startPlace = this.currentTrip!!.startPlace,
                 places = this.currentTrip!!.places
             )
+
+            if (currentTripIdentifier?.creatorUID != user?.uid) {
+
+                viewModelUser.resetCurrentTrip()
+            }*/
+
             findNavController().navigate(R.id.action_FragmentUser_to_FragmentMain)
         }
         binding.updateTrip.setOnClickListener { l ->
@@ -300,11 +311,21 @@ class FragmentUser : Fragment() {
      */
     private fun updateTripDetails(trip:Trip, tripIdentifier: TripRepository.TripIdentifier) {
 
+        binding.tripCreator.setText(tripIdentifier.creatorUsername.toString())
+
         binding.tripTitle.setText(trip.title.toString())
+
         binding.tripDate.setText(trip.date.toString())
+
         binding.tripNote.setText(trip.note.toString())
 
-        setContributorsList(tripIdentifier.contributorsUsernames)
+        val usernames = tripIdentifier.contributors.values.toList().map { it.username.toString() }
+
+        setContributorsList(usernames)
+
+        checkContributorPermission(
+            tripIdentifier = tripIdentifier
+        )
     }
 
     /** [updateUiOnSignedStateChange]
@@ -328,6 +349,23 @@ class FragmentUser : Fragment() {
             binding.signOut.visibility = View.GONE
 
             binding.settings.visibility = View.GONE
+        }
+    }
+    private fun checkContributorPermission(tripIdentifier: TripRepository.TripIdentifier) {
+
+        binding.updateTrip.visibility = View.VISIBLE
+
+        if (!tripIdentifier.permissionToUpdate && tripIdentifier.location != "local") {
+
+            binding.updateTrip.visibility = View.INVISIBLE
+
+            /*val currentUser = tripIdentifier.contributors.values.find {
+                it.uid == user?.uid
+            }
+
+            if (currentUser?.canUpdate != true ) {
+
+            }*/
         }
     }
 }

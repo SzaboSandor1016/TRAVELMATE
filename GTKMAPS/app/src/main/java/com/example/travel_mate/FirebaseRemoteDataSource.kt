@@ -18,4 +18,6 @@ interface FirebaseRemoteDataSource {
     suspend fun fetchContributedTrips(uid: String): List<TripIdentifier?>
 
     suspend fun deleteTripsByUserUid(uid: String)
+
+    suspend fun deleteUidFromContributedTrips(uid: String, tripUUID: String)
 }

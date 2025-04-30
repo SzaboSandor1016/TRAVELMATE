@@ -1,11 +1,11 @@
 package com.example.travel_mate
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.travel_mate.databinding.FragmentSelectContributorsBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.launch
 
 // TODO: Rename parameter arguments, choose names that match
@@ -48,11 +49,13 @@ class FragmentSelectContributors : Fragment() {
             }
     }
 
-    private val viewModelUser: ViewModelUser by activityViewModels { MyApplication.factory }
+    private val viewModelUser: ViewModelUser by activityViewModels { Application.factory }
 
     private lateinit var contributorsAdapter: AdapterContributorsRecyclerView
 
-    private var recentContributors: ArrayList<ViewModelUser.Contributor> = ArrayList()
+    private var recentContributors: ArrayList<Contributor> = ArrayList()
+
+    private lateinit var standardBottomSheetBehavior: BottomSheetBehavior<FrameLayout>
 
     private var _binding : FragmentSelectContributorsBinding? = null
     private val binding get() = _binding!!
@@ -82,16 +85,20 @@ class FragmentSelectContributors : Fragment() {
         binding.contributorsRecyclerView.layoutManager = LinearLayoutManager(context)
         binding.contributorsRecyclerView.adapter = contributorsAdapter
 
-        viewModelUser.getRecentContributors()
+        standardBottomSheetBehavior = BottomSheetBehavior.from(binding.tripDetailsLayout)
+
+        standardBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+        viewModelUser.getSelectableContributors()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                viewModelUser.currentTripUiState.collect {
+                viewModelUser.userUiState.collect {
 
                     recentContributors.clear()
 
-                    recentContributors.addAll(it.recentContributors)
+                    recentContributors.addAll(it.contributors)
 
                     contributorsAdapter.notifyDataSetChanged()
                 }
@@ -99,12 +106,21 @@ class FragmentSelectContributors : Fragment() {
         }
 
         contributorsAdapter.setOnClickListener(object: AdapterContributorsRecyclerView.OnClickListener {
-            override fun onClick(position: Int) {
-                viewModelUser.selectContributor(
-                    position = position
-                )
+            override fun onClick(uid: String) {
 
-                Log.d("selectedContributor", recentContributors[position].selected.toString())
+                viewModelUser.selectContributor(
+                    uid = uid
+                )
+                //Log.d("selectedContributor", recentContributors[uid].selected.toString())
+            }
+        })
+
+        contributorsAdapter.setOnItemLongClickListener(object : AdapterContributorsRecyclerView.OnItemLongClickListener {
+            override fun onItemLongClick(uid: String) {
+
+                showEditedContributorData(
+                    uid = uid
+                )
             }
         })
 
@@ -119,12 +135,9 @@ class FragmentSelectContributors : Fragment() {
 
         binding.done.setOnClickListener { _ ->
 
-            val selectedContributors = recentContributors.filter{ it.selected == true }.associate { Pair(it.data.first, it.selected) }
-            val usernames = recentContributors.associate { Pair(it.data.first,true) }
+            val usernames = recentContributors.associate { Pair(it.uid.toString(), true) }
 
-            viewModelUser.setCurrentTripContributors(
-                contributors = selectedContributors
-            )
+            viewModelUser.setCurrentTripContributors()
 
             viewModelUser.setRecentContributors(
                 contributors = usernames
@@ -145,4 +158,27 @@ class FragmentSelectContributors : Fragment() {
         _binding = null
     }
 
+    fun showEditedContributorData(uid: String) {
+
+        val editedContributor = recentContributors.find { it.uid == uid }
+
+        if (editedContributor != null) {
+
+            standardBottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+
+            binding.canUpdate.setOnCheckedChangeListener(null)
+
+            binding.username.setText(editedContributor.username.toString())
+
+            binding.canUpdate.setChecked(editedContributor.canUpdate)
+
+            binding.canUpdate.setOnCheckedChangeListener { l, checked ->
+
+                viewModelUser.setUpdatePermission(
+                    uid = editedContributor.uid.toString(),
+                    canUpdate = checked
+                )
+            }
+        }
+    }
 }

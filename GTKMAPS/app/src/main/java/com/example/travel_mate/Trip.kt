@@ -36,7 +36,19 @@ data class Trip(
         note = ""
     )
 
+    fun findPlaceByUUID(uUID: String): Place? {
 
+        return places.find { it.uUID == uUID }
+    }
+
+    fun selectInspectedPlaceByUUIDForRoute(uuid: String): Trip {
+
+        return this.copy(
+            places = places.map { place ->
+                if (place.uUID == uuid) place.containedByRoute(!place.isContainedByRoute()) else place
+            }
+        )
+    }
 
     /*fun setUUID(uuid: String) {
 

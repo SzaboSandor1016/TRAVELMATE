@@ -4,12 +4,12 @@ import android.app.Application
 import android.content.Context
 import androidx.room.Room
 
-/** [MyApplication]
+/** [Application]
  *  custom [Application]
  *  that creates a [ViewModelFactory] for the app's [ViewModel]s
  *  and builds the [Room] [AppDatabase]
  */
-class MyApplication: Application() {
+class Application: Application() {
 
     companion object {
         lateinit var appContext: Context

@@ -2,7 +2,6 @@ package com.example.travel_mate
 
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,11 +63,11 @@ class FragmentSaveTrip : Fragment() {
     private var selectedContributors: Map<String,String> = emptyMap()
     private var updatedFrom: String = ""
 
-    private var currentTrip: Trip = Trip()
-    private var currentTripIdentifier: TripRepository.TripIdentifier = TripRepository.TripIdentifier()
+    private var currentTrip: Trip? = null
+    private var currentTripIdentifier: TripRepository.TripIdentifier? = null
 
-    private val viewModelUser: ViewModelUser by activityViewModels{ MyApplication.factory }
-    private val viewModelMain: ViewModelMain by activityViewModels{ MyApplication.factory }
+    private val viewModelUser: ViewModelUser by activityViewModels{ Application.factory }
+    private val viewModelMain: ViewModelMain by activityViewModels{ Application.factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +89,8 @@ class FragmentSaveTrip : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+
         /**
          * observe the [ViewModelUser.currentTripUiState] [kotlinx.coroutines.flow.StateFlow]
          * and call the functions that updates the UI based on the read values
@@ -99,21 +100,24 @@ class FragmentSaveTrip : Fragment() {
 
                 viewModelUser.currentTripUiState.collect {
 
-                    currentTrip = it.currentTrip
-                    currentTripIdentifier = it.tripIdentifier
+                    if (it.currentTrip != null && it.tripIdentifier != null) {
 
-                    updateSaveUi(
-                        trip = it.currentTrip,
-                        tripIdentifier = it.tripIdentifier
-                    )
+                        currentTrip = it.currentTrip
+                        currentTripIdentifier = it.tripIdentifier
 
-                    Log.d("FirebaseDatabaseSaveTrip", it.currentTrip.uUID.toString())
+                        updateSaveUi(
+                            trip = it.currentTrip,
+                            tripIdentifier = it.tripIdentifier
+                        )
 
-                    Log.d("FragmentSaveTrip", it.currentTrip.title.toString())
+                        Log.d("FirebaseDatabaseSaveTrip", it.currentTrip.uUID.toString())
 
-                    updatedFrom = it.updatedFrom
+                        Log.d("FragmentSaveTrip", it.currentTrip.title.toString())
 
-                    Log.d("FragmentSaveTrip", updatedFrom.toString())
+                        updatedFrom = it.updatedFrom
+
+                        Log.d("FragmentSaveTrip", updatedFrom.toString())
+                    }
                 }
             }
         }
@@ -144,18 +148,18 @@ class FragmentSaveTrip : Fragment() {
                     date = binding.saveDate.getText().toString().trim()
                 )*/
 
-                currentTrip.title = title
-                currentTripIdentifier.title = title
+                currentTrip?.title = title
+                currentTripIdentifier?.title = title
 
-                currentTrip.date = binding.saveDate.getText().toString().trim()
-                currentTrip.note = binding.saveNote.getText().toString().trim()
+                currentTrip?.date = binding.saveDate.getText().toString().trim()
+                currentTrip?.note = binding.saveNote.getText().toString().trim()
 
                 /**
                  * save the trip
                  */
                 viewModelUser.saveTrip(
-                    trip = currentTrip,
-                    tripIdentifier = currentTripIdentifier
+                    trip = currentTrip!!,
+                    tripIdentifier = currentTripIdentifier!!
                 )
 
                 returnAndClear()
@@ -224,7 +228,9 @@ class FragmentSaveTrip : Fragment() {
 
             binding.saveNote.setText(trip.note.toString().trim())
 
-            setContributorsList(tripIdentifier.contributorsUsernames)
+            val usernames = tripIdentifier.contributors.values.toList().map { it.username.toString() }
+
+            setContributorsList( contributorsList = usernames )
         }
     }
 

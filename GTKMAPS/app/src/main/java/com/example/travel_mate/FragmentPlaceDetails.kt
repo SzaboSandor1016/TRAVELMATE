@@ -44,7 +44,7 @@ class FragmentPlaceDetails : Fragment(){
 
     private lateinit var place: Place/*
     private val viewModelDetails: ViewModelFragmentPlaceDetails by activityViewModels()*/
-    private val viewModelMain: ViewModelMain by activityViewModels { MyApplication.factory }
+    private val viewModelMain: ViewModelMain by activityViewModels { Application.factory }
 
     private var listener: PlaceDetailsListener? = null
 
@@ -107,6 +107,21 @@ class FragmentPlaceDetails : Fragment(){
                         }
                     } finally {
                         Log.d("LifecycleTest", "Collecting stopped")
+                    }
+                }
+            }
+
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                viewModelMain.mainInspectTripState.collect {
+
+                    if (it.inspectedTripIdentifier != null && !it.editing) {
+                        binding.placeAddRemoveTrip.visibility = View.GONE
+                    } else {
+                        binding.placeAddRemoveTrip.visibility = View.VISIBLE
                     }
                 }
             }

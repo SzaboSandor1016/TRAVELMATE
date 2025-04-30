@@ -1,10 +1,12 @@
 package com.example.travel_mate
 
+import android.R
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,7 +43,9 @@ class ViewModelUser (
             ) { tripStateFlow, userState, userStateFlow ->
 
                 userStateFlow.copy(
+                    user = userState.user,
                     username = userState.username,
+                    contributors = userState.contributors.values.toList(),
                     trips = tripStateFlow.trips
                 )
 
@@ -86,6 +90,14 @@ class ViewModelUser (
                 trip = trip,
                 tripIdentifier = tripIdentifier
             )
+        }
+    }
+
+    fun initDefaultTrip() {
+
+        viewModelScope.launch {
+
+            tripRepository.initDefaultTrip()
         }
     }
 
@@ -191,13 +203,22 @@ class ViewModelUser (
         }
     }*/
 
-    fun setCurrentTripContributors(contributors: Map<String, Boolean>) {
+    fun setUpdatePermission(uid: String, canUpdate: Boolean) {
 
         viewModelScope.launch {
 
-            tripRepository.setCurrentTripContributors(
-                contributors = contributors
+            tripRepository.setUpdatePermission(
+                uid = uid,
+                canUpdate = canUpdate
             )
+        }
+    }
+
+    fun setCurrentTripContributors() {
+
+        viewModelScope.launch {
+
+            tripRepository.setCurrentTripContributors()
         }
     }
 
@@ -205,40 +226,19 @@ class ViewModelUser (
 
         viewModelScope.launch {
 
-            val user = async {
-
-                tripRepository.findUserByUsername(
-                    username = username
-                )
-            }
-
-            Log.d("FirebaseCurrentUser", user.await()?.first + " " + user.await()?.second)
-
-            if (user.await() != null) {
-
-                _currentTripUiState.update {
-
-                    val contributors = it.recentContributors.plus(Contributor(user.await()!!, true))
-
-                    it.copy(
-                        recentContributors = contributors.toMutableList()
-                    )
-                }
-            }
+            tripRepository.getNewContributorData(
+                username = username
+            )
 
         }
     }
 
-    fun selectContributor(position: Int) {
+    fun selectContributor(uid: String) {
 
-        _currentTripUiState.update {
+        viewModelScope.launch {
 
-            val oldList = it.recentContributors
-
-            oldList[position].selected = !oldList[position].selected
-
-            it.copy(
-                recentContributors = oldList.toMutableList()
+            tripRepository.selectUnselectContributor(
+                uid = uid
             )
         }
     }
@@ -263,19 +263,12 @@ class ViewModelUser (
         }
     }
 
-    fun getRecentContributors() {
+    fun getSelectableContributors() {
 
         viewModelScope.launch {
-            val contributors = tripRepository.getRecentContributorsOfUser()
 
-            _currentTripUiState.update {
-                it.copy(
-                    recentContributors = contributors.entries.map { Contributor(it.toPair(),false) }.toMutableList()
-                )
-            }
-
+            tripRepository.getSelectableContributors()
         }
-
     }
 
     fun saveTrip(trip: Trip, tripIdentifier: TripRepository.TripIdentifier){
@@ -405,15 +398,16 @@ class ViewModelUser (
     }
 
     data class UserUiState(
+        val user: FirebaseUser? = null,
         val username: String? = null,
-        val contributors: Map<String, String> = hashMapOf(),
+        val contributors: List<Contributor> = emptyList(),
         val trips: List<TripRepository.TripIdentifier> = emptyList())
 
-    data class CurrentTripState(val currentTrip: Trip = Trip(),
-                                val tripIdentifier: TripRepository.TripIdentifier = TripRepository.TripIdentifier(uuid = currentTrip.uUID),
+    data class CurrentTripState(val currentTrip: Trip? = null,
+                                val tripIdentifier: TripRepository.TripIdentifier? = null,
                                 val recentContributors: MutableList<Contributor> = mutableListOf(),
                                 val updatedFrom: String = ""
     )
 
-    data class Contributor(val data: Pair<String, String>, var selected: Boolean)
+
 }

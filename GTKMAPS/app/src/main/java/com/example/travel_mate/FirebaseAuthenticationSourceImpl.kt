@@ -472,7 +472,11 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
                             ref: DatabaseReference
                         ) {
                             if (error != null) {
-                                Log.e("FirebaseCurrentUser", "delete user from contributors: error", error.toException())
+                                Log.e(
+                                    "FirebaseCurrentUser",
+                                    "delete user from contributors: error",
+                                    error.toException()
+                                )
                             }
                         }
 
@@ -481,6 +485,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
             }
         }
     }
+
     /** [getReferencesOfUIDFromContributors]
      * get the reference of each instance the [uid] of the current user appears among other users contributors
      */

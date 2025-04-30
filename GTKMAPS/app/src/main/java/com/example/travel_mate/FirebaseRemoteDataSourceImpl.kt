@@ -2,7 +2,6 @@ package com.example.travel_mate
 
 import android.util.Log
 import com.example.travel_mate.TripRepository.TripIdentifier
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -31,7 +30,8 @@ class FirebaseRemoteDataSourceImpl: FirebaseRemoteDataSource {
         const val SAVES_DATABASE_REFERENCE_STRING = "saves"
         const val SAVES_IDENTIFIERS_REFERENCE_STRING = "saves_identifiers"
         const val SAVES_CREATOR_UID_DATABASE_REFERENCE_STRING = "creatorUID"
-        const val SAVES_CONTRIBUTORS_DATABASE_REFERENCE_STRING = "contributors/"
+        const val SAVES_CONTRIBUTOR_UID_DATABASE_REFERENCE_STRING = "contributorUIDs"
+        const val SAVES_CONTRIBUTORS_DATABASE_REFERENCE_STRING = "contributors"
     }
 
     private val database: DatabaseReference = Firebase.database.reference
@@ -79,6 +79,7 @@ class FirebaseRemoteDataSourceImpl: FirebaseRemoteDataSource {
         }
 
     }
+
     /** [deleteTripDataBranchByUUID]
      * deletes the data branch of a trip which [uuid] matches the [uuid] passed as parameter
      */
@@ -187,6 +188,8 @@ class FirebaseRemoteDataSourceImpl: FirebaseRemoteDataSource {
             }
     }
 
+
+
     /** [fetchMyTrips]
      * gets all trips' [TripIdentifier] that the currently signed in user has uploaded to the [Firebase] database
      */
@@ -223,29 +226,34 @@ class FirebaseRemoteDataSourceImpl: FirebaseRemoteDataSource {
     override suspend fun fetchContributedTrips(uid: String): List<TripIdentifier?>
     = suspendCancellableCoroutine{ continuation ->
 
-            database.child(SAVES_IDENTIFIERS_REFERENCE_STRING).orderByChild(
-                SAVES_CONTRIBUTORS_DATABASE_REFERENCE_STRING + uid)
-                .equalTo(true).addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
+        database.child(SAVES_IDENTIFIERS_REFERENCE_STRING)
+            .orderByChild("$SAVES_CONTRIBUTOR_UID_DATABASE_REFERENCE_STRING/$uid")
+            .equalTo(true)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
 
-                        val contributedTripIdentifiers = snapshot.children.map { dataSnapshot ->
+                    Log.d("contributedTrips", snapshot.key.toString())
 
-                            val tripIdentifier = dataSnapshot.getValue(TripIdentifier::class.java)
+                    val contributedTripIdentifiers = snapshot.children.map { dataSnapshot ->
 
-                            tripIdentifier?.copy(
-                                location = "remote",
-                                uuid = dataSnapshot.key.toString()
-                            )
-                        }
-                        continuation.resume(contributedTripIdentifiers)
+                        Log.d("contributedTrips", dataSnapshot.key.toString())
+
+                        val tripIdentifier = dataSnapshot.getValue(TripIdentifier::class.java)
+
+                        tripIdentifier?.copy(
+                            location = "remote",
+                            uuid = dataSnapshot.key.toString()
+                        )
                     }
+                    continuation.resume(contributedTripIdentifiers)
+                }
 
-                    override fun onCancelled(error: DatabaseError) {
-                        Log.e("FirebaseDatabase", "fetch contributed trips: error", error.toException())
-                        continuation.resumeWithException(error.toException())
-                    }
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("FirebaseDatabase", "fetch contributed trips: error", error.toException())
+                    continuation.resumeWithException(error.toException())
+                }
 
-                })
+            })
         }
     /** [deleteTripsByUserUid]
      * deletes all shared trips that has the uid of the currently signed in user's
@@ -262,7 +270,7 @@ class FirebaseRemoteDataSourceImpl: FirebaseRemoteDataSource {
             myTrips.forEach { deleteTrip(it.uuid.toString()) }
 
             contributedTrips.forEach { deleteUidFromContributedTrips(
-                userUid = uid,
+                uid = uid,
                 tripUUID = it.uuid.toString()
             ) }
 
@@ -272,12 +280,25 @@ class FirebaseRemoteDataSourceImpl: FirebaseRemoteDataSource {
     /** [deleteUidFromContributedTrips]
      * deletes the currently signed in user's uid from a shared trip's identifier branch
      */
-    suspend fun deleteUidFromContributedTrips(userUid: String, tripUUID: String) {
+    override suspend fun deleteUidFromContributedTrips(uid: String, tripUUID: String) {
 
         withContext(Dispatchers.IO) {
 
             database.child(SAVES_IDENTIFIERS_REFERENCE_STRING)
-                .child("$tripUUID/$SAVES_CONTRIBUTORS_DATABASE_REFERENCE_STRING$userUid")
+                .child("$tripUUID/$SAVES_CONTRIBUTORS_DATABASE_REFERENCE_STRING/$uid")
+                .removeValue(object: DatabaseReference.CompletionListener{
+                    override fun onComplete(
+                        error: DatabaseError?,
+                        ref: DatabaseReference
+                    ) {
+                        if (error != null) {
+                            Log.e("FirebaseCurrentUser", "delete user from other saves' contributors: error", error.toException())
+                        }
+                    }
+                })
+
+            database.child(SAVES_IDENTIFIERS_REFERENCE_STRING)
+                .child("$tripUUID/$SAVES_CONTRIBUTOR_UID_DATABASE_REFERENCE_STRING/$uid")
                 .removeValue(object: DatabaseReference.CompletionListener{
                     override fun onComplete(
                         error: DatabaseError?,

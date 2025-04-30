@@ -41,7 +41,7 @@ class FragmentSignUp : Fragment() {
                 }
             }
     }
-    private val viewModelUser: ViewModelUser by activityViewModels { MyApplication.factory }
+    private val viewModelUser: ViewModelUser by activityViewModels { Application.factory }
 
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!

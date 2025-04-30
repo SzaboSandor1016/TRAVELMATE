@@ -161,11 +161,35 @@
                     app:icon="@drawable/ic_edit"/>
 
                 <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/trip_date_text"
+                    android:id="@+id/trip_creator_text"
                     android:layout_width="0dp"
                     android:minWidth="88dp"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@id/trip_title"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:textSize="24sp"
+                    style="@style/text_view_style"
+                    android:text="@string/created_by"
+                    android:layout_margin="16dp"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/trip_creator"
+                    android:layout_width="0dp"
+                    android:minWidth="88dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBaseline_toBaselineOf="@id/trip_creator_text"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/trip_creator_text"
+                    android:textSize="16sp"
+                    style="@style/text_view_style"
+                    android:layout_margin="16dp"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/trip_date_text"
+                    android:layout_width="0dp"
+                    android:minWidth="88dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/trip_creator_text"
                     app:layout_constraintLeft_toLeftOf="parent"
                     android:textSize="24sp"
                     style="@style/text_view_style"

@@ -41,16 +41,22 @@ class RouteRemoteDataSourceImpl: RouteRemoteDataSource {
                     listOf(pointStart.getLongitude(),pointStart.getLatitude()),
                     listOf(pointEnd.getLongitude(),pointEnd.getLatitude())))
 
-            val routeResponseWalk = async { routeServiceRetrofit.getRoute(
-                apiKey = API_KEY,
-                profile = "foot-walking",
-                request = request
-            ) }
-            val routeResponseCar = async {  routeServiceRetrofit.getRoute(
-                apiKey = API_KEY,
-                profile = "driving-car",
-                request = request
-            ) }
+            val routeResponseWalk = async {
+
+                routeServiceRetrofit.getRoute(
+                    apiKey = API_KEY,
+                    profile = "foot-walking",
+                    request = request
+                )
+            }
+            val routeResponseCar = async {
+
+                routeServiceRetrofit.getRoute(
+                    apiKey = API_KEY,
+                    profile = "driving-car",
+                    request = request
+                )
+            }
 
             requestCounter = requestCounter + 2
 

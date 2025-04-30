@@ -17,7 +17,7 @@ class ViewModelFactory(
                 ViewModelUser(tripRepository) as T
             }
             modelClass.isAssignableFrom(ViewModelMain::class.java) -> {
-                ViewModelMain(searchRepository, routeRepository) as T
+                ViewModelMain(searchRepository, routeRepository, tripRepository) as T
             }
             else -> throw IllegalArgumentException("Unknown fragment type")
         }

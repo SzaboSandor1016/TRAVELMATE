@@ -115,8 +115,8 @@ class FragmentMain : Fragment() {
     private var categoryManager: ClassCategoryManager? = null
     private var resources: Resources? = null
 
-    private val viewModelMain: ViewModelMain by activityViewModels { MyApplication.factory }
-    private val viewModelUser: ViewModelUser by activityViewModels { MyApplication.factory }
+    private val viewModelMain: ViewModelMain by activityViewModels { Application.factory }
+    private val viewModelUser: ViewModelUser by activityViewModels { Application.factory }
 
     private lateinit var fragmentManager: FragmentManager
 
@@ -276,7 +276,7 @@ class FragmentMain : Fragment() {
 
         viewModelMain.getInitialCurrentLocation()
 
-/**Observe the [ViewModelMain.chipsState], [ViewModelMain.placeState] and the [ViewModelMain.mainSearchState] located in [viewModelMain]
+/**Observe the [ViewModelMain.chipsState], [ViewModelMain.placeState], [ViewModelMain.mainInspectTripState] and the [ViewModelMain.mainSearchState] located in [viewModelMain]
  *
  **/
 //_________________________________________________________________________________________________________________________
@@ -335,7 +335,7 @@ class FragmentMain : Fragment() {
          *  - [handleRouteStopsChange] function is called
          *  - [ViewModelMain.getCurrentPlaceByUUID] function is called
          *   if there is a currentPlace selected
-         *  - [handleTripButtons] function is called
+         *
          */
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -388,6 +388,12 @@ class FragmentMain : Fragment() {
             }
         }
 
+        /** [ViewModelMain.mainStartPlaceState] observer
+         *  observe the [viewModelMain]'s [ViewModelMain.mainStartPlaceState]
+         *  on state update
+         *  - call [handleStartPlaceChange]
+         */
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
@@ -403,6 +409,13 @@ class FragmentMain : Fragment() {
             }
         }
 
+        /** [ViewModelMain.mainRouteNavigationState] observer
+         *  observe the [viewModelMain]'s [ViewModelMain.mainRouteNavigationState]
+         *  on state update
+         *  - call [showNavigationData]
+         *  - call [handleRouteStopsChange]
+         *  - call [handleRouteNavigationChange]
+         */
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
@@ -415,6 +428,7 @@ class FragmentMain : Fragment() {
                     )
 
                     handleRouteStopsChange(
+                        mode = it.mode,
                         route = it.route
                     )
                     handleRouteNavigationChange(
@@ -427,6 +441,28 @@ class FragmentMain : Fragment() {
                     Log.d("refresh", "refresh")
                 }
 
+            }
+        }
+        /** [ViewModelMain.mainRouteNavigationState] observer
+         *  observe the [viewModelMain]'s [ViewModelMain.mainRouteNavigationState]
+         *  on state update
+         *  - call [handleInspectedTripChange]
+         */
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                viewModelMain.mainInspectTripState.collect {
+
+                    handleInspectedTripChange(
+                        editing = it.editing,
+                        start = it.start,
+                        inspectedTripIdentifier = it.inspectedTripIdentifier
+                    )
+
+                    enableDisableNavigateToUserFragment(
+                        editing = it.editing
+                    )
+                }
             }
         }
 
@@ -1416,13 +1452,14 @@ class FragmentMain : Fragment() {
     /** [handleRouteStopsChange]
      * call [showRouteData] and [showHideSearchAndRouteElementsOnRouteStopsChange]
      */
-    fun handleRouteStopsChange(route: Route) {
+    fun handleRouteStopsChange(mode: Boolean, route: Route) {
 
         showRouteData(
             route = route
         )
 
         showHideSearchAndRouteElementsOnRouteStopsChange(
+            mode = mode,
             isRouteEmpty = route.getRouteNodes().size < 2
         )
     }
@@ -1430,19 +1467,37 @@ class FragmentMain : Fragment() {
     /**
      * hide or show the search UI and the route plan UI if there is/isn't a selected place for route planning
      */
-    fun showHideSearchAndRouteElementsOnRouteStopsChange(isRouteEmpty: Boolean) {
+    fun showHideSearchAndRouteElementsOnRouteStopsChange(mode: Boolean, isRouteEmpty: Boolean) {
+
+        when(mode) {
+
+            true -> {
+
+                binding.tripInfoBar.visibility = View.VISIBLE
+                binding.searchContent.visibility = View.GONE
+            }
+            false -> {
+
+                binding.tripInfoBar.visibility = View.GONE
+                binding.searchContent.visibility = View.VISIBLE
+            }
+        }
 
         when(isRouteEmpty) {
 
             true -> {
-                binding.searchContent.visibility = View.VISIBLE
+
                 binding.routeInfoBar.visibility = View.GONE
             }
             false -> {
+
+                binding.tripInfoBar.visibility = View.GONE
                 binding.searchContent.visibility = View.GONE
+
                 binding.routeInfoBar.visibility = View.VISIBLE
             }
         }
+
     }
 
     /** [showRouteData]
@@ -1530,10 +1585,108 @@ class FragmentMain : Fragment() {
 // BEGINNING OF TRIP METHODS
 //_________________________________________________________________________________________________________________________
 
+    private fun enableDisableNavigateToUserFragment(editing: Boolean) {
+
+        binding.userBTN2.isEnabled = !editing
+    }
+
+    private fun handleInspectedTripChange(
+        editing: Boolean,
+        start: String?,
+        inspectedTripIdentifier: TripRepository.TripIdentifier?
+    ) {
+
+        Log.d("editing", editing.toString())
+
+        if (inspectedTripIdentifier == null || editing) {
+
+            hideSearchAndRouteUIOnInspectedTripChange(
+                currentlyInspecting = false
+            )
+
+            removeInspectedTripListeners()
+
+        } else {
+
+            hideSearchAndRouteUIOnInspectedTripChange(
+                currentlyInspecting = true
+            )
+
+            showHideEditInspectedTripButton(
+                permissionToUpdate = inspectedTripIdentifier.permissionToUpdate
+            )
+
+            setupInspectedTripListeners()
+
+
+            showInspectedTripData(
+                startPlace = start!!,
+                inspectedTripIdentifier = inspectedTripIdentifier
+            )
+        }
+    }
+
+    private fun showHideEditInspectedTripButton(permissionToUpdate: Boolean) {
+
+        if (permissionToUpdate) {
+
+            binding.editTripPlaces.visibility = View.VISIBLE
+        } else {
+
+            binding.editTripPlaces.visibility = View.GONE
+        }
+    }
+
+    private fun hideSearchAndRouteUIOnInspectedTripChange(currentlyInspecting: Boolean) {
+
+        if (currentlyInspecting) {
+
+            binding.searchContent.visibility = View.GONE
+            binding.tripInfoBar.visibility = View.VISIBLE
+        } else {
+
+            binding.searchContent.visibility = View.VISIBLE
+            binding.tripInfoBar.visibility = View.GONE
+        }
+    }
+
+    private fun showInspectedTripData(startPlace: String, inspectedTripIdentifier: TripRepository.TripIdentifier) {
+
+        binding.tripCreatorUsername.setText(inspectedTripIdentifier.creatorUsername.toString())
+
+        binding.tripTitle.setText(inspectedTripIdentifier.title.toString())
+
+        binding.tripStart.setText(startPlace)
+    }
+
+    private fun setupInspectedTripListeners() {
+
+        binding.editTripPlaces.setOnClickListener { l ->
+
+            viewModelMain.editInspectedTrip()
+        }
+
+        binding.dismissInspectTrip.setOnClickListener { l ->
+
+            viewModelMain.cancelEditInspected()
+
+            viewModelMain.resetCurrentTripInRepository()
+
+            viewModelMain.resetFullDetails()
+        }
+    }
+    private fun removeInspectedTripListeners() {
+
+        binding.editTripPlaces.setOnClickListener(null)
+
+        binding.dismissInspectTrip.setOnClickListener(null)
+    }
+
     /**
      *
      */
     private fun setupTripButtonListeners() {
+
         binding.saveTrip.setOnClickListener { l ->
 
             viewModelUser.setUpdatedFrom("main")
@@ -1546,7 +1699,9 @@ class FragmentMain : Fragment() {
         }
         binding.dismissTrip.setOnClickListener { l ->
 
-            viewModelMain.clearTrip()
+            viewModelMain.cancelEditInspected()
+
+            viewModelMain.clearPlacesAddedToTrip()
         }
     }
 

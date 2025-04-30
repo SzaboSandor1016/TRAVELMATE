@@ -13,16 +13,18 @@ import kotlinx.coroutines.launch
 //@HiltViewModel
 class ViewModelMain /*@Inject*/ constructor(
     private val searchRepository: SearchRepository,
-    private val routeRepository: RouteRepository
+    private val routeRepository: RouteRepository,
+    private val tripRepository: TripRepository
 ): ViewModel() {
-
-    private var tripId: String? = null
 
     private val _mainSearchState = MutableStateFlow(MainSearchState())
     val mainSearchState: StateFlow<MainSearchState> = _mainSearchState.asStateFlow()
 
     private val _mainRouteNavigationState = MutableStateFlow(MainRouteNavigationState())
     val mainRouteNavigationState: StateFlow<MainRouteNavigationState> = _mainRouteNavigationState.asStateFlow()
+
+    private val _mainInspectTripState = MutableStateFlow(MainInspectTripState())
+    val mainInspectTripState: StateFlow<MainInspectTripState> = _mainInspectTripState.asStateFlow()
 
     private val _mainStartPlaceState = MutableStateFlow(MainStartPlaceState())
     val mainStartPlaceState: StateFlow<MainStartPlaceState> = _mainStartPlaceState.asStateFlow()
@@ -134,6 +136,49 @@ class ViewModelMain /*@Inject*/ constructor(
             }
 
         }
+
+        viewModelScope.launch {
+
+            combine(
+                tripRepository.currentTripState,
+                _mainInspectTripState
+            ) {  currentTripState, mainInspectTripState ->
+
+                Log.d("refreshInspect", "refreshInspect")
+
+                var start: String? = null
+
+                if (currentTripState.trip != null) {
+                    setupNewTrip(
+                        startPlace = currentTripState.trip.startPlace,
+                        places = currentTripState.trip.places
+                    )
+                    start = currentTripState.trip.startPlace.getName().toString() +
+                            " ," +
+                            currentTripState.trip.startPlace.getAddress()?.getFullAddress().toString()
+
+                    setRouteMode(
+                        mode = true
+                    )
+
+
+                } else {
+
+                    setRouteMode(
+                        mode = false
+                    )
+                }
+
+                mainInspectTripState.copy(
+                    start = start,
+                    inspectedTripIdentifier = currentTripState.tripIdentifier
+                )
+
+            }.collect { newState ->
+
+                _mainInspectTripState.value = newState
+            }
+        }
     }
 
     fun setContainerState(state: String){
@@ -146,13 +191,9 @@ class ViewModelMain /*@Inject*/ constructor(
 
     fun setStartPlace(startPlace: Place){
 
-
-
         viewModelScope.launch {
             searchRepository.setSearchStartPlace(startPlace)
         }
-
-
     }
 
     fun setTransportMode(optionIndex: Int){
@@ -189,7 +230,9 @@ class ViewModelMain /*@Inject*/ constructor(
     fun resetFullDetails(){
 
         viewModelScope.launch {
+
             searchRepository.resetFullSearchDetails()
+
             routeRepository.resetRoute()
         }
     }
@@ -197,7 +240,9 @@ class ViewModelMain /*@Inject*/ constructor(
     fun initNewSearch(startPlace: Place) {
 
         viewModelScope.launch {
+
             Log.d("viewModelStartPlaceTest2", startPlace.getName().toString())
+
             searchRepository.initNewSearch(
                 startPlace = startPlace
             )
@@ -212,17 +257,48 @@ class ViewModelMain /*@Inject*/ constructor(
     fun removePlacesByCategory(category: String){
 
         viewModelScope.launch {
+
             searchRepository.removePlacesByCategory(
                 category = category
             )
         }
-
-
     }
 
-    fun setupNewTrip(tripId: String, startPlace: Place, places: List<Place>) {
+    fun resetCurrentTripInRepository() {
 
-        this.tripId = tripId
+        viewModelScope.launch {
+
+            tripRepository.resetCurrentTrip()
+        }
+    }
+
+    fun cancelEditInspected() {
+
+        viewModelScope.launch {
+
+            _mainInspectTripState.update {
+
+                it.copy(
+                    editing = false
+                )
+            }
+        }
+    }
+
+    fun editInspectedTrip() {
+
+        viewModelScope.launch {
+
+            _mainInspectTripState.update {
+
+                it.copy(
+                    editing = true
+                )
+            }
+        }
+    }
+
+    fun setupNewTrip(startPlace: Place, places: List<Place>) {
 
         viewModelScope.launch {
 
@@ -234,7 +310,6 @@ class ViewModelMain /*@Inject*/ constructor(
                 startPlace = startPlace
             )
         }
-
     }
 
     fun addRemovePlaceToTrip(uuid: String){
@@ -278,9 +353,7 @@ class ViewModelMain /*@Inject*/ constructor(
         }
     }*/
 
-    fun clearTrip() {
-
-        this.tripId = null
+    fun clearPlacesAddedToTrip() {
 
         viewModelScope.launch {
 
@@ -291,7 +364,11 @@ class ViewModelMain /*@Inject*/ constructor(
     fun getCurrentPlaceByUUID(uuid: String){
 
         viewModelScope.launch {
-            searchRepository.getCurrentPlaceByUUID(uuid)
+
+
+            searchRepository.getCurrentPlaceByUUID(
+                uuid = uuid
+            )
         }
 
     }
@@ -498,6 +575,18 @@ class ViewModelMain /*@Inject*/ constructor(
         }
     }
 
+    fun setRouteMode(mode: Boolean) {
+
+        viewModelScope.launch {
+
+            _mainRouteNavigationState.update {
+                it.copy(
+                    mode = mode
+                )
+            }
+        }
+    }
+
 
     data class MainChipsState(
         val extendedSearchVisible: Boolean = false,
@@ -523,7 +612,14 @@ class ViewModelMain /*@Inject*/ constructor(
         val isRouteEmpty: Boolean = places.none { it.containedByRoute == true }
     }
 
+    data class MainInspectTripState(
+        val editing: Boolean = false,
+        val start: String? = null,
+        val inspectedTripIdentifier: TripRepository.TripIdentifier? = null
+    )
+
     data class MainRouteNavigationState(
+        val mode: Boolean = false, //true -> inspecting trip false -> not inspecting
         val route: Route = Route(),
         val navigationRouteNode: RouteNode? = null,
         val currentLocation: Coordinates? = null,

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.Serializable
+import kotlin.collections.plus
 import kotlin.coroutines.coroutineContext
 
 class TripRepository constructor(
@@ -146,6 +147,7 @@ class TripRepository constructor(
 
             _userState.update {
                 it.copy(
+                    user = null,
                     username = null
                 )
             }
@@ -169,6 +171,7 @@ class TripRepository constructor(
 
                     _userState.update {
                         it.copy(
+                            user = firebaseUser,
                             username = usernameByUid
                         )
                     }
@@ -179,6 +182,7 @@ class TripRepository constructor(
 
                     _userState.update {
                         it.copy(
+                            user = null,
                             username = null
                         )
                     }
@@ -187,6 +191,7 @@ class TripRepository constructor(
             } else {
                 _userState.update {
                     it.copy(
+                        user = null,
                         username = null
                     )
                 }
@@ -280,6 +285,84 @@ class TripRepository constructor(
         }
     }
 
+    suspend fun setUpdatePermission(uid: String, canUpdate: Boolean) {
+
+        withContext(Dispatchers.IO) {
+
+            val newContributors = _userState.value.contributors.toMutableMap()
+
+            val toBeUpdated = newContributors.getValue(uid)
+
+            newContributors.replace(
+                uid,
+                toBeUpdated.setPermissionToUpdate(canUpdate = canUpdate)
+            )
+
+            _userState.update {
+
+                it.copy(
+                    contributors = newContributors
+                )
+            }
+
+        }
+    }
+
+    suspend fun getNewContributorData(username: String) {
+
+        withContext(Dispatchers.IO) {
+
+            val user = findUserByUsername(
+                username = username
+            )
+
+            if (user != null) {
+
+                _userState.update {
+                    it.copy(
+
+                        contributors = it.contributors.plus(
+
+                            Pair(
+                                user.first,
+                                Contributor(
+                                    uid = user.first.toString(),
+                                    username = user.second.toString(),
+                                    selected = true
+                                )
+                            )
+                        ).toMap()
+                    )
+                }
+            }
+        }
+    }
+
+    suspend fun selectUnselectContributor(uid: String) {
+
+        withContext(Dispatchers.IO) {
+
+            val contributors = _userState.value.contributors.toMutableMap()
+
+            val toBeSelected = contributors.get(uid)
+
+            if (toBeSelected != null) {
+
+                contributors.replace(
+                    uid,
+                    toBeSelected.setSelected(toBeSelected.selected!!.not())
+                )
+
+                _userState.update {
+                    it.copy(
+
+                        contributors = contributors
+                    )
+                }
+            }
+        }
+    }
+
     suspend fun setRecentContributors(users: Map<String, Boolean>) {
 
         withContext(Dispatchers.IO) {
@@ -291,6 +374,41 @@ class TripRepository constructor(
         }
     }
 
+    suspend fun getSelectableContributors() {
+
+        withContext(Dispatchers.IO) {
+
+            val contributorsOfTrip = _currentTripState.value.tripIdentifier?.contributors
+
+            val recentContributorsOfUser = getRecentContributorsOfUser().map {
+
+                Pair(it.key,
+                    Contributor(
+                        uid = it.key,
+                        username = it.value,
+                        selected = false
+                    )
+                )
+            }.toMap()
+
+            var fullContributors: MutableMap<String,Contributor> = mutableMapOf()
+
+            fullContributors.putAll(contributorsOfTrip!!)
+
+            fullContributors.putAll(recentContributorsOfUser.filter {
+                !fullContributors.map { it.value.username.toString() }.contains(it.value.username.toString())
+            })
+
+            _userState.update {
+                it.copy(
+
+                    contributors = fullContributors
+                )
+            }
+        }
+
+    }
+
     suspend fun getRecentContributorsOfUser(): Map<String, String> {
 
         return withContext(Dispatchers.IO) {
@@ -299,10 +417,7 @@ class TripRepository constructor(
 
             val contributors = deferredList.await()
 
-            if (contributors.isNotEmpty())
-                return@withContext authenticationSource.getUserPairsByUIds(contributors)
-
-            return@withContext emptyMap()
+            return@withContext authenticationSource.getUserPairsByUIds(contributors)
         }
     }
 
@@ -328,6 +443,23 @@ class TripRepository constructor(
             }
         }
     }*/
+
+    suspend fun initDefaultTrip() {
+
+        withContext(Dispatchers.IO) {
+
+            val defaultTrip = Trip()
+            val defaultIdentifier = TripIdentifier(uuid = defaultTrip.uUID)
+
+            _currentTripState.update {
+
+                it.copy(
+                    trip = defaultTrip,
+                    tripIdentifier = defaultIdentifier
+                )
+            }
+        }
+    }
 
     suspend fun saveNewTrip(trip: Trip, tripIdentifier: TripIdentifier) {
 
@@ -410,12 +542,10 @@ class TripRepository constructor(
 
         withContext(Dispatchers.IO) {
 
-            val newTrip = Trip()
-
             _currentTripState.update {
                 it.copy(
-                    trip = newTrip,
-                    tripIdentifier = TripIdentifier(newTrip.uUID)
+                    trip = null,
+                    tripIdentifier = null
                 )
             }
         }
@@ -442,43 +572,32 @@ class TripRepository constructor(
 
             _currentTripState.update {
 
+                val newTrip = it.trip ?: Trip()
+                val newIdentifier = it.tripIdentifier ?: TripIdentifier( uuid = newTrip.uUID )
                 it.copy(
-                    trip = it.trip.copy(
-
+                    trip = newTrip.copy(
                         startPlace = startPlace,
                         places = places
-                    )
+                    ),
+                    tripIdentifier = newIdentifier
                 )
             }
         }
     }
 
-    suspend fun setCurrentTripContributors(contributors: Map<String, Boolean>) {
+    suspend fun setCurrentTripContributors() {
 
         withContext(Dispatchers.IO) {
 
-            val usernames = async {
-                getUsernamesByUIDs(
-                    uIds = contributors.map { it.key }
-                )
-            }
+            val contributors = _userState.value.contributors.filter { it.value.selected == true }
 
             _currentTripState.update {
 
                 it.copy(
-                    tripIdentifier = it.tripIdentifier.copy(
+                    tripIdentifier = it.tripIdentifier?.copy(
 
+                        contributorUIDs = contributors.mapValues { true },
                         contributors = contributors
-                    )
-                )
-            }
-
-            _currentTripState.update {
-
-                it.copy(
-                    tripIdentifier = it.tripIdentifier.copy(
-
-                        contributorsUsernames = usernames.await()
                     )
                 )
             }
@@ -590,14 +709,22 @@ class TripRepository constructor(
 
         withContext(Dispatchers.IO) {
 
-            Log.d("FirebaseDatabaseRepository", _currentTripState.value.trip.uUID.toString())
+            Log.d("FirebaseDatabaseRepository", _currentTripState.value.trip?.uUID.toString())
 
-            firebaseRemoteDataSource.uploadTrip(
-                trip = trip,
-                firebaseIdentifier = tripIdentifier.copy(
-                    creatorUID = firebaseUser!!.uid
+            when(tripIdentifier.creatorUID) {
+
+                null -> firebaseRemoteDataSource.uploadTrip(
+                    trip = trip,
+                    firebaseIdentifier = tripIdentifier.copy(
+                        creatorUID = firebaseUser!!.uid
+                    )
                 )
-            )
+
+                else -> firebaseRemoteDataSource.uploadTrip(
+                trip = trip,
+                firebaseIdentifier = tripIdentifier
+                )
+            }
 
             //resetCurrentTrip()
         }
@@ -607,9 +734,19 @@ class TripRepository constructor(
 
         withContext(Dispatchers.IO) {
 
-            firebaseRemoteDataSource.deleteTrip(
-                uuid = trip.uUID
-            )
+            if (_currentTripState.value.tripIdentifier?.creatorUID == firebaseUser?.uid) {
+
+                firebaseRemoteDataSource.deleteTrip(
+                    uuid = _currentTripState.value.tripIdentifier?.uuid!!
+                )
+            } else {
+
+                firebaseRemoteDataSource.deleteUidFromContributedTrips(
+                    uid = firebaseUser?.uid.toString(),
+                    tripUUID = _currentTripState.value.tripIdentifier?.uuid!!
+                )
+            }
+
 
             //resetCurrentTrip()
         }
@@ -629,7 +766,7 @@ class TripRepository constructor(
             Log.d("FirebaseDatabaseTitle", tripIdentifier.title.toString())
             Log.d("FirebaseDatabaseLocation", tripIdentifier.location.toString())
             Log.d("FirebaseDatabaseCreator", tripIdentifier.creatorUID.toString())
-            Log.d("FirebaseDatabaseContributorUID", tripIdentifier.contributors.map { it.key }.toString())
+            /*Log.d("FirebaseDatabaseContributorUID", tripIdentifier.contributors.map { it.key }.toString())*/
 
             /*updateCurrentTripData(
                 trip = currentTrip.await(),
@@ -663,15 +800,13 @@ class TripRepository constructor(
                 val myTrips = firebaseRemoteDataSource.fetchMyTrips(uid = firebaseUser!!.uid)
                     .filterNotNull()
 
-                val fullTrips = myTrips.map { trip ->
-                    val usernames =
-                        authenticationSource.getUserPairsByUIds(trip.contributors.keys.toList())
-                            .map { it.value }
-
-                    trip.copy(contributorsUsernames = usernames)
+                _tripsStateFlow.update {
+                    it.copy(
+                        trips = processFetchedTrips(
+                            tripIdentifiers = myTrips
+                        )
+                    )
                 }
-
-                _tripsStateFlow.update { it.copy(trips = fullTrips) }
             }
         }
     }
@@ -690,15 +825,58 @@ class TripRepository constructor(
                     uid = firebaseUser!!.uid
                 ).filterNotNull()
 
-                val fullTrips = contributedTrips.map { trip ->
-                    val usernames =
-                        authenticationSource.getUserPairsByUIds(trip.contributors.keys.toList())
-                            .map { it.value }
+                _tripsStateFlow.update {
+                    it.copy(
+                        trips = processFetchedTrips(
+                            tripIdentifiers = contributedTrips
+                        )
+                    )
+                }
+            }
+        }
+    }
 
-                    trip.copy(contributorsUsernames = usernames)
+    /** [processFetchedTrips]
+     *  sets values for the uid, username and selected fields for each [TripIdentifier]s passed as parameter
+     *
+     *  @param tripIdentifiers the trip identifiers needed to be processed
+     *
+     *  @return the list of the processed trip identifiers
+     */
+    suspend fun processFetchedTrips(tripIdentifiers: List<TripIdentifier>): List<TripIdentifier> {
+
+        return withContext(Dispatchers.IO) {
+
+            return@withContext tripIdentifiers.map {
+
+                val creatorUsername = getUsernamesByUIDs(listOf(it.creatorUID.toString()))[0]
+
+                var contributors = it.contributors.toMutableMap().mapValues {
+
+                    it.value.copy(
+                        uid = it.key,
+                        username = getUsernamesByUIDs(uIds = listOf(it.key))[0],
+                        selected = true
+                    )
                 }
 
-                _tripsStateFlow.update { it.copy(trips = fullTrips) }
+                val permissionToUpdate = when(it.creatorUID == firebaseUser?.uid) {
+
+                    false -> contributors.any { (it.key == firebaseUser?.uid && it.value.canUpdate == true) }
+
+                    true -> true
+                }
+
+                var contributorUIDs = it.contributors.toMutableMap().mapValues {
+                    true
+                }
+
+                it.copy(
+                    permissionToUpdate = permissionToUpdate,
+                    creatorUsername = creatorUsername,
+                    contributorUIDs = contributorUIDs,
+                    contributors = contributors
+                )
             }
         }
     }
@@ -824,10 +1002,14 @@ class TripRepository constructor(
      * */
 
     data class TripsState(val trips: List<TripIdentifier> = emptyList())
-    data class UserState(val username: String? = null)
+    data class UserState(
+        val user: FirebaseUser? = null,
+        val username: String? = null,
+        val contributors: Map<String, Contributor> = emptyMap())
 
-    data class CurrentTrip(val trip: Trip = Trip(),
-                           val tripIdentifier: TripIdentifier = TripIdentifier(uuid = trip.uUID)
+    data class CurrentTrip(
+        val trip: Trip? = null,
+        val tripIdentifier: TripIdentifier? = null
     )
 
     @IgnoreExtraProperties
@@ -835,10 +1017,12 @@ class TripRepository constructor(
         @get:Exclude var uuid: String? = null,
         @get:Exclude var location: String? = null,
         var title: String? = null,
-        @Ignore var contributors: Map<String, Boolean> = emptyMap(),
+        @Ignore var contributorUIDs: Map<String, Boolean> = emptyMap(),
+        @Ignore var contributors: Map<String,Contributor> = emptyMap(),
         @Ignore
-        @get:Exclude
-        @set:Exclude var contributorsUsernames: List<String> = emptyList(),
+        @get:Exclude var creatorUsername: String? = null,
+        @Ignore
+        @get:Exclude val permissionToUpdate: Boolean = true,
         var creatorUID: String? = null
     ): Serializable {
 

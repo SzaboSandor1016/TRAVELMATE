@@ -266,5 +266,9 @@
     <string name="duration_string">" minutes"</string>
     <string name="distance_string">metres</string>
     <string name="start_navigation">Start navigation</string>
+    <string name="can_update_trip">Can update trip</string>
+    <string name="created_by">"Created by "</string>
+    <string name="trip_title">Title of trip</string>
+    <string name="edit_places">Edit places</string>
 
 </resources>

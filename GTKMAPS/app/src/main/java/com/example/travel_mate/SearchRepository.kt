@@ -166,7 +166,19 @@ class SearchRepository /*@Inject*/ constructor(
                 )
             }
         }
+    }
 
+    suspend fun resetCurrentPlace(){
+
+        withContext(Dispatchers.IO) {
+
+            _searchState.update {
+
+                it.copy(
+                    currentPlace = null
+                )
+            }
+        }
     }
 
     suspend fun getCurrentPlaceByUUID(uuid: String){
@@ -202,7 +214,7 @@ class SearchRepository /*@Inject*/ constructor(
                     search = it.search.selectPlaceByUUIDForTrip(
                         uuid = uuid
                     ),
-                    currentPlace = it.currentPlace.containedByTrip(
+                    currentPlace = it.currentPlace?.containedByTrip(
                         contained = !it.currentPlace.isContainedByTrip()
                     )
                 )
@@ -218,11 +230,11 @@ class SearchRepository /*@Inject*/ constructor(
                 uuid = uuid)!!
 
 
-            if (place.uUID == _searchState.value.currentPlace.uUID)
+            if (place.uUID == _searchState.value.currentPlace?.uUID)
                 _searchState.update {
 
                     it.copy(
-                        currentPlace = it.currentPlace.containedByRoute(
+                        currentPlace = it.currentPlace?.containedByRoute(
                             contained = !it.currentPlace.isContainedByRoute()
                         )
                     )
@@ -380,7 +392,7 @@ class SearchRepository /*@Inject*/ constructor(
     }
 
     data class SearchState(val search: Search = Search(),
-                           val currentPlace: Place = Place()
+                           val currentPlace: Place? = null
     )
 
     data class SearchOptions(var transportMode: String? = null,

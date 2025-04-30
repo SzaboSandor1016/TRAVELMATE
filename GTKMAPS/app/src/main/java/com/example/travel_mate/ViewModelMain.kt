@@ -17,6 +17,9 @@ class ViewModelMain /*@Inject*/ constructor(
     private val tripRepository: TripRepository
 ): ViewModel() {
 
+    private val _mainContentState = MutableStateFlow(MainContentState())
+    val mainContentState: StateFlow<MainContentState> = _mainContentState.asStateFlow()
+
     private val _mainSearchState = MutableStateFlow(MainSearchState())
     val mainSearchState: StateFlow<MainSearchState> = _mainSearchState.asStateFlow()
 
@@ -122,6 +125,24 @@ class ViewModelMain /*@Inject*/ constructor(
                 _mainRouteNavigationState
             ) {  routeState, navigationState, mainRouteNavigationState ->
 
+                if (routeState.route.getRouteNodes().size > 1) {
+
+                    setMainContentId(
+                        contentId = 1
+                    )
+                } else {
+
+                    when(mainRouteNavigationState.mode) {
+
+                        true -> setMainContentId(
+                            contentId = 2
+                        )
+                        false -> setMainContentId(
+                            contentId = 0
+                        )
+                    }
+                }
+
                 mainRouteNavigationState.copy(
                     route = routeState.route,
                     navigationRouteNode = navigationState.navigationGoal,
@@ -149,6 +170,7 @@ class ViewModelMain /*@Inject*/ constructor(
                 var start: String? = null
 
                 if (currentTripState.trip != null) {
+
                     setupNewTrip(
                         startPlace = currentTripState.trip.startPlace,
                         places = currentTripState.trip.places
@@ -157,12 +179,32 @@ class ViewModelMain /*@Inject*/ constructor(
                             " ," +
                             currentTripState.trip.startPlace.getAddress()?.getFullAddress().toString()
 
-                    setRouteMode(
-                        mode = true
-                    )
+                    if (!mainInspectTripState.editing) {
+
+                        setRouteMode(
+                            mode = true
+                        )
+
+                        setMainContentId(
+                            contentId = 2
+                        )
+                    } else {
+
+                        setRouteMode(
+                            mode = false
+                        )
+
+                        setMainContentId(
+                            contentId = 0
+                        )
+                    }
 
 
                 } else {
+
+                    setMainContentId(
+                        contentId = 0
+                    )
 
                     setRouteMode(
                         mode = false
@@ -177,6 +219,19 @@ class ViewModelMain /*@Inject*/ constructor(
             }.collect { newState ->
 
                 _mainInspectTripState.value = newState
+            }
+        }
+    }
+
+    fun setMainContentId(contentId: Int) {
+
+        viewModelScope.launch {
+
+            _mainContentState.update {
+
+                it.copy(
+                    contentId = contentId
+                )
             }
         }
     }
@@ -282,6 +337,13 @@ class ViewModelMain /*@Inject*/ constructor(
                     editing = false
                 )
             }
+
+            _mainRouteNavigationState.update {
+
+                it.copy(
+                    mode = false
+                )
+            }
         }
     }
 
@@ -293,6 +355,12 @@ class ViewModelMain /*@Inject*/ constructor(
 
                 it.copy(
                     editing = true
+                )
+            }
+            _mainRouteNavigationState.update {
+
+                it.copy(
+                    mode = false
                 )
             }
         }
@@ -365,12 +433,18 @@ class ViewModelMain /*@Inject*/ constructor(
 
         viewModelScope.launch {
 
-
             searchRepository.getCurrentPlaceByUUID(
                 uuid = uuid
             )
         }
+    }
 
+    fun resetCurrentPlace() {
+
+        viewModelScope.launch {
+
+            searchRepository.resetCurrentPlace()
+        }
     }
 
     fun setFragmentContainerHeight(height :Int) {
@@ -398,7 +472,7 @@ class ViewModelMain /*@Inject*/ constructor(
             it.copy(extendedSearchSelected = false, extendedSearchVisible = false)
         }
     }
-    fun setCurrentChipGroup(id: Int, chipContent: List<FragmentMain.ChipCategory>) {
+    fun setCurrentChipGroup(id: Int, chipContent: List<FragmentSearch.ChipCategory>) {
 
         _chipsState.update {
 
@@ -406,7 +480,7 @@ class ViewModelMain /*@Inject*/ constructor(
         }
     }
 
-    fun setCurrentChipGroupContent( chipContent: List<FragmentMain.ChipCategory>) {
+    fun setCurrentChipGroupContent( chipContent: List<FragmentSearch.ChipCategory>) {
 
         _chipsState.update {
 
@@ -512,6 +586,19 @@ class ViewModelMain /*@Inject*/ constructor(
         }
     }
 
+    fun setSelectedRouteNodePosition(coordinates: Coordinates?) {
+
+        viewModelScope.launch {
+
+            _mainRouteNavigationState.update {
+
+                it.copy(
+                    selectedRouteNodePosition = coordinates
+                )
+            }
+        }
+    }
+
     fun resetRoute() {
 
         viewModelScope.launch {
@@ -587,12 +674,15 @@ class ViewModelMain /*@Inject*/ constructor(
         }
     }
 
+    data class MainContentState(
+        val contentId: Int = 0 //0 -> search Fragment, 1 -> route fragment, 2 -> inspect trip fragment
+    )
 
     data class MainChipsState(
         val extendedSearchVisible: Boolean = false,
         val extendedSearchSelected: Boolean = false,
         val currentChipGroup: Int? = null,
-        val currentChipGroupContent: List<FragmentMain.ChipCategory>? = null,
+        val currentChipGroupContent: List<FragmentSearch.ChipCategory>? = null,
         val selectedChips: List<Int> = emptyList(),
         val distance: Double = 0.0,
         val transportMode: String? = null,
@@ -621,6 +711,7 @@ class ViewModelMain /*@Inject*/ constructor(
     data class MainRouteNavigationState(
         val mode: Boolean = false, //true -> inspecting trip false -> not inspecting
         val route: Route = Route(),
+        val selectedRouteNodePosition: Coordinates? = null,
         val navigationRouteNode: RouteNode? = null,
         val currentLocation: Coordinates? = null,
         val prevRouteStep: RouteStep? = null,

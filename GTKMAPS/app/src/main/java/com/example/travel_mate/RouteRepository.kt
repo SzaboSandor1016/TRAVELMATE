@@ -390,13 +390,13 @@ class RouteRepository constructor(
                             //update the StateFlow with the found instruction
                             //update the previous instruction with the current
                             //and update the current with the newly found one
-                            _navigationState.update {
+                        _navigationState.update {
 
-                                it.copy(
-                                    prevRouteStep = it.currentRouteStep,
-                                    currentRouteStep = currentRoute[nextInstructionStepIndex]
-                                )
-                            }
+                            it.copy(
+                                prevRouteStep = it.currentRouteStep,
+                                currentRouteStep = currentRoute[nextInstructionStepIndex]
+                            )
+                        }
                         //}
 
                         // Move to next segment

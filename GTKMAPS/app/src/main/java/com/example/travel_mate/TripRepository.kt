@@ -492,6 +492,33 @@ class TripRepository constructor(
         }
     }
 
+    suspend fun saveTripWithUpdatedPlaces(startPlace: Place, places: List<Place>) {
+
+        withContext(Dispatchers.IO) {
+
+            val newTrip = _currentTripState.value.trip?.copy(
+                startPlace = startPlace,
+                places = places
+            )
+
+            val tripIdentifier = _currentTripState.value.tripIdentifier
+
+            saveNewTrip(
+                trip = newTrip!!,
+                tripIdentifier = tripIdentifier!!
+            )
+
+            _currentTripState.update {
+
+                it.copy(
+                    trip = newTrip,
+                    tripIdentifier = tripIdentifier
+                )
+            }
+        }
+
+    }
+
     suspend fun deleteCurrentTrip(trip: Trip, tripIdentifier: TripIdentifier) {
 
         CoroutineScope(coroutineContext).launch {

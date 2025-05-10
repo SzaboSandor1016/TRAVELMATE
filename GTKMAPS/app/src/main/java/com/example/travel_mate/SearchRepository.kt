@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.util.GeoPoint
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.math.atan2
@@ -31,6 +32,9 @@ class SearchRepository /*@Inject*/ constructor(
 
     private val _searchOptions = MutableStateFlow(SearchOptions())
     val searchOptions: StateFlow<SearchOptions> = _searchOptions.asStateFlow()
+
+    private val _customPlaceState = MutableStateFlow(CustomPlace())
+    val customPlace: StateFlow<CustomPlace> = _customPlaceState.asStateFlow()
 
     suspend fun setSearchStartPlace(startPlace: Place) {
 
@@ -334,6 +338,32 @@ class SearchRepository /*@Inject*/ constructor(
         return photonRemoteDataSource.getStartPlaces(query)
     }
 
+    suspend fun getCustomPlace(clickedPoint: GeoPoint) {
+
+        withContext(Dispatchers.IO) {
+
+            val positionInCoordinates = Coordinates(
+                latitude = clickedPoint.latitude,
+                longitude = clickedPoint.longitude
+            )
+
+            val deferredReverseGeoCode = async {
+                photonRemoteDataSource.getReverseGeoCode(
+                    coordinates = positionInCoordinates
+                )
+            }
+
+            val reverseGeoCode = deferredReverseGeoCode.await()
+
+            _customPlaceState.update {
+
+                it.copy(
+                    customPlace = reverseGeoCode[0]
+                )
+            }
+        }
+    }
+
     suspend fun getReverseGeoCode(): Place? {
 
         return withContext(Dispatchers.IO) {
@@ -391,12 +421,30 @@ class SearchRepository /*@Inject*/ constructor(
         }
     }
 
-    data class SearchState(val search: Search = Search(),
-                           val currentPlace: Place? = null
+    suspend fun resetCustomPlace() {
+
+        withContext(Dispatchers.IO) {
+
+            _customPlaceState.update {
+                it.copy(
+                    customPlace = null
+                )
+            }
+        }
+    }
+
+    data class CustomPlace(
+        val customPlace: Place? = null
     )
 
-    data class SearchOptions(var transportMode: String? = null,
-                             var minute: Int = 0
+    data class SearchState(
+        val search: Search = Search(),
+        val currentPlace: Place? = null
+    )
+
+    data class SearchOptions(
+        var transportMode: String? = null,
+        var minute: Int = 0
     ) {
 
         private var speed = when (transportMode) {

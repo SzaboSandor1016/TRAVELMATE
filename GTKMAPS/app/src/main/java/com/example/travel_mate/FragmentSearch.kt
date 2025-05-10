@@ -21,13 +21,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.example.travel_mate.databinding.FragmentMainBinding
 import com.example.travel_mate.databinding.FragmentSearchBinding
 import com.google.android.material.chip.Chip
 import kotlinx.coroutines.launch
@@ -133,6 +131,8 @@ class FragmentSearch : Fragment() {
     private val viewModelUser: ViewModelUser by activityViewModels { Application.factory }
 
     private lateinit var popupView: View
+
+    private var editingInspectTrip: Boolean = false
 
     var startPlace: Place = Place()
     private var startPlaces: ArrayList<Place> = ArrayList()
@@ -260,6 +260,7 @@ class FragmentSearch : Fragment() {
                         )
 
                     handleTripButtons(
+                        editingInspectTrip = editingInspectTrip,
                         isTripPlacesEmpty = it.isTripEmpty
                     )
 
@@ -292,20 +293,27 @@ class FragmentSearch : Fragment() {
         /** [ViewModelMain.mainInspectTripState] observer
          *  observe the [viewModelMain]'s [ViewModelMain.mainInspectTripState]
          *  on state update
-         *  - call [handleInspectedTripChange]
+         *  - call [enableDisableNavigateToUserFragment]
          */
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 viewModelMain.mainInspectTripState.collect {
 
+                    editingInspectTrip = it.editing
+
                     enableDisableNavigateToUserFragment(
                         editing = it.editing
                     )
+
+                    handleInspectTripButtons(
+                        editing = it.editing
+                    )
+
+                    Log.d("editing", it.editing.toString())
                 }
             }
         }
-
 
         /**Listener to handle CLICKING THE USER BUTTON
          * navigate to the [FragmentUser]
@@ -871,9 +879,23 @@ class FragmentSearch : Fragment() {
         view.startAnimation(animation)
     }
 
-    private fun handleTripButtons(isTripPlacesEmpty: Boolean){
+    private fun handleInspectTripButtons(editing: Boolean){
 
-        when (isTripPlacesEmpty){
+        when (editing){
+            false -> {
+                removeInspectTripButtonListeners()
+            }
+            true -> {
+                setupInspectTripButtonListeners()
+            }
+        }
+        handleInspectTripUiChanges(editing)
+
+    }
+
+    private fun handleTripButtons(editingInspectTrip: Boolean, isTripPlacesEmpty: Boolean){
+
+        when (isTripPlacesEmpty || editingInspectTrip){
             true -> {
                 removeTripButtonListeners()
             }
@@ -881,7 +903,7 @@ class FragmentSearch : Fragment() {
                 setupTripButtonListeners()
             }
         }
-        handleTripUiChanges(isTripPlacesEmpty)
+        handleTripUiChanges(editingInspectTrip,isTripPlacesEmpty)
 
     }
 
@@ -893,6 +915,28 @@ class FragmentSearch : Fragment() {
     private fun enableDisableNavigateToUserFragment(editing: Boolean) {
 
         binding.userBTN2.isEnabled = !editing
+    }
+
+    private fun setupInspectTripButtonListeners() {
+
+        binding.saveInspectTrip.setOnClickListener { l ->
+
+            viewModelUser.saveTripWithUpdatedPlaces(
+                startPlace = viewModelMain.getStartPlace()!!,
+                places = viewModelMain.getPlacesContainedByTrip()
+            )
+        }
+
+        binding.dismissInspectTrip.setOnClickListener { l ->
+
+            viewModelMain.cancelEditInspected()
+        }
+    }
+
+    private fun removeInspectTripButtonListeners() {
+
+        binding.saveInspectTrip.setOnClickListener(null)
+        binding.dismissInspectTrip.setOnClickListener(null)
     }
 
     /**
@@ -912,8 +956,6 @@ class FragmentSearch : Fragment() {
         }
         binding.dismissTrip.setOnClickListener { l ->
 
-            viewModelMain.cancelEditInspected()
-
             viewModelMain.clearPlacesAddedToTrip()
         }
     }
@@ -924,19 +966,31 @@ class FragmentSearch : Fragment() {
         binding.dismissTrip.setOnClickListener(null)
     }
 
-    private fun handleTripUiChanges(isEmpty: Boolean){
+    private fun handleInspectTripUiChanges(editing: Boolean){
 
-        when(isEmpty) {
-            false -> {
-                binding.saveTrip.setVisibility(View.VISIBLE)
-                binding.dismissTrip.setVisibility(View.VISIBLE)
-            }
+        when(editing) {
             true -> {
-                binding.saveTrip.setVisibility(View.GONE)
-                binding.dismissTrip.setVisibility(View.GONE)
+                binding.saveInspectTrip.setVisibility(View.VISIBLE)
+                binding.dismissInspectTrip.setVisibility(View.VISIBLE)
+            }
+            false -> {
+                binding.saveInspectTrip.setVisibility(View.GONE)
+                binding.dismissInspectTrip.setVisibility(View.GONE)
             }
         }
 
+    }
+
+    private fun handleTripUiChanges(editingInspectTrip: Boolean, isEmpty: Boolean){
+
+        binding.saveTrip.setVisibility(View.GONE)
+        binding.dismissTrip.setVisibility(View.GONE)
+
+        if (!isEmpty && !editingInspectTrip) {
+
+            binding.saveTrip.setVisibility(View.VISIBLE)
+            binding.dismissTrip.setVisibility(View.VISIBLE)
+        }
     }
 
 //_________________________________________________________________________________________________________________________

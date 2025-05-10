@@ -26,7 +26,8 @@
             android:id="@+id/main_fragment_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            android:animateLayoutChanges="true"/>
 
         <!--<com.google.android.material.chip.ChipGroup
             android:id="@+id/route_chips"

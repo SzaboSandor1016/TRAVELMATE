@@ -66,8 +66,8 @@
 
     <string name="choose_transport">Choose transport mode</string>
     <string name="transporte_form">Transport mode:</string>
-    <string name="walk">Walk</string>
-    <string name="car">Car</string>
+    <string name="walk">On foot</string>
+    <string name="car">By car</string>
     <string name="more_categories"> More categories</string>
 
     <string name="from">From:</string>
@@ -270,5 +270,10 @@
     <string name="created_by">"Created by "</string>
     <string name="trip_title">Title of trip</string>
     <string name="edit_places">Edit places</string>
+    <string name="place_name">Name of the place</string>
+    <string name="place_address">Address of the place</string>
+    <string name="set_as_start">Set as start place</string>
+    <string name="navigate_to">Navigate_here</string>
+    <string name="to_next_goal">To next stop</string>
 
 </resources>

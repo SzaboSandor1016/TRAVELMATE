@@ -166,11 +166,11 @@ class FragmentInspectTrip : Fragment() {
 
         binding.dismissInspectTrip.setOnClickListener { l ->
 
-            viewModelMain.cancelEditInspected()
-
             viewModelMain.resetCurrentTripInRepository()
 
             viewModelMain.resetFullDetails()
+
+            viewModelMain.returnToPrevContent()
         }
     }
     private fun removeInspectedTripListeners() {

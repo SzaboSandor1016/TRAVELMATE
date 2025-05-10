@@ -8,21 +8,15 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.Callback.makeMovementFlags
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travel_mate.databinding.FragmentRouteBinding
-import com.example.travel_mate.databinding.FragmentSearchBinding
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.launch
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.overlay.Marker
 import kotlin.getValue
 
 /*// TODO: Rename parameter arguments, choose names that match
@@ -95,29 +89,21 @@ class FragmentRoute : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
+        categoryManager= ClassCategoryManager(requireContext())
         resources = getResources()
 
-        /** [ViewModelMain.mainRouteNavigationState] observer
-         *  observe the [viewModelMain]'s [ViewModelMain.mainRouteNavigationState]
+        /** [ViewModelMain.mainRouteState] observer
+         *  observe the [viewModelMain]'s [ViewModelMain.mainRouteState]
          *  on state update
-         *  - call [showNavigationData]
          *  - call [handleRouteStopsChange]
          *  - call [handleRouteNavigationChange]
          */
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                viewModelMain.mainRouteNavigationState.collect {
-
-                    showNavigationData(
-                        coordinates = it.currentLocation,
-                        prevRouteStep = it.prevRouteStep,
-                        currentRouteStep = it.currentRouteStep
-                    )
+                viewModelMain.mainRouteState.collect {
 
                     handleRouteStopsChange(
-                        mode = it.mode,
                         route = it.route
                     )
 
@@ -143,8 +129,6 @@ class FragmentRoute : Fragment() {
 
             var draggedIndex: Int = 0
             var targetIndex: Int = 0
-
-
 
             override fun getMovementFlags(
                 recyclerView: RecyclerView,
@@ -254,6 +238,11 @@ class FragmentRoute : Fragment() {
             )
         }
 
+        binding.startNavigation.setOnClickListener { l ->
+
+            viewModelMain.startNavigationThroughPlacesInRoute()
+        }
+
         /**
          * add an [OnclickListener] for the [dismissRoutePlan] button
          * when clicked reset the route [ViewModelMain.resetRoute]
@@ -262,6 +251,8 @@ class FragmentRoute : Fragment() {
 
             viewModelMain.resetRoute()
 
+            viewModelMain.returnToPrevContent()
+
             viewModelMain.resetCurrentPlace()
         }
 
@@ -269,18 +260,6 @@ class FragmentRoute : Fragment() {
             viewModelMain.optimizeRoute()
         }
 
-        binding.startNavigation.setOnClickListener { l ->
-            viewModelMain.startNavigation()
-
-            handleNavigationOnOff(true)
-        }
-        binding.cancelNavigation.setOnClickListener { l ->
-
-            viewModelMain.stopNavigation()
-
-            handleNavigationOnOff(false)
-
-        }
 //_________________________________________________________________________________________________________________________
 // END OF ROUTE METHODS BLOCK
 //_________________________________________________________________________________________________________________________
@@ -312,53 +291,13 @@ class FragmentRoute : Fragment() {
     /** [handleRouteStopsChange]
      * call [showRouteData] and [showHideSearchAndRouteElementsOnRouteStopsChange]
      */
-    fun handleRouteStopsChange(mode: Boolean, route: Route) {
+    fun handleRouteStopsChange(route: Route) {
 
         showRouteData(
             route = route
         )
-
-        /*showHideSearchAndRouteElementsOnRouteStopsChange(
-            mode = mode,
-            isRouteEmpty = route.getRouteNodes().size < 2
-        )*/
     }
 
-    /**
-     * hide or show the search UI and the route plan UI if there is/isn't a selected place for route planning
-     */
-    /*fun showHideSearchAndRouteElementsOnRouteStopsChange(mode: Boolean, isRouteEmpty: Boolean) {
-
-        when(mode) {
-
-            true -> {
-
-                binding.tripInfoBar.visibility = View.VISIBLE
-                binding.searchContent.visibility = View.GONE
-            }
-            false -> {
-
-                binding.tripInfoBar.visibility = View.GONE
-                binding.searchContent.visibility = View.VISIBLE
-            }
-        }
-
-        when(isRouteEmpty) {
-
-            true -> {
-
-                binding.routeInfoBar.visibility = View.GONE
-            }
-            false -> {
-
-                binding.tripInfoBar.visibility = View.GONE
-                binding.searchContent.visibility = View.GONE
-
-                binding.routeInfoBar.visibility = View.VISIBLE
-            }
-        }
-
-    }*/
 
     /** [showRouteData]
      * refresh the [routeStopsAdapter]'s list with the currently added places
@@ -385,83 +324,8 @@ class FragmentRoute : Fragment() {
     }
 
 //_________________________________________________________________________________________________________________________
-// END OF METHODS FOR MAP
+// END OF METHODS FOR ROUTE
 //_________________________________________________________________________________________________________________________
 
-    private fun handleNavigationOnOff(isActive: Boolean) {
 
-        when(isActive) {
-
-            true -> {
-                binding.routeInfoLayout.visibility = View.GONE
-                binding.navigationInfoLayout.visibility = View.VISIBLE
-            }
-            false -> {
-                binding.routeInfoLayout.visibility = View.VISIBLE
-                binding.navigationInfoLayout.visibility = View.GONE
-            }
-        }
-    }
-
-    private fun handleSecondaryRouteStepVisibility(isSecondary: Boolean) {
-
-        when(isSecondary) {
-
-            true -> {
-                binding.navigationSecondaryInfoLayout.visibility = View.VISIBLE
-            }
-            false -> {
-                binding.navigationSecondaryInfoLayout.visibility = View.GONE
-            }
-        }
-    }
-
-    @SuppressLint("UseCompatLoadingForDrawables")
-    private fun showNavigationData(coordinates: Coordinates?,prevRouteStep: RouteStep?, currentRouteStep: RouteStep?) {
-
-        if (coordinates !=null && currentRouteStep != null) {
-
-            showCurrentRouteStepData(
-                currentRouteStep = currentRouteStep
-            )
-        }
-
-        if ( prevRouteStep != null && prevRouteStep.name != null ) {
-
-            handleSecondaryRouteStepVisibility( isSecondary = true)
-
-            showPreviousRouteStepData(
-                prevRouteStep = prevRouteStep
-            )
-        } else {
-            handleSecondaryRouteStepVisibility(isSecondary = false)
-        }
-    }
-
-    private fun showCurrentRouteStepData(currentRouteStep: RouteStep?) {
-
-        if (currentRouteStep != null) {
-
-            if (currentRouteStep.name != null && currentRouteStep.instruction != null) {
-
-                binding.routeStopName.text = currentRouteStep.instruction
-
-                binding.directionImage.setImageDrawable(categoryManager?.getInstructionImage(currentRouteStep.type!!))
-
-            }
-        }
-
-    }
-    private fun showPreviousRouteStepData(prevRouteStep: RouteStep) {
-
-        if (prevRouteStep.instruction != null) {
-
-            val secondaryContent = prevRouteStep.name ?: prevRouteStep.instruction
-
-            binding.routeSecondaryStopName.text = secondaryContent
-
-            binding.directionSecondaryImage.setImageDrawable(categoryManager?.getInstructionImage(prevRouteStep.type!!))
-
-        }
-    }
 }

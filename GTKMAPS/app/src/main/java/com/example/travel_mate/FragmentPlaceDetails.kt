@@ -116,9 +116,9 @@ class FragmentPlaceDetails : Fragment(){
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                viewModelMain.mainInspectTripState.collect {
+                viewModelMain.mainContentState.collect {
 
-                    if (it.inspectedTripIdentifier != null && !it.editing) {
+                    if (it.currentContentId == ViewModelMain.MainContent.INSPECT) {
                         binding.placeAddRemoveTrip.visibility = View.GONE
                     } else {
                         binding.placeAddRemoveTrip.visibility = View.VISIBLE
@@ -127,27 +127,6 @@ class FragmentPlaceDetails : Fragment(){
             }
 
         }
-
-        /*viewModelMain.containerState.observe(viewLifecycleOwner) { state ->
-
-            handleContainerState(state)
-
-        }
-
-        viewModelMain.currentPlace.observe(viewLifecycleOwner) { place ->
-
-            isContainedByTrip = place!!.isContained()
-
-            handleContainerState(viewModelMain.containerState.value.toString())
-
-            this.place = place
-
-            setPlaceDetails(place)
-
-            view.post {
-                handleContainerHeightMeasurement()
-            }
-        }*/
 
         /**
          * calls the [ViewModelMain.addRemovePlaceToTrip] function
@@ -180,35 +159,6 @@ class FragmentPlaceDetails : Fragment(){
 
     override fun onResume() {
         super.onResume()
-
-        /*viewLifecycleOwner.lifecycleScope.launch {
-            viewModelMain.placeState.collect {
-
-                Log.d("LifecycleTest", "repeatOnLifecycle started collecting")
-
-                try {
-                    handleContainerState(it.containerState)
-
-                    if (it.currentPlace != null) {
-                        isContainedByTrip = it.currentPlace.isContained()
-
-                        place = it.currentPlace
-
-                        setPlaceDetails(it.currentPlace)
-
-                        Log.d("currentPlaceFragment", it.currentPlace.getName().toString())
-
-                        view?.post {
-                            handleContainerHeightMeasurement()
-                        }
-                    }
-                } finally {
-                    Log.d("LifecycleTest", "Collecting stopped")
-                }
-            }
-
-        }*/
-
     }
 
     override fun onCreateView(

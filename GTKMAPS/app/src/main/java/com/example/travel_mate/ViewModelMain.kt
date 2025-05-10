@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Polyline
+import java.util.Stack
 
 //@HiltViewModel
 class ViewModelMain /*@Inject*/ constructor(
@@ -23,8 +26,11 @@ class ViewModelMain /*@Inject*/ constructor(
     private val _mainSearchState = MutableStateFlow(MainSearchState())
     val mainSearchState: StateFlow<MainSearchState> = _mainSearchState.asStateFlow()
 
-    private val _mainRouteNavigationState = MutableStateFlow(MainRouteNavigationState())
-    val mainRouteNavigationState: StateFlow<MainRouteNavigationState> = _mainRouteNavigationState.asStateFlow()
+    private val _mainRouteState = MutableStateFlow(MainRouteState())
+    val mainRouteState: StateFlow<MainRouteState> = _mainRouteState.asStateFlow()
+
+    private val _mainNavigationState = MutableStateFlow(MainNavigationState())
+    val mainNavigationState: StateFlow<MainNavigationState> = _mainNavigationState.asStateFlow()
 
     private val _mainInspectTripState = MutableStateFlow(MainInspectTripState())
     val mainInspectTripState: StateFlow<MainInspectTripState> = _mainInspectTripState.asStateFlow()
@@ -38,7 +44,11 @@ class ViewModelMain /*@Inject*/ constructor(
     private val _placeState = MutableStateFlow(CurrentPlaceState())
     val placeState: StateFlow<CurrentPlaceState> = _placeState.asStateFlow()
 
+    private val _mainCustomPlaceState = MutableStateFlow(MainCustomPlaceState())
+    val mainCustomPlaceState: StateFlow<MainCustomPlaceState> = _mainCustomPlaceState.asStateFlow()
+
     init {
+
         viewModelScope.launch {
 
             combine(
@@ -121,31 +131,45 @@ class ViewModelMain /*@Inject*/ constructor(
 
             combine(
                 routeRepository.routeState,
-                routeRepository.navigationState,
-                _mainRouteNavigationState
-            ) {  routeState, navigationState, mainRouteNavigationState ->
+                _mainRouteState
+            ) {  routeState, mainRouteState ->
 
-                if (routeState.route.getRouteNodes().size > 1) {
+                if (routeState.route.getRouteNodes().size >= 2) {
 
                     setMainContentId(
-                        contentId = 1
+                        contentId = MainContent.ROUTE
                     )
-                } else {
-
-                    when(mainRouteNavigationState.mode) {
-
-                        true -> setMainContentId(
-                            contentId = 2
-                        )
-                        false -> setMainContentId(
-                            contentId = 0
-                        )
-                    }
                 }
 
-                mainRouteNavigationState.copy(
-                    route = routeState.route,
+                mainRouteState.copy(
+                    route = routeState.route
+                )
+
+            }.collect { newState ->
+
+                _mainRouteState.value = newState
+            }
+
+        }
+
+        viewModelScope.launch {
+
+            combine(
+                routeRepository.navigationState,
+                _mainNavigationState
+            ) {  navigationState, mainNavigationState ->
+
+                if (navigationState.navigationGoal != null) {
+
+                    setMainContentId(
+                        contentId = MainContent.NAVIGATION
+                    )
+                }
+
+                mainNavigationState.copy(
+                    endOfRoute = navigationState.endOfRoute,
                     navigationRouteNode = navigationState.navigationGoal,
+                    navigationPolyline = navigationState.routePolyLines,
                     prevRouteStep = navigationState.prevRouteStep,
                     currentLocation = navigationState.currentLocation,
                     currentRouteStep = navigationState.currentRouteStep
@@ -153,7 +177,7 @@ class ViewModelMain /*@Inject*/ constructor(
 
             }.collect { newState ->
 
-                _mainRouteNavigationState.value = newState
+                _mainNavigationState.value = newState
             }
 
         }
@@ -180,35 +204,12 @@ class ViewModelMain /*@Inject*/ constructor(
                             currentTripState.trip.startPlace.getAddress()?.getFullAddress().toString()
 
                     if (!mainInspectTripState.editing) {
-
-                        setRouteMode(
-                            mode = true
-                        )
-
                         setMainContentId(
-                            contentId = 2
-                        )
-                    } else {
-
-                        setRouteMode(
-                            mode = false
-                        )
-
-                        setMainContentId(
-                            contentId = 0
+                            contentId = MainContent.INSPECT
                         )
                     }
-
-
-                } else {
-
-                    setMainContentId(
-                        contentId = 0
-                    )
-
-                    setRouteMode(
-                        mode = false
-                    )
+                }  else {
+                    returnToPrevContent()
                 }
 
                 mainInspectTripState.copy(
@@ -221,17 +222,74 @@ class ViewModelMain /*@Inject*/ constructor(
                 _mainInspectTripState.value = newState
             }
         }
+        viewModelScope.launch {
+
+            combine (
+                searchRepository.customPlace,
+                _mainCustomPlaceState
+            ) { customPlace, mainCustomPlace ->
+
+                if (customPlace.customPlace != null) {
+
+                    setMainContentId(
+                        contentId = MainContent.CUSTOM
+                    )
+                }
+
+                mainCustomPlace.copy(
+                    customPlace = customPlace.customPlace
+                )
+
+            }.collect { newState ->
+
+                _mainCustomPlaceState.value = newState
+            }
+        }
     }
 
-    fun setMainContentId(contentId: Int) {
+    fun setMainContentId(contentId: MainContent) {
 
         viewModelScope.launch {
 
-            _mainContentState.update {
+            val currentContentId = _mainContentState.value.currentContentId
 
-                it.copy(
-                    contentId = contentId
-                )
+            if (currentContentId != contentId) {
+
+                val prevContents = _mainContentState.value.prevContents
+
+                val currentContent = _mainContentState.value.currentContentId
+
+                prevContents.push(currentContent)
+
+
+                _mainContentState.update {
+
+                    it.copy(
+                        prevContents = prevContents.clone() as Stack<MainContent>,
+                        currentContentId = contentId
+                    )
+                }
+            }
+        }
+    }
+
+    fun returnToPrevContent() {
+
+        viewModelScope.launch {
+
+            val prevContents = _mainContentState.value.prevContents
+
+            if (prevContents.isNotEmpty()) {
+
+                val last = prevContents.pop()
+
+                _mainContentState.update {
+
+                    it.copy(
+                        prevContents = prevContents.clone() as Stack<MainContent>,
+                        currentContentId = last
+                    )
+                }
             }
         }
     }
@@ -337,13 +395,6 @@ class ViewModelMain /*@Inject*/ constructor(
                     editing = false
                 )
             }
-
-            _mainRouteNavigationState.update {
-
-                it.copy(
-                    mode = false
-                )
-            }
         }
     }
 
@@ -351,16 +402,12 @@ class ViewModelMain /*@Inject*/ constructor(
 
         viewModelScope.launch {
 
+            returnToPrevContent()
+
             _mainInspectTripState.update {
 
                 it.copy(
                     editing = true
-                )
-            }
-            _mainRouteNavigationState.update {
-
-                it.copy(
-                    mode = false
                 )
             }
         }
@@ -590,7 +637,7 @@ class ViewModelMain /*@Inject*/ constructor(
 
         viewModelScope.launch {
 
-            _mainRouteNavigationState.update {
+            _mainRouteState.update {
 
                 it.copy(
                     selectedRouteNodePosition = coordinates
@@ -642,14 +689,39 @@ class ViewModelMain /*@Inject*/ constructor(
         }
     }
 
-    fun startNavigation() {
+    fun startNavigationThroughPlacesInRoute() {
 
-        routeRepository.startNavigation()
+        viewModelScope.launch {
+
+            routeRepository.navigateToPlaceInRoute()
+        }
+    }
+
+    fun navigateToNextPlaceInRoute() {
+
+        viewModelScope.launch {
+
+            routeRepository.navigateToNextPlaceInRoute()
+        }
+    }
+
+    fun startNavigationToCustomPlace(
+        coordinates: Coordinates,
+        transportMode: String
+    ) {
+
+        viewModelScope.launch {
+
+            routeRepository.navigateToCustomPlace(
+                coordinates = coordinates,
+                transportMode = transportMode
+            )
+        }
     }
 
     fun stopNavigation() {
 
-        routeRepository.stopNavigation()
+        routeRepository.stopNavigationJob()
 
         routeRepository.stopExtrapolationLoop()
     }
@@ -662,20 +734,28 @@ class ViewModelMain /*@Inject*/ constructor(
         }
     }
 
-    fun setRouteMode(mode: Boolean) {
+    fun getCustomPlace(position: GeoPoint) {
 
         viewModelScope.launch {
 
-            _mainRouteNavigationState.update {
-                it.copy(
-                    mode = mode
-                )
-            }
+            searchRepository.getCustomPlace(
+                clickedPoint = position
+            )
+        }
+    }
+
+    fun resetCustomPlace() {
+
+        viewModelScope.launch {
+
+            searchRepository.resetCustomPlace()
         }
     }
 
     data class MainContentState(
-        val contentId: Int = 0 //0 -> search Fragment, 1 -> route fragment, 2 -> inspect trip fragment
+        val prevContents: Stack<MainContent> = Stack(),
+        val currentContentId: MainContent = MainContent.SEARCH //0 -> search Fragment, 1 -> route fragment,
+                                        // 2 -> inspect trip fragment, 3 -> custom place, 4 -> navigation
     )
 
     data class MainChipsState(
@@ -702,17 +782,26 @@ class ViewModelMain /*@Inject*/ constructor(
         val isRouteEmpty: Boolean = places.none { it.containedByRoute == true }
     }
 
+    data class MainCustomPlaceState(
+        val canAddCustomPlace: Boolean = true,
+        val customPlace: Place? = null
+    )
+
     data class MainInspectTripState(
         val editing: Boolean = false,
         val start: String? = null,
         val inspectedTripIdentifier: TripRepository.TripIdentifier? = null
     )
 
-    data class MainRouteNavigationState(
-        val mode: Boolean = false, //true -> inspecting trip false -> not inspecting
+    data class MainRouteState(
         val route: Route = Route(),
         val selectedRouteNodePosition: Coordinates? = null,
+    )
+
+    data class MainNavigationState(
+        val endOfRoute: Boolean = false,
         val navigationRouteNode: RouteNode? = null,
+        val navigationPolyline: Polyline? = null,
         val currentLocation: Coordinates? = null,
         val prevRouteStep: RouteStep? = null,
         val currentRouteStep: RouteStep? = null
@@ -730,4 +819,8 @@ class ViewModelMain /*@Inject*/ constructor(
         val containerState: String = "collapsed",
         val containerHeight: Int = 0,
         )
+
+    enum class MainContent {
+        SEARCH, INSPECT, ROUTE, NAVIGATION, CUSTOM
+    }
 }

@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.views.overlay.Polyline
+import kotlin.collections.get
 import kotlin.coroutines.coroutineContext
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -296,7 +298,80 @@ class RouteRepository constructor(
         }
     }
 
-    fun startNavigation() {
+    fun navigateToPlaceInRoute() {
+
+        navigationScope.launch {
+
+            val routeNode = _routeState.value.route.getRouteNodes()[1]
+
+            val goalLocationNode = RouteNode(
+                coordinate = routeNode.coordinate
+            )
+
+            _navigationState.update {
+                it.copy(
+                    currentNavigationRouteNodeIndex = 1,
+                    navigationMode = _routeState.value.route.getTransportMode(),
+                    navigationGoal = goalLocationNode
+                )
+            }
+
+            startNavigationJob(
+                goalLocationNode = goalLocationNode
+            )
+        }
+    }
+
+    fun navigateToNextPlaceInRoute() {
+
+        navigationScope.launch {
+
+            val currentRouteNodeIndex = _navigationState.value.currentNavigationRouteNodeIndex
+
+            if (currentRouteNodeIndex != _routeState.value.route.getRouteNodes().size - 1) {
+
+                val nextRoute = _routeState.value.route.getRouteNodes()[currentRouteNodeIndex + 1]
+
+                val goalLocationNode = RouteNode(
+                    coordinate = nextRoute.coordinate
+                )
+
+                _navigationState.update {
+                    it.copy(
+                        currentNavigationRouteNodeIndex = currentRouteNodeIndex + 1,
+                        navigationGoal = goalLocationNode
+                    )
+                }
+
+                restartNavigation(
+                    goalLocationNode = goalLocationNode
+                )
+            }
+        }
+    }
+
+    fun navigateToCustomPlace(coordinates: Coordinates, transportMode: String) {
+
+        navigationScope.launch {
+
+            val goalLocationNode = RouteNode(
+                coordinate = coordinates
+            )
+
+            _navigationState.update {
+                it.copy(
+                    navigationMode = transportMode,
+                    navigationGoal = goalLocationNode
+                )
+            }
+
+            startNavigationJob(
+                goalLocationNode = goalLocationNode
+            )
+        }
+    }
+
+    fun startNavigationJob(goalLocationNode: RouteNode ) {
 
         if (navigationJob?.isActive == true) return
 
@@ -305,7 +380,11 @@ class RouteRepository constructor(
             locationLocalDataSource.startContinuousLocationUpdates()
 
             //The location of the user at the start of the navigation
-            val initialLocation = getCurrentLocation() ?: _routeState.value.route.getRouteNodes()[0].coordinate!!
+            var initialLocation: Coordinates? = null
+
+            do {
+                initialLocation = updateCurrentLocation()
+            } while (initialLocation == null)
 
             //create a node representing the initial location of the user
             //this is the start point of the navigation
@@ -316,23 +395,28 @@ class RouteRepository constructor(
             //find the route between the goal of the navigation and the start point
             val navigationRouteNode = getRouteNode(
                 stop1 = currentLocationNode,
-                stop2 = _routeState.value.route.getRouteNodes()[1]
+                stop2 = goalLocationNode
             )
             //select the appropriate route based on the selected transport mode
-            var currentRoute = when(_routeState.value.route.getTransportMode()) {
+            var currentRoute = when (_navigationState.value.navigationMode) {
                 "driving-car" -> navigationRouteNode.carRouteSteps
                 else -> navigationRouteNode.walkRouteSteps
             }
+            var currentRoutePolyLine = when (_navigationState.value.navigationMode) {
+                "driving-car" -> navigationRouteNode.carPolyLine
+                else -> navigationRouteNode.walkPolyLine
+            }
 
             lastKnownLocation = initialLocation
+
             /*
             update the last known location of the user
             if the initial location is null then use the coordinates of the start point
             TODO That is actually the same that is an issue
-             */
+            */
             onNewMatchedLocation(initialLocation)
 
-            //start the interpolation loop
+            //start the extrapolation loop
             startExtrapolationLoop()
 
             //initial increase count, last distance ant the target segment index
@@ -342,11 +426,15 @@ class RouteRepository constructor(
 
             //update the UI with the initial values
             _navigationState.update {
+
                 it.copy(
-                    navigationGoal = navigationRouteNode,
+                    endOfRoute = false,
+                    routeSteps = currentRoute,
+                    routePolyLines = currentRoutePolyLine,
                     currentRouteStep = currentRoute[0]
                 )
             }
+
             //in every 'duration' milliseconds (currently 1500)
             while (isActive) {
 
@@ -375,37 +463,41 @@ class RouteRepository constructor(
                 onNewMatchedLocation(projectedPosition)
 
                 // Check for proximity
-                //if the distance is less than 25 meters
-                if (currentDistance < 0.030) {
+                //if the distance is less than 20 meters
+                if (currentDistance < 0.020) {
 
                     //if the target segment is not the last one
                     if ( targetSegmentIndex < currentRoute.size - 1 ) {
 
-                        //find the first segment after the current one that has a
-                        //instruction attached to it
-                        val nextInstructionStepIndex = findNextInstruction(targetSegmentIndex, currentRoute)
+                        // Move to next segment
+                        targetSegmentIndex++
 
-                        //if (nextInstructionStepIndex - 1 == targetSegmentIndex) {
+                        if (currentRoute[targetSegmentIndex + 1].instruction != null) {
 
                             //update the StateFlow with the found instruction
                             //update the previous instruction with the current
                             //and update the current with the newly found one
-                        _navigationState.update {
+                            _navigationState.update {
 
-                            it.copy(
-                                prevRouteStep = it.currentRouteStep,
-                                currentRouteStep = currentRoute[nextInstructionStepIndex]
-                            )
+                                it.copy(
+                                    prevRouteStep = it.currentRouteStep,
+                                    currentRouteStep = currentRoute[targetSegmentIndex + 1]
+                                )
+                            }
                         }
-                        //}
-
-                        // Move to next segment
-                        targetSegmentIndex++
 
                         lastDistance = Double.MAX_VALUE // reset
                         distanceIncreaseCount = 0
 
                         Log.d("restartNavigation", "count reset")
+                    } else if (targetSegmentIndex == currentRoute.size - 1 ) {
+
+                        _navigationState.update {
+
+                            it.copy(
+                                endOfRoute = true
+                            )
+                        }
                     }
                     //if the distance is greater than 25 meters
                 } else {
@@ -418,7 +510,7 @@ class RouteRepository constructor(
                         endLon = currentRoute[targetSegmentIndex].coordinates.getLongitude()
                     )
 
-                    var avgDistance = ((actualDistance * 0.6) + (currentDistance * 1.4 )) / 2
+                    var avgDistance = ((actualDistance) + (currentDistance)) / 2
 
                     // Detect wrong direction
                     // if the actual distance is greater than the last distance
@@ -440,7 +532,9 @@ class RouteRepository constructor(
                     //if the counter is at least 4
                     if (distanceIncreaseCount >= 4) {
 
-                        restartNavigation()
+                        restartNavigation(
+                            goalLocationNode = goalLocationNode
+                        )
                         Log.d("restartNavigation", "navigation restarted")
 
                     }
@@ -451,7 +545,7 @@ class RouteRepository constructor(
 
     }
 
-    fun stopNavigation() {
+    fun stopNavigationJob() {
         navigationJob?.cancel()
 
         locationLocalDataSource.stopLocationUpdates()
@@ -459,22 +553,24 @@ class RouteRepository constructor(
         _navigationState.update {
 
             it.copy(
+                routePolyLines = null,
                 navigationGoal = null,
                 prevRouteStep = null,
                 currentRouteStep = null,
                 currentLocation = null
             )
         }
-
     }
 
-    fun restartNavigation() {
+    fun restartNavigation(goalLocationNode: RouteNode) {
 
-        stopNavigation()
+        stopNavigationJob()
+
         stopExtrapolationLoop()
 
-        startNavigation()
-
+        startNavigationJob(
+            goalLocationNode = goalLocationNode
+        )
     }
 
     fun onNewMatchedLocation(newLocation: Coordinates) {
@@ -789,12 +885,19 @@ class RouteRepository constructor(
         }
     }
 
-    data class RouteState( val route: Route = Route()
+    data class RouteState(
+        val route: Route = Route()
     )
 
-    data class NavigationState( val navigationGoal: RouteNode? = null,
-                                val currentLocation: Coordinates? = null,
-                                val prevRouteStep: RouteStep? = null,
-                                val currentRouteStep: RouteStep? = null
+    data class NavigationState(
+        val endOfRoute: Boolean = false,
+        val currentNavigationRouteNodeIndex: Int = 1,
+        val navigationMode: String? = null,
+        val navigationGoal: RouteNode? = null,
+        val routeSteps: List<RouteStep>? = null,
+        val routePolyLines: Polyline? = null,
+        val currentLocation: Coordinates? = null,
+        val prevRouteStep: RouteStep? = null,
+        val currentRouteStep: RouteStep? = null
     )
 }

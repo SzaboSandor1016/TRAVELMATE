@@ -1,31 +1,18 @@
 package com.example.travel_mate
 
 import android.annotation.SuppressLint
-import android.app.Dialog
 import android.content.Context
 import android.content.res.Resources
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
-import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.view.animation.AnimationUtils
-import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
 import android.widget.FrameLayout
-import android.widget.LinearLayout
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.children
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -34,24 +21,22 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.travel_mate.databinding.FragmentMainBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.chip.Chip
 import kotlinx.coroutines.launch
 import org.osmdroid.api.IMapController
 import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
 import org.osmdroid.bonuspack.utils.BonusPackHelper
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.FolderOverlay
+import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
@@ -66,7 +51,7 @@ private const val ARG_PARAM2 = "param2"*/
  * create an instance of this fragment.
  */
 @Suppress("DEPRECATION")
-class FragmentMain : Fragment() {
+class FragmentMain : Fragment(), MapEventsReceiver {
     // TODO: Rename and change types of parameters
     /*private var param1: String? = null
     private var param2: String? = null*/
@@ -101,9 +86,7 @@ class FragmentMain : Fragment() {
 
     private var locationMarker: Marker? = null
 
-    private var startPlaces: ArrayList<Place> = ArrayList()
-    private var routeStops: ArrayList<RouteNode> = ArrayList()
-    private var routeMode: String = "foot-walking"
+    private var customPlace: Marker? = null
     private var unContainedMarkers: ArrayList<Marker> = ArrayList()
     private var containedMarkers: ArrayList<Marker> = ArrayList()
     private var routePolyLines: ArrayList<Polyline> = ArrayList()
@@ -114,6 +97,9 @@ class FragmentMain : Fragment() {
     private lateinit var mapController: IMapController
     private lateinit var startMarker: Marker
     private var markerClusterer: RadiusMarkerClusterer?= null
+
+    private lateinit var containedOverlay: FolderOverlay
+    private lateinit var mapEventsOverlay: MapEventsOverlay
 
     private lateinit var fragmentManager: FragmentManager
 
@@ -179,13 +165,17 @@ class FragmentMain : Fragment() {
         categoryManager= ClassCategoryManager(requireContext())
         resources = getResources()
 
+        containedOverlay = FolderOverlay()
+
+        mapEventsOverlay = MapEventsOverlay(this)
+
         fragmentManager = childFragmentManager
 
         viewModelUser.checkCurrentUser()
 
         viewModelMain.getInitialCurrentLocation()
 
-        replaceCurrentMainFragment(0) //set the current main fragment to FragmentSearch
+        replaceCurrentMainFragment(ViewModelMain.MainContent.SEARCH) //set the current main fragment to FragmentSearch
 
 /**Observe the [ViewModelMain.chipsState], [ViewModelMain.placeState], [ViewModelMain.mainInspectTripState] and the [ViewModelMain.mainSearchState] located in [viewModelMain]
  *
@@ -272,17 +262,40 @@ class FragmentMain : Fragment() {
             }
         }
 
-        /** [ViewModelMain.mainRouteNavigationState] observer
-         *  observe the [viewModelMain]'s [ViewModelMain.mainRouteNavigationState]
+        /** [ViewModelMain.mainNavigationState] observer
+         *  observe the [viewModelMain]'s [ViewModelMain.mainNavigationState]
          *  on state update
          *  - call [showNavigationData]
          *  - call [handleRouteStopsChange]
-         *  - call [handleRouteNavigationChange]
          */
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                viewModelMain.mainRouteNavigationState.collect {
+                viewModelMain.mainNavigationState.collect {
+
+                    showNavigationData(
+                        coordinates = it.currentLocation,
+                        currentRouteStep = it.currentRouteStep
+                    )
+
+                    handleNavigationChange(
+                        routePolyline = it.navigationPolyline
+                    )
+
+                    Log.d("refresh", "refresh")
+                }
+            }
+        }
+
+        /** [ViewModelMain.mainRouteState] observer
+         *  observe the [viewModelMain]'s [ViewModelMain.mainRouteState]
+         *  on state update
+         *  - call [handleRouteChange]
+         */
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                viewModelMain.mainRouteState.collect {
 
                     if (it.selectedRouteNodePosition != null) {
 
@@ -295,14 +308,8 @@ class FragmentMain : Fragment() {
                         )
                     }
 
-                    showNavigationData(
-                        coordinates = it.currentLocation,
-                        currentRouteStep = it.currentRouteStep
-                    )
-
-                    handleRouteNavigationChange(
-                        route = it.route,
-                        navigationRouteNode = it.navigationRouteNode
+                    handleRouteChange(
+                        route = it.route
                     )
 
                     Log.d("routePolysFragment",  it.route.getRouteNodes().size.toString())
@@ -318,10 +325,24 @@ class FragmentMain : Fragment() {
 
                 viewModelMain.mainContentState.collect {
 
-                    Log.d("contentId", it.contentId.toString())
+                    Log.d("contentId", it.currentContentId.toString())
 
                     replaceCurrentMainFragment(
-                        fragmentIndex = it.contentId
+                        fragmentIndex = it.currentContentId
+                    )
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                viewModelMain.mainCustomPlaceState.collect {
+
+                    showCustomPlace(
+                        uuid = it.customPlace?.uUID,
+                        coordinates = it.customPlace?.getCoordinates()
                     )
                 }
             }
@@ -449,58 +470,130 @@ class FragmentMain : Fragment() {
 // END OF METHODS FOR SEARCH TEXT FIELD
 //_________________________________________________________________________________________________________________________*/
 
-/**Methods of map related operations
+/*Methods of map related operations
 *
  */
 //_________________________________________________________________________________________________________________________
 // BEGINNING OF METHODS FOR MAP
 //_________________________________________________________________________________________________________________________
 
-    /** [showMarkersOnMap]
-     * [showMarkersOnMap] creates and returns a list of the markers
+
+    override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+
+        Log.d("mapSinglePress", "press")
+
+        return true
+    }
+
+    override fun longPressHelper(p: GeoPoint?): Boolean {
+
+        viewModelMain.getCustomPlace(
+            position = p!!
+        )
+        Log.d("mapLongPress", "press")
+
+        return true
+    }
+
+    private fun showCustomPlace(uuid: String?, coordinates: Coordinates?) {
+
+        binding.map.overlays.remove(customPlace)
+
+        if (uuid != null && coordinates != null) {
+            customPlace = createMarker(
+                uuid = uuid,
+                category = null,
+                coordinates = coordinates
+            )
+
+            binding.map.overlays.add(customPlace)
+        }
+    }
+
+    /** [createMarkersOnMap]
+     * [createMarkersOnMap] creates and returns a list of the markers
      *  *  based on the list of [ViewModelMain.PlaceProcessed] classes passed as he functions parameter
      */
-    private fun showMarkersOnMap(places: List<ViewModelMain.PlaceProcessed>): List<Marker> {
+    private fun createMarkersOnMap(places: List<ViewModelMain.PlaceProcessed>): List<Marker> {
 
         val markers: ArrayList<Marker> = ArrayList()
 
         for (place in places){
-            val marker: Marker = Marker(binding.map)
-            val titleMarker = Marker(binding.map)
-            val position = GeoPoint(place.coordinates.getLatitude(), place.coordinates.getLongitude())
-            marker.position = position
-            titleMarker.position = position
-            marker.icon = categoryManager?.getMarkerIcon(place.category)
-            titleMarker.setTextIcon(place.title)
 
-            marker.relatedObject = place.uuid
+            val marker = createMarker(
+                uuid = place.uuid,
+                category = place.category,
+                coordinates = place.coordinates
+            )
+            val titleMarker = createTitleMarker(
+                uuid = place.uuid,
+                title = place.title,
+                coordinates = place.coordinates
+            )
 
-            marker.setOnMarkerClickListener{ m, mapView ->
-
-                /** get the related object of the clicked marker
-                    that is the uuid of the place associated with it
-                    then calls an update on the current place in the ViewModel
-                    [ViewModelMain.getCurrentPlaceByUUID]
-                    set the [com.google.android.material.bottomsheet.BottomSheetDialog]'s
-                    state as "collapsed"
-                 */
-
-                val relatedPlace = m.relatedObject as String
-
-                viewModelMain.getCurrentPlaceByUUID(relatedPlace)
-
-                viewModelMain.setContainerState("collapsed")
-
-                initDetailsFragment()
-
-                true
-            }
-
-            markers.add(marker)
-            markers.add(titleMarker)
+            markers.add(
+                setMarkerClickListener(
+                    marker = marker
+                )
+            )
+            markers.add(
+                setMarkerClickListener(
+                    marker = titleMarker
+                )
+            )
         }
 
         return markers
+    }
+
+    private fun createMarker(uuid: String, category: String?, coordinates: Coordinates): Marker {
+
+        val marker = Marker(binding.map)
+        val position = GeoPoint(coordinates.getLatitude(), coordinates.getLongitude())
+        marker.position = position
+        marker.icon = categoryManager?.getMarkerIcon(category)
+
+        marker.relatedObject = uuid
+
+        return marker
+    }
+
+    private fun createTitleMarker(uuid: String, title: String, coordinates: Coordinates): Marker {
+
+        val titleMarker = Marker(binding.map)
+        val position = GeoPoint(coordinates.getLatitude(), coordinates.getLongitude())
+        titleMarker.position = position
+        titleMarker.setTextIcon(title)
+
+        titleMarker.relatedObject = uuid
+
+        return titleMarker
+    }
+
+    private fun setMarkerClickListener(marker: Marker): Marker {
+
+        marker.setOnMarkerClickListener{ m, mapView ->
+
+            /** get the related object of the clicked marker
+            that is the uuid of the place associated with it
+            then calls an update on the current place in the ViewModel
+            [ViewModelMain.getCurrentPlaceByUUID]
+            set the [com.google.android.material.bottomsheet.BottomSheetDialog]'s
+            state as "collapsed"
+             */
+
+            val relatedPlace = m.relatedObject as String
+
+            viewModelMain.getCurrentPlaceByUUID(relatedPlace)
+
+            viewModelMain.setContainerState("collapsed")
+
+            initDetailsFragment()
+
+            true
+        }
+
+        return marker
     }
 
     /** [showMapContent]
@@ -516,17 +609,21 @@ class FragmentMain : Fragment() {
         places: List<ViewModelMain.PlaceProcessed>
     ) {
 
-        binding.map.overlays.removeAll(unContainedMarkers)
+        binding.map.overlays.remove(containedOverlay)
         binding.map.overlays.removeAll(containedMarkers)
+
+        containedOverlay = FolderOverlay()
 
         unContainedMarkers.clear()
         containedMarkers.clear()
 
-        unContainedMarkers.addAll(showMarkersOnMap(places = places.filter { !it.containedByRoute }))
-        containedMarkers.addAll(showMarkersOnMap(places = places.filter { it.containedByRoute }))
+        unContainedMarkers.addAll(createMarkersOnMap(places = places.filter { !it.containedByRoute }))
+        containedMarkers.addAll(createMarkersOnMap(places = places.filter { it.containedByRoute }))
 
-
-        binding.map.overlays.addAll(containedMarkers)
+        containedMarkers.forEach {
+            containedOverlay.add(it)
+        }
+        binding.map.overlays.add(containedOverlay)
 
         binding.map.invalidate()
 
@@ -597,6 +694,9 @@ class FragmentMain : Fragment() {
                 R.drawable.ic_start_marker,
                 requireContext().theme
             )
+
+            binding.map.overlays.add(mapEventsOverlay)
+
             binding.map.invalidate()
         }
     }
@@ -616,6 +716,8 @@ class FragmentMain : Fragment() {
 
         binding.map.overlays.removeAll(binding.map.overlays)
 
+        binding.map.overlays.add(mapEventsOverlay)
+
         binding.map.invalidate()
     }
 //_________________________________________________________________________________________________________________________
@@ -627,13 +729,15 @@ class FragmentMain : Fragment() {
 // BEGINNING OF METHODS FOR INTERNAL FRAGMENTS
 //_________________________________________________________________________________________________________________________
 
-    private fun replaceCurrentMainFragment(fragmentIndex: Int) {
+    private fun replaceCurrentMainFragment(fragmentIndex: ViewModelMain.MainContent) {
 
         when(fragmentIndex) {
 
-            0 -> initSearchFragment()
-            1 -> initRouteFragment()
-            else -> initTripFragment()
+            ViewModelMain.MainContent.SEARCH -> initSearchFragment()
+            ViewModelMain.MainContent.ROUTE -> initRouteFragment()
+            ViewModelMain.MainContent.INSPECT -> initTripFragment()
+            ViewModelMain.MainContent.CUSTOM -> initCustomPlaceFragment()
+            else -> initNavigationFragment()
         }
     }
 
@@ -706,6 +810,52 @@ class FragmentMain : Fragment() {
         }
     }
 
+    private fun initNavigationFragment() {
+        val tag = "NAVIGATION_FRAGMENT"
+
+        val existingFragment = childFragmentManager.findFragmentByTag(tag)
+
+        if (existingFragment == null) {
+
+            val fragment = FragmentNavigation.newInstance()
+
+            childFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace(binding.mainFragmentContainer.id, fragment, tag)
+            }
+
+        } else {
+
+            childFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace(binding.mainFragmentContainer.id, existingFragment, tag)
+            }
+        }
+    }
+
+    private fun initCustomPlaceFragment() {
+        val tag = "CUSTOM_PLACE_FRAGMENT"
+
+        val existingFragment = childFragmentManager.findFragmentByTag(tag)
+
+        if (existingFragment == null) {
+
+            val fragment = FragmentCustomPlace.newInstance()
+
+            childFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace(binding.mainFragmentContainer.id, fragment, tag)
+            }
+
+        } else {
+
+            childFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace(binding.mainFragmentContainer.id, existingFragment, tag)
+            }
+        }
+    }
+
     private fun initDetailsFragment() {
         val tag = "PLACE_DETAILS_FRAGMENT"
 
@@ -729,30 +879,26 @@ class FragmentMain : Fragment() {
 //_________________________________________________________________________________________________________________________
 
 
-    private fun handleRouteNavigationChange(
-        route: Route,
-        navigationRouteNode: RouteNode?) {
+    private fun handleRouteChange(
+        route: Route
+    ) {
 
-        if (navigationRouteNode != null) {
-
-            showRouteDataOnMap(
-                routeNodes = listOf(navigationRouteNode),
-                mode = route.getTransportMode()
-            )
-
-            /*showNavigationStart(
-                navigationRouteNode = navigationRouteNode,
-                mode = route.getTransportMode()
-            )*/
-
-        } else {
-
-            showRouteDataOnMap(
-                routeNodes = route.getRouteNodes(),
-                mode = route.getTransportMode()
-            )
+        val routePolylines = when(route.getTransportMode()) {
+            "driving-car" -> route.getRouteNodes().mapNotNull { it.carPolyLine }
+            else -> route.getRouteNodes().mapNotNull { it.walkPolyLine }
         }
 
+        showRouteDataOnMap(
+            routePolylines = routePolylines
+        )
+    }
+
+    private fun handleNavigationChange(
+        routePolyline: Polyline?
+    ) {
+        showRouteDataOnMap(
+            routePolylines = listOf(routePolyline).mapNotNull { it }
+        )
     }
 
     /*private fun showNavigationStart(navigationRouteNode: RouteNode, mode: String) {
@@ -783,26 +929,15 @@ class FragmentMain : Fragment() {
     }*/
 
     private fun showRouteDataOnMap(
-        routeNodes: List<RouteNode>?,
-        mode: String?
+        routePolylines: List<Polyline>?
     ) {
 
         binding.map.overlays.removeAll(routePolyLines)
 
         routePolyLines.clear()
 
-        if (routeNodes != null) {
-            when (mode) {
-                "foot-walking" -> for (polyline in routeNodes.mapNotNull { it.walkPolyLine }) {
-                    routePolyLines.add(polyline)
-                }
-
-                "driving-car" -> for (polyline in routeNodes.mapNotNull { it.carPolyLine }) {
-                    routePolyLines.add(polyline)
-                }
-            }
-
-        }
+        if (routePolylines != null)
+            routePolyLines.addAll(routePolylines)
 
         binding.map.overlays.addAll(routePolyLines)
 

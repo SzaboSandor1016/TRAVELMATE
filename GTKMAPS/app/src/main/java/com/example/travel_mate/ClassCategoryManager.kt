@@ -65,7 +65,7 @@ class ClassCategoryManager{
     }*/
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    fun getMarkerIcon(category: String): Drawable {
+    fun getMarkerIcon(category: String?): Drawable {
         val resources = context!!.resources
 
         return when (category) {

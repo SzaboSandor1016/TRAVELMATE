@@ -65,7 +65,7 @@
     <string name="choose_transport">Válasszon közlekedési módot!</string>
     <string name="transporte_form">Közlekedési forma:</string>
     <string name="walk">Gyalog</string>
-    <string name="car">Autó</string>
+    <string name="car">Autóval</string>
     <string name="more_categories"> Több kategória</string>
 
     <string name="detailed">Részletes keresés</string>
@@ -273,8 +273,13 @@
     <string name="created_by">Készítő</string>
     <string name="trip_title">Utazás címe</string>
     <string name="edit_places">Helyek szerkesztése</string>
+    <string name="place_name">Hely neve</string>
+    <string name="place_address">Hely címe</string>
+    <string name="set_as_start">Beállítás kezdőpontnak</string>
+    <string name="navigate_to">Navigáció ide</string>
+    <string name="to_next_goal">A következő állomáshoz</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- TODO: Remove or change this placeholder text -->
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>

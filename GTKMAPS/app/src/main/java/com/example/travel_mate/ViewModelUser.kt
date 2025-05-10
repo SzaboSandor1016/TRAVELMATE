@@ -131,6 +131,17 @@ class ViewModelUser (
         }
     }
 
+    fun saveTripWithUpdatedPlaces(startPlace: Place, places: List<Place>) {
+
+        viewModelScope.launch {
+
+            tripRepository.saveTripWithUpdatedPlaces(
+                startPlace = startPlace,
+                places = places
+            )
+        }
+    }
+
     /*fun initNewAddUpdateTripState(startPlace: Place, places: List<Place>) {
 
         viewModelScope.launch {

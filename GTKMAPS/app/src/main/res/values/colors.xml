@@ -57,5 +57,115 @@
     <color name="chip_background_night">#1D1B20</color>
     <color name="chip_background_light">#F7F2FA</color>
 
+    <color name="light_icon_color_variant">#49454F</color>
+    <color name="light_button_background_color">#24C3C6</color>
+
+    <color name="icon_button_pressed_color">#5B7171</color>
+
+    <color name="light_button_label_color_unselected">#454F4F</color>
+    <color name="light_button_label_color_selected">#EFF7F7</color>
+    <color name="night_button_label_color_unselected">#2F3535</color>
+    <color name="night_button_label_color_selected">#1E7172</color>
+
+    <color name="light_button_pressed_label_color_unselected">#454F4F</color>
+    <color name="light_button_pressed_label_color_selected">#C4D0CF</color>
+    <color name="night_button_pressed_label_color_unselected">#2F3535</color>
+    <color name="night_button_pressed_label_color_selected">#1E7172</color>
+
+    <color name="light_outlined_button_pressed_color_selected">#EFF7F7</color>
+    <color name="night_outlined_button_pressed_color_selected">#2F3535</color>
+    <color name="light_outlined_button_pressed_color_unselected">#454F4F</color>
+    <color name="night_outlined_button_pressed_color_unselected">#C4D0D0</color>
+
+    <color name="light_outlined_button_pressed_color_selected_variant1">#F7F2EF</color>
+    <color name="night_outlined_button_pressed_color_selected_variant1">#35312F</color>
+    <color name="light_outlined_button_pressed_color_unselected_variant1">#4F4845</color>
+    <color name="night_outlined_button_pressed_color_unselected_variant1">#D0C8C4</color>
+
+    <color name="light_outlined_button_pressed_outline_color_selected">#C4D0D0</color>
+    <color name="night_outlined_button_pressed_outline_color_selected">#454F4F</color>
+    <color name="light_outlined_button_pressed_outline_color_unselected">#C4D0D0</color>
+    <color name="night_outlined_button_pressed_outline_color_unselected">#454F4F</color>
+
+    <color name="light_button_pressed_icon_color_unselected">#454F4F</color>
+    <color name="light_button_pressed_icon_color_selected">#EFF7F7</color>
+    <color name="night_button_pressed_icon_color_unselected">#2F3535</color>
+    <color name="night_button_pressed_icon_color_selected">#1E7172</color>
+
+    <color name="light_button_pressed_icon_color_unselected_variant1">#4F4845</color>
+    <color name="light_button_pressed_icon_color_selected_variant1">#F7F2EF</color>
+    <color name="night_button_pressed_icon_color_unselected_variant1">#35312F</color>
+    <color name="night_button_pressed_icon_color_selected_variant1">#723D1E</color>
+
+    <color name="light_button_icon_color_unselected">#454F4F</color>
+    <color name="light_button_icon_color_selected">#EFF7F7</color>
+    <color name="night_button_icon_color_unselected">#C4D0D0</color>
+    <color name="night_button_icon_color_selected">#2F3535</color>
+
+    <color name="light_outlined_button_outline_color_selected">#EDF7F7</color>
+    <color name="night_outlined_button_outline_color_selected">#C4D0D0</color>
+    <color name="light_outlined_button_outline_color_unselected">#2F3535</color>
+    <color name="night_outlined_button_outline_color_unselected">#454F4F</color>
+
+    <color name="light_icon_button_background_color_selected">#2F3535</color>
+    <color name="light_icon_button_background_color_unselected">#24C3C6</color>
+    <color name="night_icon_button_background_color_selected">#BCFCFF</color>
+    <color name="night_icon_button_background_color_unselected">#1F2626</color>
+
+    <color name="light_icon_button_background_color_selected_variant1">#35312F</color>
+    <color name="light_icon_button_background_color_unselected_variant1">#C65A24</color>
+    <color name="night_icon_button_background_color_selected_variant1">#FFD5BC</color>
+    <color name="night_icon_button_background_color_unselected_variant1">#26211F</color>
+
+    <color name="light_icon_button_icon_color_unselected">#454F4F</color>
+    <color name="light_icon_button_icon_color_selected">#C4D0D0</color>
+    <color name="night_icon_button_icon_color_unselected">#C4D0D0</color>
+    <color name="night_icon_button_icon_color_selected">#1E7172</color>
+
+    <color name="light_icon_button_icon_color_unselected_variant1">#4F4845</color>
+    <color name="light_icon_button_icon_color_selected_variant1">#D0C8C4</color>
+    <color name="night_icon_button_icon_color_unselected_variant1">#D0C8C4</color>
+    <color name="night_icon_button_icon_color_selected_variant1">#72371E</color>
+
+    <color name="light_filter_chip_surface_color">#50A3A4</color>
+    <color name="night_filter_chip_surface_color">#BCFEFF</color>
+
+    <color name="light_filter_chip_background_color_unselected">#F2FAFA</color>
+    <color name="light_filter_chip_background_color_selected">#DEF8F8</color>
+    <color name="night_filter_chip_background_color_unselected">#1B2020</color>
+    <color name="night_filter_chip_background_color_selected">#445858</color>
+
+    <color name="light_chip_ripple_color_selected">#DEF8F8</color>
+    <color name="night_chip_ripple_color_selected">#C4D0D0</color>
+    <color name="light_chip_ripple_color_unselected">#DEF8F8</color>
+    <color name="night_chip_ripple_color_unselected">#DEF8F8</color>
+
+    <color name="light_text_button_text_color">#50A4A3</color>
+    <color name="night_text_button_text_color">#BCFEFF</color>
+
+    <color name="light_tab_layout_active_indicator_color">#50A3A4</color>
+    <color name="night_tab_layout_active_indicator_color">#BCFEFF</color>
+
+    <color name="light_tab_layout_tab_text_active_color">#50A3A4</color>
+    <color name="night_tab_layout_tab_text_active_color">#BCFEFF</color>
+    <color name="light_tab_layout_tab_text_inactive_color">#454F4F</color>
+    <color name="night_tab_layout_tab_text_inactive_color">#C4D0D0</color>
+
+    <color name="light_tab_layout_tab_icon_active_color">#50A3A4</color>
+    <color name="night_tab_layout_tab_icon_active_color">#BCFEFF</color>
+    <color name="light_tab_layout_tab_icon_inactive_color">#454F4F</color>
+    <color name="night_tab_layout_tab_icon_inactive_color">#C4D0D0</color>
+
+    <color name="light_text_input_layout_background_color">#F2FAFA</color>
+    <color name="night_text_input_layout_background_color">#1B2020</color>
+
+    <color name="light_text_input_layout_outline_color">#747E7C</color>
+    <color name="night_text_input_layout_outline_color">#8F9997</color>
+
+    <color name="light_text_input_layout_text_color">#1B201F</color>
+    <color name="night_text_input_layout_text_color">#E0E9E9</color>
+
+    <color name="light_text_input_layout_hint_color">#454F4D</color>
+    <color name="night_text_input_layout_hint_color">#C4D0CE</color>
 
 </resources>

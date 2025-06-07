@@ -275,5 +275,12 @@
     <string name="set_as_start">Set as start place</string>
     <string name="navigate_to">Navigate_here</string>
     <string name="to_next_goal">To next stop</string>
+    <string name="error_search">Error during searching for nearby places...</string>
+    <string name="error_navigation">Error during navigation...</string>
+    <string name="error_location">Error getting the current location...</string>
+    <string name="error_other">Error during executing this operation...</string>
+    <string name="error_custom_place">Error during getting the custom place...</string>
+    <string name="error_autocomplete">Error during searching for potential start places...</string>
+    <string name="error_show_search">Error during showing the places...</string>
 
 </resources>

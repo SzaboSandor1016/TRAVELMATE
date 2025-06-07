@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="bottom"
     android:animateLayoutChanges="true"
-    tools:context=".FragmentMain">
+    tools:context=".ui.FragmentMain">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -86,7 +86,6 @@
                 app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

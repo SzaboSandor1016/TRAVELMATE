@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".FragmentUser">
+    tools:context=".ui.FragmentUser">
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/back"
@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        style="?attr/materialIconButtonFilledStyle"
+        style="@style/Widget.Material3.Button.IconButton.Filled3.Variant1"
         android:layout_marginTop="66dp"
         android:layout_marginHorizontal="16dp"
         app:icon="@drawable/ic_go_back"/>
@@ -39,7 +39,7 @@
             android:id="@+id/sign_in"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.Material3.Button.TextButton3"
             android:layout_marginHorizontal="16dp"
             android:visibility="gone"
             android:text="@string/login"/>
@@ -48,7 +48,7 @@
             android:id="@+id/sign_out"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.Material3.Button.TextButton3"
             android:layout_marginHorizontal="16dp"
             android:visibility="gone"
             android:text="@string/logout"/>
@@ -61,7 +61,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        style="?attr/materialIconButtonFilledStyle"
+        style="@style/Widget.Material3.Button.IconButton.Filled3.Variant1"
         android:layout_marginTop="66dp"
         android:layout_marginHorizontal="16dp"
         app:icon="@drawable/ic_settings"/>
@@ -86,6 +86,9 @@
         android:layout_marginTop="16dp"
         android:background="@color/transparent"
         app:tabContentStart="16dp"
+        app:tabTextColor="@color/color_tab_layout_tab_text_color"
+        app:tabIconTint="@color/color_tab_layout_tab_icon_color"
+        app:tabIndicatorColor="@color/tab_layout_active_indicator_color"
         app:tabMode="auto">
 
         <com.google.android.material.tabs.TabItem
@@ -119,13 +122,13 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/trip_item_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <FrameLayout
             android:id="@+id/trip_details_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             style="@style/Widget.Material3.BottomSheet"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
@@ -156,7 +159,7 @@
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@id/bottom_sheet_handle"
                     app:layout_constraintRight_toRightOf="parent"
-                    style="?attr/materialIconButtonOutlinedStyle"
+                    style="@style/Widget.Widget.Button.OutlinedButton.Variant0"
                     android:layout_margin="16dp"
                     app:icon="@drawable/ic_edit"/>
 
@@ -263,7 +266,7 @@
                     app:layout_constraintRight_toLeftOf="@id/select_trip"
                     android:layout_marginVertical="16dp"
                     android:layout_marginStart="16dp"
-                    style="?attr/materialButtonOutlinedStyle"
+                    style="@style/Widget.Widget.Button.OutlinedButton.Variant1"
                     app:icon="@drawable/ic_delete_account"
                     android:text="@string/delete"/>
 
@@ -276,6 +279,7 @@
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintLeft_toRightOf="@id/delete_trip"
                     app:layout_constraintTop_toBottomOf="@id/trip_note"
+                    style="@style/Widget.Material3.Button3"
                     android:layout_marginVertical="16dp"
                     android:layout_marginEnd="16dp"
                     android:text="@string/select"

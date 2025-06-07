@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/FragmentMain"
-        android:name="com.example.travel_mate.FragmentMain"
+        android:name="com.example.travel_mate.ui.FragmentMain"
         android:label="@string/fragment_main_label"
         tools:layout="@layout/fragment_main">
 
@@ -22,7 +22,7 @@
 
     <fragment
         android:id="@+id/FragmentUser"
-        android:name="com.example.travel_mate.FragmentUser"
+        android:name="com.example.travel_mate.ui.FragmentUser"
         android:label="@string/fragment_user_label"
         tools:layout="@layout/fragment_user">
 
@@ -43,7 +43,7 @@
 
     <fragment
         android:id="@+id/FragmentSignIn"
-        android:name="com.example.travel_mate.FragmentSignIn"
+        android:name="com.example.travel_mate.ui.FragmentSignIn"
         android:label="@string/fragment_sign_in_label"
         tools:layout="@layout/fragment_sign_in">
 
@@ -58,7 +58,7 @@
 
     <fragment
         android:id="@+id/FragmentSignUp"
-        android:name="com.example.travel_mate.FragmentSignUp"
+        android:name="com.example.travel_mate.ui.FragmentSignUp"
         android:label="@string/fragment_sign_up_label"
         tools:layout="@layout/fragment_sign_up">
 
@@ -72,7 +72,7 @@
     </fragment>
     <fragment
         android:id="@+id/fragmentSelectContributors"
-        android:name="com.example.travel_mate.FragmentSelectContributors"
+        android:name="com.example.travel_mate.ui.FragmentSelectContributors"
         android:label="fragment_select_contributors"
         tools:layout="@layout/fragment_select_contributors" >
         <action
@@ -81,7 +81,7 @@
     </fragment>
     <fragment
         android:id="@+id/fragmentSaveTrip"
-        android:name="com.example.travel_mate.FragmentSaveTrip"
+        android:name="com.example.travel_mate.ui.FragmentSaveTrip"
         android:label="fragment_save_trip"
         tools:layout="@layout/fragment_save_trip" >
         <action
@@ -96,7 +96,7 @@
     </fragment>
     <fragment
         android:id="@+id/fragmentSettings"
-        android:name="com.example.travel_mate.FragmentSettings"
+        android:name="com.example.travel_mate.ui.FragmentSettings"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" >
         <action

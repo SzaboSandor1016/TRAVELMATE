@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".FragmentSelectContributors">
+    tools:context=".ui.FragmentSelectContributors">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            style="?attr/materialIconButtonFilledStyle"
+            style="@style/Widget.Material3.Button.IconButton.Filled3.Variant1"
             app:icon="@drawable/ic_go_back"
             android:layout_marginTop="66dp"
             android:layout_marginHorizontal="16dp"/>
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBaseline_toBaselineOf="@+id/back"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.Material3.Button.TextButton3"
             android:layout_margin="16dp"
             android:text="@string/done"
             android:textStyle="bold"/>
@@ -53,7 +53,7 @@
             app:layout_constraintTop_toBottomOf="@+id/contributors_text"
             app:layout_constraintRight_toLeftOf="@+id/add_contributor_button"
             android:layout_margin="16dp"
-            style="@style/style_text_input_editText"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Variant0"
             android:hint="@string/add_contributor">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -73,7 +73,7 @@
             app:layout_constraintBaseline_toBaselineOf="@+id/add_contributor_layout"
             app:layout_constraintLeft_toRightOf="@+id/add_contributor_layout"
             app:layout_constraintRight_toRightOf="parent"
-            style="?attr/materialIconButtonFilledStyle"
+            style="@style/Widget.Material3.Button.IconButton.Filled3.Variant0"
             app:icon="@drawable/ic_add"
             android:layout_marginEnd="16dp"/>
 

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".FragmentSignIn">
+    tools:context=".ui.FragmentSignIn">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/back"
-            style="?attr/materialIconButtonFilledStyle"
+            style="@style/Widget.Material3.Button.IconButton.Filled3.Variant1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginVertical="66dp"
@@ -45,14 +45,10 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/sign_in_email_layout"
-                style="@style/style_text_input_editText"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Variant0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="@string/email"
-                android:minWidth="88dp"
-                app:boxStrokeErrorColor="@color/red"
-                app:errorEnabled="true"
-                app:errorTextColor="@color/red"
                 app:helperText="@string/required">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -66,15 +62,10 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/sign_in_password_layout"
-                style="@style/style_text_input_editText"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Variant0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="@string/password"
-                android:minWidth="88dp"
-                app:endIconMode="password_toggle"
-                app:boxStrokeErrorColor="@color/red"
-                app:errorEnabled="true"
-                app:errorTextColor="@color/red"
                 app:helperText="@string/required">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -90,7 +81,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/sign_in"
-            style="@style/Widget.Material3.Button"
+            style="@style/Widget.Material3.Button3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
@@ -106,7 +97,7 @@
             app:layout_constraintTop_toBottomOf="@id/sign_in"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.Material3.Button.TextButton3"
             android:layout_margin="16dp"
             android:text="@string/forgot_password"
             android:textStyle="bold"/>
@@ -127,7 +118,7 @@
                 android:id="@+id/to_sign_up"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/Widget.Material3.Button.TextButton"
+                style="@style/Widget.Material3.Button.TextButton3"
                 android:layout_margin="16dp"
                 android:text="@string/register"
                 android:textStyle="bold"/>

@@ -278,6 +278,13 @@
     <string name="set_as_start">Beállítás kezdőpontnak</string>
     <string name="navigate_to">Navigáció ide</string>
     <string name="to_next_goal">A következő állomáshoz</string>
+    <string name="error_search">Hiba történt a helyek keresése során...</string>
+    <string name="error_navigation">Hiba történt a navigáció során...</string>
+    <string name="error_location">Hiba a tartózkodási hely lekérése során...</string>
+    <string name="error_other">Hiba történt a művelet végrehajtása során...</string>
+    <string name="error_custom_place">Hiba történt a hely lekérése során...</string>
+    <string name="error_autocomplete">Hiba történt a kiindulási helyek keresése során...</string>
+    <string name="error_show_search">Hiba történt a helyek megjelenítése során...</string>
     <!-- TODO: Remove or change this placeholder text -->
     <!-- TODO: Remove or change this placeholder text -->
     <!-- TODO: Remove or change this placeholder text -->

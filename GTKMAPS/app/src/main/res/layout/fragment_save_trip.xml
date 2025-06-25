@@ -2,15 +2,15 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Widget.Material3.BottomSheet"
     app:layout_behavior="@string/bottom_sheet_behavior"
     tools:context=".ui.FragmentSaveTrip">
     
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/fragment_background_color">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/back"
@@ -35,123 +35,106 @@
             android:textSize="24sp"
             android:text="@string/save_trip"/>
 
-        <ScrollView
-            android:id="@+id/layout_scroll_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/save_title_layout"
+            android:layout_width="wrap_content"
+            android:minWidth="88dp"
+            android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/back">
+            app:layout_constraintTop_toBottomOf="@id/save_text"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Variant0"
+            android:hint="@string/search_title"
+            app:errorEnabled="true"
+            app:errorTextColor="@color/red"
+            app:boxStrokeErrorColor="@color/red"
+            app:helperText="@string/required">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/save_title"
+                android:layout_width="245dp"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:imeOptions="actionDone"/>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/save_title_layout"
-                    android:layout_width="wrap_content"
-                    android:minWidth="88dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Variant0"
-                    android:hint="@string/search_title"
-                    app:errorEnabled="true"
-                    app:errorTextColor="@color/red"
-                    app:boxStrokeErrorColor="@color/red"
-                    app:helperText="@string/required">
+        </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/save_title"
-                        android:layout_width="245dp"
-                        android:layout_height="wrap_content"
-                        android:inputType="text"
-                        android:imeOptions="actionDone"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/save_date_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/save_title_layout"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Variant0"
+            android:hint="@string/date"
+            app:helperTextEnabled="true"
+            app:helperText="@string/date_format"
+            app:endIconMode="custom"
+            app:endIconDrawable="@drawable/ic_calendar">
 
-                </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/save_date"
+                android:layout_width="245dp"
+                android:layout_height="wrap_content"
+                android:enabled="false"/>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/save_date_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/save_title_layout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Variant0"
-                    android:hint="@string/date"
-                    app:helperTextEnabled="true"
-                    app:helperText="@string/date_format"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_calendar">
+        </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/save_date"
-                        android:layout_width="245dp"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"/>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/contributors_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="@id/save_date_layout"
+            app:layout_constraintTop_toBottomOf="@id/save_date_layout"
+            app:layout_constraintBaseline_toBaselineOf="@+id/add_contributors"
+            style="@style/text_view_style"
+            android:text="@string/contributors"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/contributors_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toRightOf="@id/contributors_text"
+            app:layout_constraintTop_toBottomOf="@id/save_date_layout"
+            app:layout_constraintBaseline_toBaselineOf="@+id/add_contributors"
+            style="@style/text_view_style"
+            android:layout_marginHorizontal="6dp"
+            />
 
-                </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/add_contributors"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintRight_toRightOf="@id/save_date_layout"
+            app:layout_constraintTop_toBottomOf="@id/save_date_layout"
+            style="@style/Widget.Widget.Button.OutlinedButton.Variant0"
+            android:layout_marginVertical="16dp"
+            app:icon="@drawable/ic_add_contributor"/>
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/contributors_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintLeft_toLeftOf="@id/save_date_layout"
-                    app:layout_constraintTop_toBottomOf="@id/save_date_layout"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/add_contributors"
-                    style="@style/text_view_style"
-                    android:text="@string/contributors"
-                    />
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/contributors_list"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintLeft_toRightOf="@id/contributors_text"
-                    app:layout_constraintTop_toBottomOf="@id/save_date_layout"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/add_contributors"
-                    style="@style/text_view_style"
-                    android:layout_marginHorizontal="6dp"
-                    />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/save_note_layout"
+            android:layout_width="wrap_content"
+            android:minWidth="88dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/add_contributors"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Variant0"
+            android:hint="@string/note"
+            app:endIconMode="clear_text">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/add_contributors"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintRight_toRightOf="@id/save_date_layout"
-                    app:layout_constraintTop_toBottomOf="@id/save_date_layout"
-                    style="@style/Widget.Widget.Button.OutlinedButton.Variant0"
-                    android:layout_marginVertical="16dp"
-                    app:icon="@drawable/ic_add_contributor"/>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/save_note"
+                android:layout_width="245dp"
+                android:layout_height="wrap_content"
+                android:maxLines="5"
+                android:inputType="textMultiLine"
+                android:scrollbars="vertical"
+                android:imeOptions="actionSend"
+                android:nestedScrollingEnabled="true"/>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/save_note_layout"
-                    android:layout_width="wrap_content"
-                    android:minWidth="88dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/add_contributors"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Variant0"
-                    android:hint="@string/note"
-                    app:endIconMode="clear_text">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/save_note"
-                        android:layout_width="245dp"
-                        android:layout_height="wrap_content"
-                        android:maxLines="5"
-                        android:inputType="textMultiLine"
-                        android:scrollbars="vertical"
-                        android:imeOptions="actionSend"
-                        android:nestedScrollingEnabled="true"/>
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </ScrollView>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/save_trip"
@@ -160,8 +143,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layout_scroll_view"
-            style="@style/Widget.Material3.Button3"
+            app:layout_constraintTop_toBottomOf="@+id/save_note_layout"
+            app:layout_constraintVertical_bias="0.1"
+            style="@style/Widget.Material3.Button3.Variant1"
             android:text="@string/save_trip"
             android:layout_margin="16dp" />
 

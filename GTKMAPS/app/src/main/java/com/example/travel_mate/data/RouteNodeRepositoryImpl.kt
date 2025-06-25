@@ -4,10 +4,11 @@ import android.util.Log
 import com.example.travel_mate.domain.RouteNodeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.java.KoinJavaComponent.inject
 
-class RouteNodeRepositoryImpl(
-    private val routeRemoteDataSource: RouteRemoteDataSource,
-): RouteNodeRepository {
+class RouteNodeRepositoryImpl(): RouteNodeRepository {
+
+    private val routeRemoteDataSource: RouteRemoteDataSource by inject(RouteRemoteDataSource::class.java)
 
     private val routeNodeCoroutineDispatcher = Dispatchers.IO
 

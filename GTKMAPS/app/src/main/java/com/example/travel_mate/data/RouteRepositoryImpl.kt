@@ -9,11 +9,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import org.koin.java.KoinJavaComponent.inject
 
 class RouteRepositoryImpl constructor(
-
-    private val routeNodeRepository: RouteNodeRepository
 ): RouteRepository {
+
+    private val routeNodeRepository: RouteNodeRepository by inject(RouteNodeRepository::class.java)
+
     private val _routeState = MutableStateFlow(RouteState())
     override val routeState: StateFlow<RouteState> = _routeState.asStateFlow()
 
@@ -21,6 +23,55 @@ class RouteRepositoryImpl constructor(
     private val routeComputingDispatcher: CoroutineDispatcher = Dispatchers.Default
 
     private val routeUtilityClass = RouteUtilityClass()
+
+    override suspend fun testSetRouteTransportMode(index: Int) {
+
+        withContext(routeCoroutineDispatcher) {
+
+            val mode = when (index) {
+                0 -> "foot-walking" // walk
+                1 -> "driving-car" // car
+                else -> "null"
+
+            }
+
+            _routeState.update {
+
+                it.copy(
+                    route = it.route.setTransportMode(
+                        transportMode = mode
+                    )
+                )
+            }
+        }
+    }
+
+    override suspend fun testResetRoute(all: Boolean) {
+
+        withContext(routeCoroutineDispatcher) {
+
+            when (all) {
+
+                true -> _routeState.update {
+
+                    it.copy(
+                        route = Route()
+                    )
+                }
+
+                false -> _routeState.update {
+
+                    it.copy(
+                        route = it.route.setRouteNodes(
+
+                            routeNodes = arrayListOf(it.route.getRouteNodes().first())
+                        )
+                    )
+                }
+            }
+
+        }
+    }
 
     override fun getCurrentRouteNodes(): List<RouteNode> = _routeState.value.route.getRouteNodes()
 
@@ -131,7 +182,7 @@ class RouteRepositoryImpl constructor(
 
                     it.copy(
 
-                        route = it.route.addRouteNode(
+                        route = it.route.copy().addRouteNode(
                             routeNode = newRoute.apply {
                                 this.placeUUID = placeUUID
                                 this.name = name
@@ -282,23 +333,45 @@ class RouteRepositoryImpl constructor(
                 distanceMatrix = initialMatrix
             )
 
-            var newRoute = currentRoute.copy(
+            /*var newRoute = currentRoute.copy(
                 routeNodes = emptyList()
             )
 
-            for(i in 0 until newRouteNodes.size-2) {
+            for(i in 1 until newRouteNodes.size-1) {
 
                 val plusRoute = routeNodeRepository.getRouteNode(
-                    stop1 = newRouteNodes[i].coordinate!!,
-                    stop2 =  newRouteNodes[i+1].coordinate!!
+                    stop1 = newRouteNodes[i-1].coordinate!!,
+                    stop2 =  newRouteNodes[i].coordinate!!
                 )
 
                 newRoute = newRoute.addRouteNode(
                     routeNode = plusRoute.apply {
-                        placeUUID = newRouteNodes[i+1].placeUUID
-                        name = newRouteNodes[i+1].name
+                        placeUUID = newRouteNodes[i].placeUUID
+                        name = newRouteNodes[i].name
                     }
                 )
+            }*/
+
+            var newRoute = currentRoute.copy(
+                routeNodes = listOf(newRouteNodes[0])
+            )
+
+            newRouteNodes.forEachIndexed { index, node ->
+                if (index>0) {
+                    val lastNode = newRoute.getLastRouteNode()
+
+                    val plusRoute = routeNodeRepository.getRouteNode(
+                        stop1 = lastNode?.coordinate!!,
+                        stop2 = node.coordinate!!
+                    )
+
+                    newRoute = newRoute.addRouteNode(
+                        routeNode = plusRoute.apply {
+                            placeUUID = node.placeUUID
+                            name = node.name
+                        }
+                    )
+                }
             }
 
             _routeState.update {
@@ -324,8 +397,8 @@ class RouteRepositoryImpl constructor(
                 initialMatrix.add(row)
             }
 
-            for (i in 0 until routeNodes.size) {
-                for (j in 0 until routeNodes.size) {
+            for (i in 0 until routeNodes.size-1) {
+                for (j in 0 until routeNodes.size-1) {
                     initialMatrix[i][j] =
                         routeUtilityClass.haversine(
                             startLat = routeNodes[i].coordinate!!.getLatitude(),

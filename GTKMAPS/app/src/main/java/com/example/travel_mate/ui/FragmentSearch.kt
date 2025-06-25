@@ -29,6 +29,7 @@ import com.example.travel_mate.data.Place
 import com.example.travel_mate.databinding.FragmentSearchBinding
 import com.google.android.material.chip.Chip
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 /**
  * A simple [androidx.fragment.app.Fragment] subclass.
@@ -70,31 +71,31 @@ class FragmentSearch : Fragment() {
     private val chipGroupCategories: Map<Int, List<ChipCategory>> = mapOf(
         0 to listOf(
             ChipCategory(1,"\"amenity\"=\"restaurant\"",
-                R.drawable.ic_restaurant,
+                null,
                 R.string.restaurant, false,"restaurant"),
-            ChipCategory(2,"\"amenity\"=\"cafe\"", R.drawable.ic_cafe, R.string.cafe,false,"cafe"),
+            ChipCategory(2,"\"amenity\"=\"cafe\"", null, R.string.cafe,false,"cafe"),
             ChipCategory(3,"\"amenity\"=\"fast_food\"",
-                R.drawable.ic_fast_food,
+                null,
                 R.string.fast_food, false,"fast_food"),
             ChipCategory(4,"\"amenity\"=\"pub\";\"amenity\"=\"bar\"",
-                R.drawable.ic_bar,
+                null,
                 R.string.pub_bar,false,"pub_bar")
         ),
         3 to listOf(
-            ChipCategory(1,"\"amenity\"=\"cinema\"", R.drawable.ic_cinema, R.string.cinema, false,"cinema"),
-            ChipCategory(2,"\"amenity\"=\"theatre\"", R.drawable.ic_theatre,
+            ChipCategory(1,"\"amenity\"=\"cinema\"", null, R.string.cinema, false,"cinema"),
+            ChipCategory(2,"\"amenity\"=\"theatre\"", null,
                 R.string.theatre, false,"theatre"),
-            ChipCategory(3,"\"amenity\"=\"nightclub\"", R.drawable.ic_nightclub, R.string.nightclub, false,"nightclub"),
-            ChipCategory(4,"\"amenity\"=\"casino\"", R.drawable.ic_casino, R.string.casino, false,"casino")
+            ChipCategory(3,"\"amenity\"=\"nightclub\"", null, R.string.nightclub, false,"nightclub"),
+            ChipCategory(4,"\"amenity\"=\"casino\"",null, R.string.casino, false,"casino")
         ), 5 to listOf(
             ChipCategory(1,"\"tourism\"=\"theme_park\"",
-                R.drawable.ic_theme_park,
+                null,
                 R.string.adventure_park,false,"theme_park"),
-            ChipCategory(2,"\"leisure\"=\"water_park\"", R.drawable.ic_beach_resort,
+            ChipCategory(2,"\"leisure\"=\"water_park\"",null,
                 R.string.spa,false,"water_park"),
-            ChipCategory(3,"\"leisure\"=\"beach_resort\"", R.drawable.ic_beach,
+            ChipCategory(3,"\"leisure\"=\"beach_resort\"",null,
                 R.string.beach_resort,false,"beach_resort"),
-            ChipCategory(4,"\"tourism\"=\"zoo\"", R.drawable.ic_zoo, R.string.zoo,false,"zoo")
+            ChipCategory(4,"\"tourism\"=\"zoo\"",null, R.string.zoo,false,"zoo")
         ))
 
     private val landmarkChip: ChipCategory = ChipCategory(null,"\"historic\"=\"memorial\";" +
@@ -129,8 +130,8 @@ class FragmentSearch : Fragment() {
 
     private var resources: Resources? = null
 
-    private val viewModelMain: ViewModelMain by activityViewModels { Application.Companion.factory }
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
+    private val viewModelMain: ViewModelMain by inject<ViewModelMain>()
+    private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
 
     private lateinit var popupView: View
 
@@ -319,7 +320,7 @@ class FragmentSearch : Fragment() {
 //_________________________________________________________________________________________________________________________
 // BEGINNING OF USER BUTTON LISTENER
 // _________________________________________________________________________________________________________________________
-        binding.userBTN2.setOnClickListener{ v ->
+        binding.navigateToUser.setOnClickListener{ v ->
 
             findNavController().navigate(R.id.action_FragmentMain_to_FragmentUser)
         }
@@ -425,23 +426,48 @@ class FragmentSearch : Fragment() {
          * transport mode selection listener
          * set the transport mode as selected
          */
-        binding.transportGroup.addOnButtonCheckedListener{ group, checkedId, isChecked ->
 
-            val index = binding.transportGroup.indexOfChild(binding.transportGroup.findViewById(binding.transportGroup.checkedButtonId))
 
-            viewModelMain.setTransportMode(index)
+        binding.selectWalk.addOnCheckedChangeListener { _ , isChecked ->
+
+            handleTransportModeSelect(
+                index = 0,
+                isChecked = isChecked
+            )
+        }
+        binding.selectCar.addOnCheckedChangeListener { _ , isChecked ->
+
+            handleTransportModeSelect(
+                index = 1,
+                isChecked = isChecked
+                )
         }
         /**
          * distance selection listener
          * set the distance that is in minutes as selected
-         */
-        binding.distanceGroup.addOnButtonCheckedListener { group, checkedId, isChecked ->
+        */
+        binding.select15.addOnCheckedChangeListener { _ , isChecked ->
 
-            val index = binding.distanceGroup.indexOfChild(binding.distanceGroup.findViewById(binding.distanceGroup.checkedButtonId))
+            handleMinuteSelect(
+                index = 0,
+                isChecked = isChecked
+            )
+        }
 
-            viewModelMain.setMinute(index)
+        binding.select30.addOnCheckedChangeListener { _ , isChecked ->
 
-            viewModelMain.setExtendedSearchSelected(true)
+            handleMinuteSelect(
+                index = 1,
+                isChecked = isChecked
+            )
+        }
+
+        binding.select45.addOnCheckedChangeListener { _ , isChecked ->
+
+            handleMinuteSelect(
+                index = 2,
+                isChecked = isChecked
+            )
         }
 //_________________________________________________________________________________________________________________________
 // END OF EXTENDED SEARCH LISTENERS
@@ -554,8 +580,11 @@ class FragmentSearch : Fragment() {
 
         dismissDialog()
 
-        binding.distanceGroup.clearOnButtonCheckedListeners()
-        binding.transportGroup.clearOnButtonCheckedListeners()
+        binding.selectWalk.clearOnCheckedChangeListeners()
+        binding.selectCar.clearOnCheckedChangeListeners()
+        binding.select15.clearOnCheckedChangeListeners()
+        binding.select30.clearOnCheckedChangeListeners()
+        binding.select45.clearOnCheckedChangeListeners()
 
         resources?.flushLayoutCache()
 
@@ -683,14 +712,14 @@ class FragmentSearch : Fragment() {
 
         if (showExtendedSearch) {
 
-            binding.transportGroup.visibility = View.VISIBLE
+            binding.transportGroupLayout.visibility = View.VISIBLE
             binding.distanceGroup.visibility = View.VISIBLE
 
             binding.chipGroups.visibility = View.GONE
 
         }else {
 
-            binding.transportGroup.visibility = View.GONE
+            binding.transportGroupLayout.visibility = View.GONE
             binding.distanceGroup.visibility = View.GONE
 
             binding.chipGroups.visibility = View.VISIBLE
@@ -704,18 +733,95 @@ class FragmentSearch : Fragment() {
         val hasChecked = transportMode != null
 
         if (hasChecked){
-            binding.distanceGroup.isEnabled = true
+
+            binding.select15.isEnabled = true
+            binding.select30.isEnabled = true
+            binding.select45.isEnabled = true
         } else {
-            binding.distanceGroup.clearChecked()
-            binding.distanceGroup.isEnabled = false
+
+            binding.select15.isChecked = false
+            binding.select30.isChecked = false
+            binding.select45.isChecked = false
+
+            binding.select15.isEnabled = false
+            binding.select30.isEnabled = false
+            binding.select45.isEnabled = false
         }
     }
 
     private fun uncheckExtendedSearch() {
 
-        binding.transportGroup.clearChecked()
-        binding.distanceGroup.clearChecked()
-        binding.distanceGroup.isEnabled = false
+        binding.selectWalk.isChecked = false
+        binding.selectCar.isChecked = false
+
+        binding.select15.isChecked = false
+        binding.select30.isChecked = false
+        binding.select45.isChecked = false
+
+        binding.select15.isEnabled = false
+        binding.select30.isEnabled = false
+        binding.select45.isEnabled = false
+    }
+
+    private fun handleTransportModeSelect(index: Int, isChecked: Boolean) {
+
+        if (isChecked) {
+
+            viewModelMain.setTransportMode(index)
+
+            when (index) {
+
+                0 -> {
+                    binding.selectCar.isChecked = false
+                }
+
+                1 -> {
+                    binding.selectWalk.isChecked = false
+                }
+            }
+        } else {
+
+            viewModelMain.setTransportMode(-1);
+
+            binding.selectWalk.isChecked = false
+            binding.selectCar.isChecked = false
+        }
+    }
+
+    private fun handleMinuteSelect(index: Int, isChecked: Boolean) {
+
+        if (isChecked) {
+
+            viewModelMain.setMinute(index)
+
+            viewModelMain.setExtendedSearchSelected(true)
+
+            when (index) {
+
+                0 -> {
+
+                    binding.select30.isChecked = false
+                    binding.select45.isChecked = false
+                }
+
+                1 -> {
+
+                    binding.select15.isChecked = false
+                    binding.select45.isChecked = false
+                }
+
+                2 -> {
+
+                    binding.select15.isChecked = false
+                    binding.select30.isChecked = false
+                }
+            }
+        } else {
+
+            binding.select15.isChecked = false
+            binding.select30.isChecked = false
+            binding.select45.isChecked = false
+        }
     }
 //_________________________________________________________________________________________________________________________
 // END OF METHODS FOR EXTENDED SEARCH
@@ -783,7 +889,6 @@ class FragmentSearch : Fragment() {
         val chip = this.layoutInflater.inflate(R.layout.item_chip_category,null,false) as Chip
 
         chip.id = chipCategory.id!!
-        chip.chipIcon = ResourcesCompat.getDrawable(resources!!,chipCategory.icon!!, context?.theme)
         chip.text = resources?.getString(chipCategory.title!!)
         chip.isClickable = true
         chip.isCheckable = true
@@ -902,7 +1007,7 @@ class FragmentSearch : Fragment() {
 
     private fun enableDisableNavigateToUserFragment(editing: Boolean) {
 
-        binding.userBTN2.isEnabled = !editing
+        binding.navigateToUser.isEnabled = !editing
     }
 
     private fun setupInspectTripButtonListeners() {

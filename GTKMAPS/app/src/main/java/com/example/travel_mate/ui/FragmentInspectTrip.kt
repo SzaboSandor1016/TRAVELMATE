@@ -11,9 +11,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.travel_mate.Application
+import com.example.travel_mate.data.Place
 import com.example.travel_mate.data.TripRepositoryImpl
 import com.example.travel_mate.databinding.FragmentInspectTripBinding
+import com.example.travel_mate.ui.ViewModelMain.MainContent
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 /**
  * A simple [androidx.fragment.app.Fragment] subclass.
@@ -48,8 +51,7 @@ class FragmentInspectTrip : Fragment() {
     private var _binding: FragmentInspectTripBinding? = null
     val binding get() = _binding!!
 
-    private val viewModelMain: ViewModelMain by activityViewModels { Application.Companion.factory }
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
+    private val viewModelMain: ViewModelMain by inject<ViewModelMain>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,9 +83,25 @@ class FragmentInspectTrip : Fragment() {
 
                 viewModelMain.mainInspectTripState.collect {
 
+                    val start = if(it.inspectedTrip != null) getTripStartLabel(it.inspectedTrip.startPlace)
+                                else ""
+
+                    if (it.inspectedTrip != null) {
+
+                        viewModelMain.setupNewTrip(
+                            startPlace = it.inspectedTrip.startPlace,
+                            places = it.inspectedTrip.places
+                        )
+                    } else {
+
+                        viewModelMain.resetDetails(
+                            allDetails = true
+                        )
+                    }
+
                     handleInspectedTripChange(
                         editing = it.editing,
-                        start = it.start,
+                        start = start,
                         inspectedTripIdentifier = it.inspectedTripIdentifier
                     )
                 }
@@ -103,6 +121,14 @@ class FragmentInspectTrip : Fragment() {
 //_________________________________________________________________________________________________________________________
 // BEGINNING OF TRIP METHODS
 //_________________________________________________________________________________________________________________________
+
+    private fun getTripStartLabel(startPlace: Place?): String {
+
+        return startPlace?.getName().toString() +
+                " ," +
+                startPlace?.getAddress()?.getFullAddress()
+                    .toString()
+    }
 
     private fun handleInspectedTripChange(
         editing: Boolean,

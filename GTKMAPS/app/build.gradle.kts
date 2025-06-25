@@ -88,4 +88,6 @@ dependencies {
     val fragment_version = "1.8.6"
     // Kotlin
     implementation("androidx.fragment:fragment-ktx:$fragment_version")
+
+    implementation("io.insert-koin:koin-android:3.5.0")
 }

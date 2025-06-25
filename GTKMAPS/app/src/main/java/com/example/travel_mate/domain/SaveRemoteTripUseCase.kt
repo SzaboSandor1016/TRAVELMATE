@@ -17,7 +17,7 @@ class SaveRemoteTripUseCase(
 
             null -> {
 
-                val userUid = userRepository.getCurrentUserUid()
+                val userUid = userRepository.getCurrentUserUid()?: return
 
                 tripRepository.uploadTripToRemoteDatabase(
                     userUid = userUid,

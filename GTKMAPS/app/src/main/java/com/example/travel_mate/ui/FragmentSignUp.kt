@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.travel_mate.Application
 import com.example.travel_mate.R
 import com.example.travel_mate.databinding.FragmentSignUpBinding
+import org.koin.android.ext.android.inject
 
 /**[FragmentSignUn]
  * a [androidx.fragment.app.Fragment] to sign up
@@ -38,7 +39,8 @@ class FragmentSignUp : Fragment() {
                 }
             }
     }
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
+
+    private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
 
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!

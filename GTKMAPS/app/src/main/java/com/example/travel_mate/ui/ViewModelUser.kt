@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ViewModelUser (
-    private val tripRepository: TripRepository,
     private val currentTripRepository: CurrentTripRepository,
     private val userRepository: UserRepository,
     private val signUpUserUseCase: SignUpUserUseCase,

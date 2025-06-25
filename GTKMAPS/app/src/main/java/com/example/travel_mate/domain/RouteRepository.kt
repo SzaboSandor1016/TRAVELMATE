@@ -9,6 +9,10 @@ interface RouteRepository {
 
     val routeState: StateFlow<RouteState>
 
+    suspend fun testSetRouteTransportMode(index: Int)
+
+    suspend fun testResetRoute(all: Boolean)
+
     fun getCurrentRouteNodes(): List<RouteNode>
 
     suspend fun setRouteTransportMode(index: Int)

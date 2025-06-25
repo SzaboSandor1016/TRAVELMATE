@@ -23,6 +23,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 /**[FragmentUser]
  * a [androidx.fragment.app.Fragment] to show the saved trips and the shared ones too if there is a user signed in
@@ -45,8 +46,7 @@ class FragmentUser : Fragment() {
 
     //private lateinit var uiControllerUser: UiControllerFragmentUser
 
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
-    private val viewModelMain: ViewModelMain by activityViewModels { Application.Companion.factory }
+    private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -162,19 +162,6 @@ class FragmentUser : Fragment() {
         })
 
         binding.selectTrip.setOnClickListener { l ->
-
-            //viewModelMain.setupNewTrip(trips[position])
-
-            /*viewModelMain.setupNewTrip(
-                tripId = this.currentTrip!!.uUID.toString(),
-                startPlace = this.currentTrip!!.startPlace,
-                places = this.currentTrip!!.places
-            )
-
-            if (currentTripIdentifier?.creatorUID != user?.uid) {
-
-                viewModelUser.resetCurrentTrip()
-            }*/
 
             findNavController().navigate(R.id.action_FragmentUser_to_FragmentMain)
         }

@@ -14,6 +14,7 @@
             android:id="@+id/route_info_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/Widget.Material3.CardView.Filled.Variant0"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="56dp"
             android:layout_marginHorizontal="16dp"
@@ -37,29 +38,6 @@
                     android:layout_marginHorizontal="16dp"
                     app:icon="@drawable/ic_go_back"/>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/start_navigation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintRight_toLeftOf="@id/optimize_route"
-                    style="@style/Widget.Material3.Button.TextButton3"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginHorizontal="16dp"
-                    android:text="@string/start_navigation"/>
-
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/optimize_route"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    style="@style/Widget.Material3.Button.TextButton3"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginHorizontal="16dp"
-                    android:text="@string/optimize_route"/>
-
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/route_stops_list"
                     android:layout_width="match_parent"
@@ -69,7 +47,7 @@
                     app:layout_constraintTop_toBottomOf="@id/dismiss_route_plan"
                     android:layout_margin="8dp" />
 
-                <com.google.android.material.button.MaterialButtonToggleGroup
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/route_mode_group"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -85,25 +63,55 @@
                         android:id="@+id/route_select_walk"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.Material3.Button.TextButton3"
+                        style="@style/Widget.Material3.Button.IconButton.Filled3.Segmented.Left"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toLeftOf="@id/route_select_car"
                         android:text="placeholder"
                         app:icon="@drawable/ic_walk"
-                        android:enabled="true"/>
+                        android:clickable="true"
+                        android:checkable="true"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/route_select_car"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.Material3.Button.TextButton3"
+                        style="@style/Widget.Material3.Button.IconButton.Filled3.Segmented.Right"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toRightOf="@id/route_select_walk"
+                        app:layout_constraintRight_toRightOf="parent"
                         android:text="placeholder"
                         app:icon="@drawable/ic_car"
-                        android:enabled="true"/>
+                        android:clickable="true"
+                        android:checkable="true"/>
 
-                </com.google.android.material.button.MaterialButtonToggleGroup>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/start_navigation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/route_info_bar"
+            app:layout_constraintLeft_toLeftOf="@id/route_info_bar"
+            style="@style/Widget.Material3.Button3.Variant0"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:text="@string/start_navigation"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/optimize_route"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/route_info_bar"
+            app:layout_constraintRight_toRightOf="@id/route_info_bar"
+            style="@style/Widget.Material3.Button3.Variant0"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:text="@string/optimize_route"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

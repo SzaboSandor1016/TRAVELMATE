@@ -13,12 +13,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
+import org.koin.java.KoinJavaComponent.inject
 import java.io.Serializable
 
-class TripRepositoryImpl constructor(
-    private val roomLocalDataSource: RoomLocalDataSource,
-    private val firebaseRemoteDataSource: FirebaseRemoteDataSource
-): TripRepository {
+class TripRepositoryImpl: TripRepository {
+
+    private val roomLocalDataSource: RoomLocalDataSource by inject(RoomLocalDataSource::class.java)
+    private val firebaseRemoteDataSource: FirebaseRemoteDataSource by inject(FirebaseRemoteDataSource::class.java)
 
     companion object {
         private const val SAVED_TRIPS_FILE_NAME = "saved_trips.json"

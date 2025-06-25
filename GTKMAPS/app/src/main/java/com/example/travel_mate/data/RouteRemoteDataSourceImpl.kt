@@ -1,9 +1,10 @@
 package com.example.travel_mate.data
 
 import android.util.Log
-import com.example.travel_mate.data.Coordinates
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Polyline
@@ -67,6 +68,20 @@ class RouteRemoteDataSourceImpl: RouteRemoteDataSource {
             )
         }
     }
+
+    override suspend fun getReverseGeoCode(coordinates: Coordinates): Flow<ReverseGeoCodeResponse> {
+
+
+        return flowOf(
+            routeServiceRetrofit.getReverseGeoCode(
+                apiKey = API_KEY,
+                longitude = coordinates.getLongitude(),
+                latitude = coordinates.getLatitude(),
+                size = 1
+            )
+        )
+    }
+
     /** [processRouteResponse]
      * process the response of a OpenRouteService network request
      * create [RouteNode] from the [RouteResponse]
@@ -235,7 +250,7 @@ class RouteRemoteDataSourceImpl: RouteRemoteDataSource {
 
     companion object {
         private const val API_KEY: String =
-            "5b3ce3597851110001cf624864449e6dcee94ccca17b179e95f464dc" // Cseréld le a saját API kulcsodra
+            "5b3ce3597851110001cf6248ee3ca87d76480e20443758659eefacc3c40cad2f9cc7ed033babdc11" // Cseréld le a saját API kulcsodra
         private const val API_URL: String = "https://api.openrouteservice.org/"
     }
 

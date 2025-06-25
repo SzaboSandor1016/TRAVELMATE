@@ -8,17 +8,17 @@ import com.example.travel_mate.data.Place
 import com.example.travel_mate.data.Route
 import com.example.travel_mate.data.RouteNode
 import com.example.travel_mate.data.RouteStep
+import com.example.travel_mate.data.Trip
 import com.example.travel_mate.domain.SearchOptionsRepository
 import com.example.travel_mate.data.TripRepositoryImpl
 import com.example.travel_mate.domain.CurrentTripRepository
 import com.example.travel_mate.domain.CustomPlaceRepository
 import com.example.travel_mate.domain.GetCurrentLocationUseCase
-import com.example.travel_mate.domain.GetLocationStartPlaceUseCase
-import com.example.travel_mate.domain.InitRouteUseCase
+import com.example.travel_mate.domain.InitSearchAndRouteWithLocationStartUseCase
+import com.example.travel_mate.domain.InitSearchAndRouteWithSelectedStartUseCase
 import com.example.travel_mate.domain.NavigationRepository
 import com.example.travel_mate.domain.RouteRepository
 import com.example.travel_mate.domain.SearchRepository
-import com.example.travel_mate.domain.InitSearchUseCase
 import com.example.travel_mate.domain.NavigateToNextPlaceUseCase
 import com.example.travel_mate.domain.SearchAutocompleteUseCase
 import com.example.travel_mate.domain.SearchPlacesUseCase
@@ -36,7 +36,6 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Polyline
 import java.util.Stack
 
-//@HiltViewModel
 class ViewModelMain /*@Inject*/ constructor(
     private val searchRepository: SearchRepository,
     private val searchOptionsRepository: SearchOptionsRepository,
@@ -49,10 +48,9 @@ class ViewModelMain /*@Inject*/ constructor(
     private val setSearchMinuteUseCase: SetSearchMinuteUseCase,
     private val navigateToNextPlaceUseCase: NavigateToNextPlaceUseCase,
     private val searchAutocompleteUseCase: SearchAutocompleteUseCase,
-    private val initSearchUseCase: InitSearchUseCase,
-    private val initRouteUseCase: InitRouteUseCase,
+    private val initSearchAndRouteWithSelectedStartUseCase: InitSearchAndRouteWithSelectedStartUseCase,
     private val setCustomPlaceUseCase: SetCustomPlaceUseCase,
-    private val getLocationStartPlaceUseCase: GetLocationStartPlaceUseCase,
+    private val initSearchAndRouteWithLocationStartUseCase: InitSearchAndRouteWithLocationStartUseCase,
     private val getCurrentLocationUseCase: GetCurrentLocationUseCase
 ): ViewModel() {
 
@@ -99,16 +97,7 @@ class ViewModelMain /*@Inject*/ constructor(
             ) { search, uiState ->
 
                 uiState.copy(
-                    places = search.search.getPlaces().map { place: Place ->
-                        PlaceProcessed(
-                            uuid = place.uUID,
-                            coordinates = place.getCoordinates(),
-                            title = place.getName().toString(),
-                            category = place.getCategory().toString(),
-                            containedByTrip = place.isContainedByTrip(),
-                            containedByRoute = place.isContainedByRoute()
-                        )
-                    }
+                    places = search.search.getPlaces().map(::mapToPlaceProcessed)
                 )
 
             }.collect { newState ->
@@ -175,7 +164,7 @@ class ViewModelMain /*@Inject*/ constructor(
                 _mainRouteState
             ) { routeState, mainRouteState ->
 
-                if (routeState.route.getRouteNodes().size >= 2) {
+                if (routeState.route.getRouteNodes().size > 1) {
 
                     setMainContentId(
                         contentId = MainContent.ROUTE
@@ -200,15 +189,7 @@ class ViewModelMain /*@Inject*/ constructor(
                 _mainNavigationState
             ) { navigationState, mainNavigationState ->
 
-                if (navigationState.navigationGoal != null) {
-
-                    setMainContentId(
-                        contentId = MainContent.NAVIGATION
-                    )
-                }
-
                 mainNavigationState.copy(
-                    navigationRouteNode = navigationState.navigationGoal,
                     navigationPolyline = navigationState.routePolyLines,
                     currentLocation = navigationState.currentLocation,
                 )
@@ -226,6 +207,13 @@ class ViewModelMain /*@Inject*/ constructor(
                 _mainNavigationInfoState,
                 navigationRepository.navigationInfoState
             ) { mainNavigationInfoState, routeNavigationInfoState ->
+
+                if (routeNavigationInfoState.isStarted) {
+
+                    setMainContentId(
+                        contentId = MainContent.NAVIGATION
+                    )
+                }
 
                 mainNavigationInfoState.copy(
                     startedFrom = routeNavigationInfoState.startedFrom,
@@ -245,35 +233,18 @@ class ViewModelMain /*@Inject*/ constructor(
                 _mainInspectTripState
             ) { currentTripState, mainInspectTripState ->
 
-                Log.d("refreshInspect", "refreshInspect")
+                if (currentTripState.trip != null && !mainInspectTripState.editing) {
 
-                var start: String? = null
-
-                if (currentTripState.trip != null) {
-
-                    setupNewTrip(
-                        startPlace = currentTripState.trip.startPlace,
-                        places = currentTripState.trip.places
+                    setMainContentId(
+                        contentId = MainContent.INSPECT
                     )
-                    start = currentTripState.trip.startPlace.getName().toString() +
-                            " ," +
-                            currentTripState.trip.startPlace.getAddress()?.getFullAddress()
-                                .toString()
-
-                    if (!mainInspectTripState.editing) {
-                        setMainContentId(
-                            contentId = MainContent.INSPECT
-                        )
-                    }
                 } else {
+
                     returnToPrevContent()
-                    resetDetails(
-                        allDetails = true
-                    )
                 }
 
                 mainInspectTripState.copy(
-                    start = start,
+                    inspectedTrip = currentTripState.trip,
                     inspectedTripIdentifier = currentTripState.tripIdentifier
                 )
 
@@ -305,6 +276,18 @@ class ViewModelMain /*@Inject*/ constructor(
                 _mainCustomPlaceState.value = newState
             }
         }
+    }
+
+    private fun mapToPlaceProcessed(place: Place): PlaceProcessed {
+
+        return PlaceProcessed(
+            uuid = place.uUID,
+            coordinates = place.getCoordinates(),
+            title = place.getName().toString(),
+            category = place.getCategory().toString(),
+            containedByTrip = place.isContainedByTrip(),
+            containedByRoute = place.isContainedByRoute()
+        )
     }
 
     fun searchAutocomplete(
@@ -346,25 +329,63 @@ class ViewModelMain /*@Inject*/ constructor(
         }
     }
 
+    //fun setMainContentId(contentId: MainContent) {
+    //
+    //        viewModelScope.launch {
+    //
+    //            val prevContents = setMainContentUseCase(
+    //                newMainContent = contentId,
+    //                currentMainContent = _mainContentState.value.currentContentId,
+    //                prevMainContents = _mainContentState.value.prevContents
+    //            )
+    //
+    //            _mainContentState.update {
+    //
+    //                it.copy(
+    //                    prevContents = prevContents,
+    //                    currentContentId = contentId
+    //                )
+    //            }
+    //        }
+    //    }
+    //
+    //    fun returnToPrevContent() {
+    //
+    //        viewModelScope.launch {
+    //
+    //            _mainContentState.update {
+    //
+    //                val newMainContent = setPrevMainContent(
+    //                    prevMainContents = _mainContentState.value.prevContents
+    //                )?:
+    //                Pair<MainContent, Stack<MainContent>>(_mainContentState.value.currentContentId, _mainContentState.value.prevContents)
+    //
+    //                it.copy(
+    //                    prevContents = newMainContent.second,
+    //                    currentContentId = newMainContent.first
+    //                )
+    //            }
+    //        }
+    //    }
+
     fun setMainContentId(contentId: MainContent) {
 
         viewModelScope.launch {
 
-            val currentContentId = _mainContentState.value.currentContentId
+            val currentContent = _mainContentState.value.currentContentId
 
-            if (currentContentId != contentId) {
+            if (currentContent != contentId && true) {
 
-                val prevContents = _mainContentState.value.prevContents
-
-                val currentContent = _mainContentState.value.currentContentId
+                val prevContents = _mainContentState.value.prevContents.clone() as Stack<MainContent>
 
                 prevContents.push(currentContent)
 
-
                 _mainContentState.update {
 
+                    Log.d("currentContentId", _mainContentState.value.currentContentId.toString())
+
                     it.copy(
-                        prevContents = prevContents.clone() as Stack<MainContent>,
+                        prevContents = prevContents,
                         currentContentId = contentId
                     )
                 }
@@ -378,7 +399,7 @@ class ViewModelMain /*@Inject*/ constructor(
 
             val prevContents = _mainContentState.value.prevContents
 
-            if (prevContents.isNotEmpty()) {
+            if (prevContents.isNotEmpty() && _mainContentState.value.currentContentId != prevContents.peek()) {
 
                 val last = prevContents.pop()
 
@@ -408,6 +429,7 @@ class ViewModelMain /*@Inject*/ constructor(
         }
     }
 
+    
     fun setTransportMode(optionIndex: Int){
 
         viewModelScope.launch {
@@ -420,7 +442,7 @@ class ViewModelMain /*@Inject*/ constructor(
             )
         }
     }
-
+    
     fun setMinute(optionIndex: Int){
 
         viewModelScope.launch {
@@ -430,7 +452,7 @@ class ViewModelMain /*@Inject*/ constructor(
             )
         }
     }
-
+    
     fun resetDetails(allDetails: Boolean){
 
         viewModelScope.launch {
@@ -441,24 +463,20 @@ class ViewModelMain /*@Inject*/ constructor(
 
         }
     }
-
+    
     fun initNewSearchAndRoute(startPlace: Place) {
 
         viewModelScope.launch {
 
             val places = emptyList<Place>();
 
-            initSearchUseCase(
+            initSearchAndRouteWithSelectedStartUseCase(
                 startPlace = startPlace,
                 places = places
             )
-
-            initRouteUseCase(
-                startPlace = startPlace
-            )
         }
     }
-
+    
     fun removePlacesByCategory(category: String){
 
         viewModelScope.launch {
@@ -510,12 +528,9 @@ class ViewModelMain /*@Inject*/ constructor(
 
         viewModelScope.launch {
 
-            initSearchUseCase(
+            initSearchAndRouteWithSelectedStartUseCase(
                 startPlace = startPlace,
                 places = places
-            )
-            initRouteUseCase(
-                startPlace = startPlace
             )
         }
     }
@@ -573,19 +588,19 @@ class ViewModelMain /*@Inject*/ constructor(
             it.copy(containerHeight = height)
         }
     }
-
+    
     fun setExtendedSearchVisible(isExtended: Boolean) {
         _chipsState.update {
             it.copy(extendedSearchVisible = isExtended)
         }
     }
-
+    
     fun setExtendedSearchSelected(isSelected: Boolean) {
         _chipsState.update {
             it.copy(extendedSearchSelected = isSelected)
         }
     }
-
+    
     fun resetExtendedSearch() {
         _chipsState.update {
             it.copy(extendedSearchSelected = false, extendedSearchVisible = false)
@@ -635,7 +650,7 @@ class ViewModelMain /*@Inject*/ constructor(
             it.copy(selectedChips = currentSelected.toList())
         }
     }
-
+    
     fun resetStartPlaces() {
         _mainSearchState.update {
             it.copy(
@@ -643,14 +658,14 @@ class ViewModelMain /*@Inject*/ constructor(
             )
         }
     }
-
+    
     fun searchReverseGeoCodeStartPlace(){
 
         viewModelScope.launch {
 
             try {
 
-                getLocationStartPlaceUseCase()
+                initSearchAndRouteWithLocationStartUseCase()
 
             } catch (e: RuntimeException) {
                 Log.e("Error during searching reverse GeoCode... Message: ", e.toString())
@@ -872,8 +887,7 @@ class ViewModelMain /*@Inject*/ constructor(
 
     data class MainContentState(
         val prevContents: Stack<MainContent> = Stack(),
-        val currentContentId: MainContent = MainContent.SEARCH //0 -> search Fragment, 1 -> route fragment,
-                                        // 2 -> inspect trip fragment, 3 -> custom place, 4 -> navigation
+        val currentContentId: MainContent = MainContent.SEARCH, //0 -> search Fragment, 1 -> route fragment, 2 -> inspect trip fragment, 3 -> custom place, 4 -> navigation
     )
 
     data class MainChipsState(
@@ -907,7 +921,7 @@ class ViewModelMain /*@Inject*/ constructor(
 
     data class MainInspectTripState(
         val editing: Boolean = false,
-        val start: String? = null,
+        val inspectedTrip: Trip? = null,
         val inspectedTripIdentifier: TripRepositoryImpl.TripIdentifier? = null
     )
 
@@ -917,7 +931,6 @@ class ViewModelMain /*@Inject*/ constructor(
     )
 
     data class MainNavigationState(
-        val navigationRouteNode: RouteNode? = null,
         val navigationPolyline: Polyline? = null,
         val currentLocation: Coordinates? = null
     )
@@ -944,6 +957,15 @@ class ViewModelMain /*@Inject*/ constructor(
                               val category: String,
                               val containedByTrip: Boolean = false,
                               val containedByRoute: Boolean = false)
+
+    /*data class MainMapState(
+        val startPlace: Place? = null,
+        val places: List<PlaceProcessed> = emptyList(),
+        val polyLines: List<Polyline> = emptyList(),
+        val customPlace: Place? = null,
+        val navigationPolyline: Polyline? = null,
+        val currentLocation: Coordinates? = null
+    )*/
 
     enum class MainContent {
         SEARCH, INSPECT, ROUTE, NAVIGATION, CUSTOM

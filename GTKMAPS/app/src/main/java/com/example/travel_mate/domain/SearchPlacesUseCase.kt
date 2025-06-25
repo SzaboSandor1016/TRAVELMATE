@@ -4,7 +4,7 @@ import com.example.travel_mate.data.Coordinates
 import com.example.travel_mate.data.SearchRepositoryImpl
 
 class SearchPlacesUseCase(
-    private val searchRepository: SearchRepositoryImpl,
+    private val searchRepository: SearchRepository,
     private val searchOptionsRepository: SearchOptionsRepository
 ) {
     suspend operator fun invoke(

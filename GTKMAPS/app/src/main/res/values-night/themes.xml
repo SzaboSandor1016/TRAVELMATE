@@ -22,6 +22,7 @@
         <item name="colorOnSurfaceVariant">#C4D0CE</item>
         <item name="colorOnSurfaceInverse">#2F3534</item>
 
+        <item name="fontFamily">@font/cabin</item>
         <!--<item name="colorPrimaryInverse">@color/design_default_color_primary</item>
         <item name="colorPrimaryContainer">#F2F2F2</item>
         <item name="colorOnPrimaryContainer">@color/black</item>
@@ -124,6 +125,13 @@
     <color name="toggle_button_off_background">#1AB0BEC5</color>
     <color name="toggle_button_off_outline">#4C7DA5</color>
 
+    <color name="instruction_color">@color/night_instruction_color</color>
+
+    <color name="start_marker_outside_color">@color/night_marker_color_variant1</color>
+
+    <color name="marker_outside_color">@color/night_marker_color</color>
+    <color name="marker_inside_color">@color/night_marker_inside_color</color>
+
     <color name="text_button_text_color">@color/night_text_button_text_color</color>
 
     <color name="label_color_selected">@color/night_button_label_color_selected</color>
@@ -190,6 +198,20 @@
 
     <color name="text_input_layout_hint_color">@color/night_text_input_layout_hint_color</color>
 
+    <color name="card_view_background_color">@color/night_card_view_background_color</color>
+
+    <color name="fragment_background_color">@color/night_fragment_background_color</color>
+
+    <color name="recycler_view_background_color">@color/night_recycler_view_background_color</color>
+
+    <color name="recycler_view_ripple_color">@color/night_recycler_view_ripple_color</color>
+
+    <color name="segmented_button_background_color_unselected">@color/night_segmented_button_background_color_unselected</color>
+    <color name="segmented_button_background_color_selected">@color/night_segmented_button_background_color_selected</color>
+
+    <color name="segmented_button_pressed_background_color_unselected">@color/night_segmented_button_pressed_color_unselected</color>
+    <color name="segmented_button_pressed_background_color_selected">@color/night_segmented_button_pressed_color_selected</color>
+
     <color name="start_icon_color">
         #404040
     </color>
@@ -206,7 +228,7 @@
         #4C7DA5
     </color>
 
-    <style name="material3_Chip" parent="Widget.Material3.Chip.Filter.Elevated">
+    <style name="Widget.Material3.Chip.Filter.Elevated0" parent="Widget.Material3.Chip.Filter.Elevated">
         <item name="colorPrimary">@color/color_filter_chip_background_color</item>
     </style>
 
@@ -250,11 +272,46 @@
         <item name="backgroundTint">@color/color_icon_button_background_color_variant1</item>
     </style>
 
+    <style name="Widget.Material3.Button.IconButton.Filled3.Segmented.Left" parent="Widget.Material3.Button.IconButton.Filled">
+        <item name="iconTint">@color/color_icon_button_icon_color_variant1</item>
+        <item name="android:textColor">@color/color_outlined_icon_button_label_color</item>
+        <item name="android:layout_marginEnd">2dp</item>
+        <item name="backgroundTint">@color/color_segmented_button_background_color</item>
+        <item name="android:background">@drawable/shape_toggle_button_style_left</item>
+    </style>
+
+    <style name="Widget.Material3.Button.IconButton.Filled3.Segmented.Middle" parent="Widget.Material3.Button.IconButton.Filled">
+        <item name="iconTint">@color/color_icon_button_icon_color_variant1</item>
+        <item name="android:textColor">@color/color_outlined_icon_button_label_color</item>
+        <item name="android:layout_marginEnd">2dp</item>
+        <item name="backgroundTint">@color/color_segmented_button_background_color</item>
+        <item name="android:background">@drawable/shape_toggle_button_style_middle</item>
+    </style>
+
+    <style name="Widget.Material3.Button.IconButton.Filled3.Segmented.Right" parent="Widget.Material3.Button.IconButton.Filled">
+        <item name="iconTint">@color/color_icon_button_icon_color_variant1</item>
+        <item name="android:textColor">@color/color_outlined_icon_button_label_color</item>
+        <item name="android:foreground">@color/transparent</item>
+        <item name="backgroundTint">@color/color_segmented_button_background_color</item>
+        <item name="android:background">@drawable/shape_toggle_button_style_right</item>
+    </style>
+
     <style name="Widget.Material3.Button3" parent="Widget.Material3.Button">
         <item name="iconTint">@color/color_icon_button_icon_color</item>
         <item name="backgroundTint">@color/color_icon_button_background_color</item>
         <item name="rippleColor">@color/icon_button_pressed_color</item>
         <item name="android:textColor">@color/color_icon_button_icon_color</item>
+    </style>
+
+    <style name="Widget.Material3.Button3.Variant0" parent="Widget.Material3.Button3">
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <style name="Widget.Material3.Button3.Variant1" parent="Widget.Material3.Button">
+        <item name="iconTint">@color/color_icon_button_icon_color_variant1</item>
+        <item name="backgroundTint">@color/color_icon_button_background_color_variant1</item>
+        <item name="rippleColor">@color/icon_button_pressed_color</item>
+        <item name="android:textColor">@color/color_icon_button_icon_color_variant1</item>
     </style>
 
     <style name="Widget.Material3.Chip.Filter.Elevated">
@@ -264,6 +321,8 @@
 
     <style name="Widget.Material3.Button.TextButton3" parent="Widget.Material3.Button.TextButton">
         <item name="minWidth">0dp</item>
+        <item name="fontFamily">@font/cabin</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/text_button_text_color</item>
         <item name="iconTint">@color/color_icon_button_icon_color</item>
     </style>
@@ -300,6 +359,16 @@
         <item name="android:padding">6dp</item>
         <item name="hintEnabled">true</item>
         <item name="boxBackgroundColor">@color/text_input_layout_background_color</item>
+    </style>
+
+    <style name="Widget.Material3.CardView.Filled.Variant0" parent="Widget.Material3.CardView.Filled">
+        <item name="android:backgroundTint">@color/card_view_background_color</item>
+    </style>
+
+    <style name="Widget.Material3.TabLayout1" parent="Widget.Material3.TabLayout">
+        <item name="tabTextColor">@color/color_tab_layout_tab_text_color</item>
+        <item name="tabIconTint">@color/color_tab_layout_tab_icon_color</item>
+        <item name="tabIndicatorColor">@color/tab_layout_active_indicator_color</item>
     </style>
 
     <style name="Theme.GTKMAPS.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />

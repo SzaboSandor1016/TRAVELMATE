@@ -18,6 +18,7 @@ import com.example.travel_mate.data.Contributor
 import com.example.travel_mate.databinding.FragmentSelectContributorsBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 /** [FragmentSelectContributors]
  * a [androidx.fragment.app.Fragment] to select contributors for a trip
@@ -47,7 +48,7 @@ class FragmentSelectContributors : Fragment() {
             }
     }
 
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
+    private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
 
     private lateinit var contributorsAdapter: AdapterContributorsRecyclerView
 

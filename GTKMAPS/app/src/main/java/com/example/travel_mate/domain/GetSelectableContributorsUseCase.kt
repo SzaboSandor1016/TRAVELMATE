@@ -9,7 +9,7 @@ class GetSelectableContributorsUseCase(
 ) {
     suspend operator fun invoke() {
 
-        val userUid = userRepository.getCurrentUserUid()
+        val userUid = userRepository.getCurrentUserUid()?: return
 
         val contributorsOfTrip = currentTripRepository.getCurrentTripContributors()
 

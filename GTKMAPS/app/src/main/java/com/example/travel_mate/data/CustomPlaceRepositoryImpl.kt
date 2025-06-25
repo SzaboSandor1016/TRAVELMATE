@@ -8,9 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
-class CustomPlaceRepositoryImpl(
-    private val photonRemoteDataSource: PhotonRemoteDataSource
-): CustomPlaceRepository {
+class CustomPlaceRepositoryImpl: CustomPlaceRepository {
 
     private val customPlaceCoroutineDispatcher = Dispatchers.IO
 

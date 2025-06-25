@@ -7,7 +7,9 @@ interface SearchOptionsRepository {
 
     val searchOptions: StateFlow<SearchOptions>
 
-    suspend fun setTransportMode(index: Int)
+    suspend fun testSetSearchTransportMode(index: Int): SearchOptions
+
+    suspend fun testSetMinute(index: Int): SearchOptions
 
     suspend fun setSearchTransportMode(index: Int)
 

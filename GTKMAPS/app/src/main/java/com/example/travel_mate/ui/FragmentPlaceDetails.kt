@@ -20,6 +20,7 @@ import com.example.travel_mate.R
 import com.example.travel_mate.data.Place
 import com.example.travel_mate.databinding.FragmentPlaceDetailsBinding
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 /** [FragmentPlaceDetails]
  * a [androidx.fragment.app.Fragment] to show important information about a [com.example.travel_mate.data.Place]
@@ -41,7 +42,7 @@ class FragmentPlaceDetails : Fragment(){
 
     private lateinit var place: Place/*
     private val viewModelDetails: ViewModelFragmentPlaceDetails by activityViewModels()*/
-    private val viewModelMain: ViewModelMain by activityViewModels { Application.Companion.factory }
+    private val viewModelMain: ViewModelMain by inject<ViewModelMain>()
 
     private var listener: PlaceDetailsListener? = null
 

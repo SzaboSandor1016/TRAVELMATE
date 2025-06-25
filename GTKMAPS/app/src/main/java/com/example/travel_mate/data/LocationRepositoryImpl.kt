@@ -2,11 +2,12 @@ package com.example.travel_mate.data
 
 import android.location.Location
 import com.example.travel_mate.domain.LocationRepository
+import org.koin.java.KoinJavaComponent.inject
 
 class LocationRepositoryImpl(
-    private val locationLocalDataSource: LocationLocalDataSource
 ): LocationRepository {
 
+    private val locationLocalDataSource: LocationLocalDataSource by inject(LocationLocalDataSource::class.java)
 
     override fun startLocationUpdates() {
         locationLocalDataSource.startContinuousLocationUpdates()

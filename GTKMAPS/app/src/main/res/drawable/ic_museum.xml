@@ -1,9 +1,20 @@
-<vector android:height="36dp" android:tint="@color/icon_color"
+<vector android:height="36dp"
     android:viewportHeight="24" android:viewportWidth="24"
     android:width="36dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="@color/icon_color" android:pathData="M4,10h3v7h-3z"/>
-    <path android:fillColor="@color/icon_color" android:pathData="M10.5,10h3v7h-3z"/>
-    <path android:fillColor="@color/icon_color" android:pathData="M2,19h20v3h-20z"/>
-    <path android:fillColor="@color/icon_color" android:pathData="M17,10h3v7h-3z"/>
-    <path android:fillColor="@color/icon_color" android:pathData="M12,1l-10,5l0,2l20,0l0,-2z"/>
+    <path
+        android:fillColor="@color/marker_outside_color"
+        android:pathData="M12,2C8.13,2 5,5.13 5,9c0,5.25 7,13 7,13s7,-7.75 7,-13c0,-3.87 -3.13,-7 -7,-7z" />
+
+    <group
+        android:translateX="7.82"
+        android:translateY="4"
+        android:scaleX="0.35"
+        android:scaleY="0.35">
+
+        <path android:fillColor="@color/marker_inside_color" android:pathData="M4,10h3v7h-3z"/>
+        <path android:fillColor="@color/marker_inside_color" android:pathData="M10.5,10h3v7h-3z"/>
+        <path android:fillColor="@color/marker_inside_color" android:pathData="M2,19h20v3h-20z"/>
+        <path android:fillColor="@color/marker_inside_color" android:pathData="M17,10h3v7h-3z"/>
+        <path android:fillColor="@color/marker_inside_color" android:pathData="M12,1l-10,5l0,2l20,0l0,-2z"/>
+    </group>
 </vector>

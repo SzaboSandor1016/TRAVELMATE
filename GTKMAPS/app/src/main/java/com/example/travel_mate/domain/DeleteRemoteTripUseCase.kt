@@ -7,7 +7,7 @@ class DeleteRemoteTripUseCase(
 
     suspend operator fun invoke(creatorUid: String,tripUuid: String) {
 
-        val userUid = userRepository.getCurrentUserUid()
+        val userUid = userRepository.getCurrentUserUid()?: return
 
         if (creatorUid == userUid) {
 

@@ -1,12 +1,14 @@
 package com.example.travel_mate.data
 
 import android.util.Log
+import com.example.travel_mate.Application
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import org.koin.java.KoinJavaComponent.inject
 import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 
@@ -15,9 +17,9 @@ import kotlin.coroutines.resume
  *
  * It has methods to fetch and delete methods for locally [Trip]s
  */
-class RoomLocalDataSourceImpl ( appDatabase: AppDatabase): RoomLocalDataSource {
+class RoomLocalDataSourceImpl: RoomLocalDataSource {
 
-
+    private val appDatabase: AppDatabase = Application.appDatabase
 
     val tripDao = appDatabase.tripDao()
 

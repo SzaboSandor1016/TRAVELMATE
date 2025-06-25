@@ -17,14 +17,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.java.KoinJavaComponent.inject
 import org.osmdroid.views.overlay.Polyline
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-class NavigationRepositoryImpl(
-    private val routeNodeRepository: RouteNodeRepository,
-    private val locationRepository: LocationRepository
-): NavigationRepository {
+class NavigationRepositoryImpl: NavigationRepository {
+
+    private val routeNodeRepository: RouteNodeRepository by inject(RouteNodeRepository::class.java)
+    private val locationRepository: LocationRepository by inject(LocationRepository::class.java)
 
     private val routeUtilityClass = RouteUtilityClass()
 
@@ -83,6 +84,7 @@ class NavigationRepositoryImpl(
 
                 it.copy(
                     startedFrom = 0,
+                    isStarted = true
                 )
             }
 
@@ -110,7 +112,8 @@ class NavigationRepositoryImpl(
 
                     it.copy(
                         startedFrom = 1,
-                        endOfRoute = false
+                        endOfRoute = false,
+                        isStarted = true
                     )
                 }
 
@@ -138,6 +141,7 @@ class NavigationRepositoryImpl(
 
                 it.copy(
                     startedFrom = 1,
+                    isStarted = true
                 )
             }
 
@@ -267,9 +271,13 @@ class NavigationRepositoryImpl(
                     if ( targetSegmentIndex < currentRoute.size - 2 ) {
 
                         // Move to next segment
-                        targetSegmentIndex++
+                        targetSegmentIndex = findNextValidTargetSegment(
+                            currentSegmentIndex = targetSegmentIndex,
+                            proximityDistance = proximityDistance,
+                            steps = currentRoute
+                        )
 
-                        if (currentRoute[targetSegmentIndex + 1].instruction != null) {
+                        if (currentRoute[targetSegmentIndex].instruction != null) {
 
                             //update the StateFlow with the found instruction
                             //update the previous instruction with the current
@@ -278,7 +286,7 @@ class NavigationRepositoryImpl(
 
                                 it.copy(
                                     prevRouteStep = it.currentRouteStep,
-                                    currentRouteStep = currentRoute[targetSegmentIndex + 1]
+                                    currentRouteStep = currentRoute[targetSegmentIndex]
                                 )
                             }
                         }
@@ -349,6 +357,33 @@ class NavigationRepositoryImpl(
 
     }
 
+    private suspend fun findNextValidTargetSegment(currentSegmentIndex: Int, proximityDistance: Double, steps: List<RouteStep>): Int {
+
+        return withContext(navigationComputingDispatcher) {
+
+            var passedDistance = routeUtilityClass.haversine(
+                startLat = steps[currentSegmentIndex].coordinates.getLatitude(),
+                startLon = steps[currentSegmentIndex].coordinates.getLongitude(),
+                endLat = steps[currentSegmentIndex+1].coordinates.getLatitude(),
+                endLon = steps[currentSegmentIndex+1].coordinates.getLongitude()
+            )
+            var index = currentSegmentIndex + 1
+
+            while (passedDistance < proximityDistance && steps[index].instruction == null) {
+
+                passedDistance+= routeUtilityClass.haversine(
+                    startLat = steps[index].coordinates.getLatitude(),
+                    startLon = steps[index].coordinates.getLongitude(),
+                    endLat = steps[index+1].coordinates.getLatitude(),
+                    endLon = steps[index+1].coordinates.getLongitude()
+                )
+                index++
+            }
+
+            return@withContext index
+        }
+    }
+
     override fun stopNavigationJob(removeData: Boolean) {
 
         navigationJob?.cancel()
@@ -368,6 +403,7 @@ class NavigationRepositoryImpl(
             _navigationInfoState.update {
 
                 it.copy(
+                    isStarted = false,
                     prevRouteStep = null,
                     currentRouteStep = null,
                 )
@@ -697,6 +733,7 @@ class NavigationRepositoryImpl(
         val currentLocation: Coordinates? = null,
     )
     data class NavigationInfoState(
+        val isStarted: Boolean = false,
         val startedFrom: Int = 0, // 0 -> Route, 1 -> CustomPlace
         val endOfRoute: Boolean = false,
         val endOfNavigation: Boolean = false,

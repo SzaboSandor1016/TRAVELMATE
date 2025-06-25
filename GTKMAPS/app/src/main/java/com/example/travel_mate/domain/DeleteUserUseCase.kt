@@ -7,7 +7,7 @@ class DeleteUserUseCase(
 
     suspend operator fun invoke(password: String) {
 
-        val userUid = userRepository.getCurrentUserUid()
+        val userUid = userRepository.getCurrentUserUid()?: return
 
         tripRepository.deleteUserTripsFromRemoteDatabase(
             userUid = userUid

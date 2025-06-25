@@ -13,6 +13,7 @@ import com.example.travel_mate.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import org.koin.android.ext.android.inject
 
 /** [FragmentSettings]
  * a [androidx.fragment.app.Fragment] for user account settings
@@ -49,7 +50,7 @@ class FragmentSettings : Fragment() {
     private lateinit var deleteView: View
     private lateinit var changePasswordView: View
 
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
+    private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

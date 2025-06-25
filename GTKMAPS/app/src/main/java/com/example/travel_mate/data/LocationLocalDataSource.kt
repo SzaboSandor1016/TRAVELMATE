@@ -22,7 +22,9 @@ class LocationLocalDataSource(private val context: Context){
     suspend fun getCurrentLocation(): Location? {
         val client = LocationServices.getFusedLocationProviderClient(context)
 
-        val location = if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        val location = if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ) {
             client.getCurrentLocation(
                 Priority.PRIORITY_HIGH_ACCURACY,
                 CancellationTokenSource().token

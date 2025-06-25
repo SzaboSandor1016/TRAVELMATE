@@ -2,6 +2,7 @@ package com.example.travel_mate.domain
 
 import com.example.travel_mate.data.TripRepositoryImpl.TripIdentifier
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class GetRemoteTripsUseCase(
@@ -11,7 +12,7 @@ class GetRemoteTripsUseCase(
 ) {
     suspend operator fun invoke(): Flow<List<TripIdentifier>> {
 
-        val currentUser = userRepository.getCurrentUserUid()
+        val currentUser = userRepository.getCurrentUserUid()?: return flowOf(emptyList())
 
         return tripRepository.fetchContributedTripsFromFirebase(currentUser)
             .map (::processTripIdentifiers)

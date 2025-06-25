@@ -10,7 +10,7 @@ interface UserRepository {
 
     val userState: StateFlow<UserState>
 
-    fun getCurrentUserUid(): String
+    fun getCurrentUserUid(): String?
 
     suspend fun checkUser(): Flow<FirebaseUser?>
 

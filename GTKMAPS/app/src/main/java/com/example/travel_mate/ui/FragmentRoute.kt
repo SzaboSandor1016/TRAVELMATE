@@ -1,6 +1,7 @@
 package com.example.travel_mate.ui
 
 import android.content.res.Resources
+import android.graphics.Canvas
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,7 +22,9 @@ import com.example.travel_mate.data.Place
 import com.example.travel_mate.data.Route
 import com.example.travel_mate.data.RouteNode
 import com.example.travel_mate.databinding.FragmentRouteBinding
+import com.example.travel_mate.ui.ViewModelMain.MainContent
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 /**
  * A simple [androidx.fragment.app.Fragment] subclass.
@@ -60,8 +63,7 @@ class FragmentRoute : Fragment() {
     private var routeStops: ArrayList<RouteNode> = ArrayList()
     private var routeMode: String = "foot-walking"
 
-    private val viewModelMain: ViewModelMain by activityViewModels { Application.Companion.factory }
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
+    private val viewModelMain: ViewModelMain by inject<ViewModelMain>()
 
     private var categoryManager: ClassCategoryManager? = null
     private var resources: Resources? = null
@@ -125,9 +127,12 @@ class FragmentRoute : Fragment() {
         val touchHelper: ItemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
 
             var drag = false
+            var selected = false
 
             var draggedIndex: Int = 0
             var targetIndex: Int = 0
+
+            var originalIndex: Int = 0
 
             override fun getMovementFlags(
                 recyclerView: RecyclerView,
@@ -140,14 +145,53 @@ class FragmentRoute : Fragment() {
                 )
             }
 
+            override fun canDropOver(
+                recyclerView: RecyclerView,
+                current: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+
+                return target.bindingAdapterPosition != 0
+            }
+
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+
+                val isDraggingUpward = dY < 0
+
+                val isDraggingIntoUndraggableArea =
+                    (isDraggingUpward && recyclerView.findViewHolderForAdapterPosition(0)?.let { !canDropOver(recyclerView, viewHolder, it ) } == true)
+
+                val newDy = if (isDraggingIntoUndraggableArea) {
+                    0f  // Clamp
+                } else {
+                    dY
+                }
+
+                super.onChildDraw(c, recyclerView, viewHolder, dX, newDy, actionState, isCurrentlyActive)
+            }
+
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean {
 
-                draggedIndex = viewHolder.adapterPosition
-                targetIndex = target.adapterPosition
+                if (!selected) {
+                    originalIndex = viewHolder.bindingAdapterPosition
+
+                    selected = true
+                }
+
+                draggedIndex = viewHolder.bindingAdapterPosition
+                targetIndex = target.bindingAdapterPosition
 
                 routeStopsAdapter.notifyItemMoved(draggedIndex, targetIndex);
 
@@ -160,7 +204,7 @@ class FragmentRoute : Fragment() {
             ) {
                 when (direction) {
                     ItemTouchHelper.END -> {
-                        val removed = routeStops[viewHolder.adapterPosition]
+                        val removed = routeStops[viewHolder.bindingAdapterPosition]
                         viewModelMain.addRemovePlaceToRoute(removed.placeUUID.toString())
                     }
                 }
@@ -178,7 +222,11 @@ class FragmentRoute : Fragment() {
 
                     if (draggedIndex != targetIndex) {
 
-                        val routeNode = routeStops[draggedIndex]
+                        val routeNode = routeStops[originalIndex]
+
+                        Log.d("targetIndex", targetIndex.toString())
+
+                        Log.d("draggedIndex", routeNode.name.toString())
 
                         viewModelMain.reorderRoute(
                             newPosition = targetIndex,
@@ -186,6 +234,7 @@ class FragmentRoute : Fragment() {
                         )
                     }
                     drag = false
+                    selected = false
                 }
 
             }
@@ -222,21 +271,24 @@ class FragmentRoute : Fragment() {
         /**
          * check the walk mode as the default mode for route planning
          */
-        binding.routeModeGroup.check(binding.routeSelectWalk.id)
+        handleRouteModeSelect(index = 0)
 
         /**
          * add an [OnButtonCheckedListener] for the route transport mode selector
          * button group
          * on check change update the transport mode
          */
-        binding.routeModeGroup.addOnButtonCheckedListener { group, checkedId, isChecked ->
+        binding.routeSelectWalk.setOnClickListener { _ ->
 
-            //get the currently selected index
-            val index = binding.routeModeGroup.indexOfChild(binding.routeModeGroup.findViewById(binding.routeModeGroup.checkedButtonId))
+            handleRouteModeSelect(
+                index = 0
+            )
+        }
 
-            //set the route mode according to the index
-            viewModelMain.setRouteTransportMode(
-                index = index
+        binding.routeSelectCar.setOnClickListener { _ ->
+
+            handleRouteModeSelect(
+                index = 1
             )
         }
 
@@ -298,6 +350,28 @@ class FragmentRoute : Fragment() {
         showRouteData(
             route = route
         )
+    }
+
+    private fun handleRouteModeSelect(index: Int) {
+
+        if (index == 0) {
+
+            viewModelMain.setRouteTransportMode(
+                index = index
+            )
+
+            binding.routeSelectWalk.isChecked = true
+            binding.routeSelectCar.isChecked = false
+        }
+        if (index == 1) {
+
+            viewModelMain.setRouteTransportMode(
+                index = index
+            )
+
+            binding.routeSelectCar.isChecked = true
+            binding.routeSelectWalk.isChecked = false
+        }
     }
 
 

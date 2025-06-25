@@ -1,13 +1,13 @@
 package com.example.travel_mate.domain
 
-import android.util.Log
 import com.example.travel_mate.data.Coordinates
 import com.example.travel_mate.data.Place
 
-class GetLocationStartPlaceUseCase(
+class InitSearchAndRouteWithLocationStartUseCase(
     private val getCurrentLocationUseCase: GetCurrentLocationUseCase,
     private val searchReverseGeoCodeUseCase: SearchReverseGeoCodeUseCase,
-    private val initSearchUseCase: InitSearchUseCase
+    private val initSearchUseCase: InitSearchUseCase,
+    private val initRouteUseCase: InitRouteUseCase
 ) {
 
     suspend operator fun invoke() {
@@ -30,6 +30,9 @@ class GetLocationStartPlaceUseCase(
                     initSearchUseCase(
                         startPlace = reverseGeoCode[0],
                         places = places
+                    )
+                    initRouteUseCase(
+                        startPlace = reverseGeoCode[0]
                     )
                 }
             }

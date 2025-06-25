@@ -3,6 +3,8 @@ package com.example.travel_mate.domain
 import com.example.travel_mate.data.Coordinates
 import com.example.travel_mate.data.PhotonResponse
 import com.example.travel_mate.data.Place
+import com.example.travel_mate.data.ReverseGeoCodeResponse
+import com.example.travel_mate.data.Search
 import com.example.travel_mate.data.SearchRepositoryImpl.SearchState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,6 +12,29 @@ import kotlinx.coroutines.flow.StateFlow
 interface SearchRepository {
 
     val searchState: StateFlow<SearchState>
+
+    suspend fun testInitNewSearch(startPlace: Place, places: List<Place>): Search
+
+    suspend fun testRemovePlacesByCategory(category: String): Search
+
+    suspend fun testResetSearchDetails(all: Boolean): Search
+
+    suspend fun testFetchPlacesByCity(
+        content: String,
+        city: String,
+        category: String
+    ): Search
+
+    suspend fun testFetchPlacesByDistance(
+        distance: Double,
+        content: String,
+        coordinates: Coordinates,
+        category: String
+    ): Search
+
+    suspend fun getSearchStartPlace(): Place?
+
+    suspend fun getSearchPlaces(): List<Place>
 
     suspend fun searchAutocomplete(query: String): Flow<PhotonResponse>
 
@@ -39,7 +64,6 @@ interface SearchRepository {
 
     suspend fun removePlacesByCategory(category: String)
 
-
     suspend fun fetchPlacesByCity(
         content: String,
         city: String,
@@ -53,6 +77,7 @@ interface SearchRepository {
         category: String
     )
 
-    suspend fun getReverseGeoCode(coordinates: Coordinates): Flow<PhotonResponse>
+
+    suspend fun getReverseGeoCode(coordinates: Coordinates): Flow<ReverseGeoCodeResponse>
 
 }

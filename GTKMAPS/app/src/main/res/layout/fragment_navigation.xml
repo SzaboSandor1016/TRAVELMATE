@@ -19,6 +19,7 @@
             android:id="@+id/navigation_info_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/Widget.Material3.CardView.Filled.Variant0"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -120,6 +121,7 @@
             android:id="@+id/route_next_goal_info_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/Widget.Material3.CardView.Filled.Variant0"
             app:layout_constraintTop_toBottomOf="@id/navigation_info_layout"
             app:layout_constraintLeft_toLeftOf="parent"
             android:layout_marginTop="6dp"

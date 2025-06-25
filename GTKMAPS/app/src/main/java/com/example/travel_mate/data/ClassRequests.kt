@@ -32,8 +32,8 @@ class ClassRequests{
          */
         @GET("reverse")
         suspend fun getReverseGeoCode(
-            @Query("lat") latitude: String?,
-            @Query("lon") longitude: String?
+            @Query("lon") longitude: Double?,
+            @Query("lat") latitude: Double?
         ): PhotonResponse
     }
     interface OverpassApi {
@@ -48,6 +48,14 @@ class ClassRequests{
     }
 
     interface RouteServiceApi {
+
+        @GET("/geocode/reverse")
+        suspend fun getReverseGeoCode(
+            @Query("api_key") apiKey: String,
+            @Query("point.lon") longitude: Double?,
+            @Query("point.lat") latitude: Double?,
+            @Query("size") size: Int
+        ): ReverseGeoCodeResponse
         /** [getRoute]
          *  get the route between two places
          */

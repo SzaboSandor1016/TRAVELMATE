@@ -68,8 +68,8 @@ class PhotonRemoteDataSourceImpl: PhotonRemoteDataSource {
 
             flowOf(
                 photonRetrofit.getReverseGeoCode(
-                    coordinates.getLatitude().toString(),
-                    coordinates.getLongitude().toString()
+                    coordinates.getLongitude(),
+                    coordinates.getLatitude()
                 )
             )
         }

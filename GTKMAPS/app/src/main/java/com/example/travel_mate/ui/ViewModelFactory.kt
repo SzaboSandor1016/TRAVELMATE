@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.travel_mate.data.RouteRepositoryImpl
 import com.example.travel_mate.domain.SearchOptionsRepository
-import com.example.travel_mate.data.SearchRepositoryImpl
 import com.example.travel_mate.domain.CheckUserUseCase
 import com.example.travel_mate.domain.CurrentTripRepository
 import com.example.travel_mate.domain.CustomPlaceRepository
@@ -12,13 +11,14 @@ import com.example.travel_mate.domain.DeleteTripUseCase
 import com.example.travel_mate.domain.DeleteUserUseCase
 import com.example.travel_mate.domain.GetCurrentLocationUseCase
 import com.example.travel_mate.domain.GetLocalTripsUseCase
-import com.example.travel_mate.domain.GetLocationStartPlaceUseCase
+import com.example.travel_mate.domain.InitSearchAndRouteWithLocationStartUseCase
 import com.example.travel_mate.domain.GetNewContributorDataUseCase
 import com.example.travel_mate.domain.GetRemoteContributedTripsUseCase
 import com.example.travel_mate.domain.GetRemoteTripsUseCase
 import com.example.travel_mate.domain.GetSelectableContributorsUseCase
 import com.example.travel_mate.domain.GetSelectedTripDataUseCase
 import com.example.travel_mate.domain.InitRouteUseCase
+import com.example.travel_mate.domain.InitSearchAndRouteWithSelectedStartUseCase
 import com.example.travel_mate.domain.InitSearchUseCase
 import com.example.travel_mate.domain.NavigateToNextPlaceUseCase
 import com.example.travel_mate.domain.NavigationRepository
@@ -39,7 +39,6 @@ import com.example.travel_mate.domain.TripRepository
 import com.example.travel_mate.domain.UserRepository
 
 class ViewModelFactory(
-    private val tripRepository: TripRepository,
     private val searchRepository: SearchRepository,
     private val searchOptionsRepository: SearchOptionsRepository,
     private val customPlaceRepository: CustomPlaceRepository,
@@ -52,10 +51,9 @@ class ViewModelFactory(
     private val setSearchTransportModeUseCase: SetSearchTransportModeUseCase,
     private val navigateToNextPlaceUseCase: NavigateToNextPlaceUseCase,
     private val searchAutocompleteUseCase: SearchAutocompleteUseCase,
-    private val initSearchUseCase: InitSearchUseCase,
-    private val initRouteUseCase: InitRouteUseCase,
+    private val initSearchAndRouteWithSelectedStartUseCase: InitSearchAndRouteWithSelectedStartUseCase,
     private val setCustomPlaceUseCase: SetCustomPlaceUseCase,
-    private val getLocationStartPlaceUseCase: GetLocationStartPlaceUseCase,
+    private val initSearchAndRouteWithLocationStartUseCase: InitSearchAndRouteWithLocationStartUseCase,
     private val getCurrentLocationUseCase: GetCurrentLocationUseCase,
     private val signUpUserUseCase: SignUpUserUseCase,
     private val signInUserUseCase: SignInUserUseCase,
@@ -80,7 +78,6 @@ class ViewModelFactory(
         return when {
             modelClass.isAssignableFrom(ViewModelUser::class.java) -> {
                 ViewModelUser(
-                    tripRepository,
                     currentTripRepository = currentTripRepository,
                     userRepository = userRepository,
                     signUpUserUseCase = signUpUserUseCase,
@@ -114,10 +111,9 @@ class ViewModelFactory(
                     setSearchTransportModeUseCase = setSearchTransportModeUseCase,
                     navigateToNextPlaceUseCase = navigateToNextPlaceUseCase,
                     searchAutocompleteUseCase = searchAutocompleteUseCase,
-                    initSearchUseCase = initSearchUseCase,
-                    initRouteUseCase = initRouteUseCase,
+                    initSearchAndRouteWithSelectedStartUseCase = initSearchAndRouteWithSelectedStartUseCase,
                     setCustomPlaceUseCase = setCustomPlaceUseCase,
-                    getLocationStartPlaceUseCase = getLocationStartPlaceUseCase,
+                    initSearchAndRouteWithLocationStartUseCase = initSearchAndRouteWithLocationStartUseCase,
                     getCurrentLocationUseCase = getCurrentLocationUseCase,
                 ) as T
             }

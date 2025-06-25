@@ -1,5 +1,24 @@
-<vector android:height="48dp" android:tint="@color/start_icon_color"
-    android:viewportHeight="24" android:viewportWidth="24"
+<vector android:height="48dp"
+    android:viewportHeight="960" android:viewportWidth="960"
     android:width="48dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="@android:color/white" android:pathData="M12,2C8.13,2 5,5.13 5,9c0,5.25 7,13 7,13s7,-7.75 7,-13c0,-3.87 -3.13,-7 -7,-7zM12,11.5c-1.38,0 -2.5,-1.12 -2.5,-2.5s1.12,-2.5 2.5,-2.5 2.5,1.12 2.5,2.5 -1.12,2.5 -2.5,2.5z"/>
+
+    <group
+        android:scaleX="40"
+        android:scaleY="40">
+
+        <path
+            android:fillColor="@color/start_marker_outside_color"
+            android:pathData="M12,2C8.13,2 5,5.13 5,9c0,5.25 7,13 7,13s7,-7.75 7,-13c0,-3.87 -3.13,-7 -7,-7z" />
+    </group>
+    <!-- Inner icon, scaled and translated -->
+    <group
+        android:translateX="288"
+        android:translateY="150"
+        android:scaleX="0.4"
+        android:scaleY="0.4">
+
+        <path
+            android:fillColor="@color/marker_inside_color"
+            android:pathData="M240,760L360,760L360,520L600,520L600,760L720,760L720,400L480,220L240,400L240,760ZM160,840L160,360L480,120L800,360L800,840L520,840L520,600L440,600L440,840L160,840ZM480,490L480,490L480,490L480,490L480,490L480,490L480,490L480,490L480,490Z" />
+    </group>
 </vector>

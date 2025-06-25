@@ -10,13 +10,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/shape_recycler_view_item">
 
+    <ImageView
+        android:id="@+id/drag_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:src="@drawable/ic_drag_handle"/>
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/route_stop_name"
         android:layout_width="0dp"
         android:maxWidth="220dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/drag_handle"
         style="@style/text_view_style"
         android:text="placeholder_stop_name"
         android:maxLines="2"

@@ -15,15 +15,45 @@ class SearchOptionsRepositoryImpl: SearchOptionsRepository {
 
     private val _searchOptions = MutableStateFlow(SearchOptions())
     override val searchOptions: StateFlow<SearchOptions> = _searchOptions.asStateFlow()
+    override suspend fun testSetSearchTransportMode(index: Int): SearchOptions {
 
-    override suspend fun setTransportMode(index: Int) {
+        return withContext(searchOptionsCoroutineDispatcher) {
 
-        withContext(searchOptionsCoroutineDispatcher) {
+            val mode = when (index) {
+                0 -> "walk" // walk
+                1 -> "car" // car
+                else -> null
 
-            setSearchTransportMode(
-                index = index
-            )
+            }
 
+            _searchOptions.update {
+
+                it.copy(
+                    transportMode = mode
+                )
+            }
+            return@withContext _searchOptions.value
+        }
+    }
+
+    override suspend fun testSetMinute(index: Int): SearchOptions {
+
+        return withContext(searchOptionsCoroutineDispatcher) {
+
+            val minute = when (index) {
+                0 -> 15
+                1 -> 30
+                2 -> 45
+                else -> 0
+
+            }
+            _searchOptions.update {
+
+                it.copy(
+                    minute = minute
+                )
+            }
+            return@withContext _searchOptions.value
         }
     }
 

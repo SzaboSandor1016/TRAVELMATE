@@ -16,7 +16,9 @@ import com.example.travel_mate.Application
 import com.example.travel_mate.data.Coordinates
 import com.example.travel_mate.data.RouteStep
 import com.example.travel_mate.databinding.FragmentNavigationBinding
+import com.example.travel_mate.ui.ViewModelMain.MainContent
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 /**
  * A simple [androidx.fragment.app.Fragment] subclass.
@@ -51,7 +53,7 @@ class FragmentNavigation : Fragment() {
     private var _binding: FragmentNavigationBinding? = null
     val binding get() = _binding!!
 
-    private val viewModelMain: ViewModelMain by activityViewModels { Application.Companion.factory }
+    private val viewModelMain: ViewModelMain by inject<ViewModelMain>()
 
     private var categoryManager: ClassCategoryManager? = null
     private var resources: Resources? = null

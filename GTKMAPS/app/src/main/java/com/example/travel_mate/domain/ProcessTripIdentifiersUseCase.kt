@@ -2,6 +2,7 @@ package com.example.travel_mate.domain
 
 import com.example.travel_mate.data.Contributor
 import com.example.travel_mate.data.TripRepositoryImpl.TripIdentifier
+import kotlinx.coroutines.flow.flowOf
 
 class ProcessTripIdentifiersUseCase(
     private val userRepository: UserRepository,
@@ -10,7 +11,7 @@ class ProcessTripIdentifiersUseCase(
 
     suspend operator fun invoke(tripIdentifiers: List<TripIdentifier>): List<TripIdentifier> {
 
-        val currentUser = userRepository.getCurrentUserUid()
+        val currentUser = userRepository.getCurrentUserUid()?: return emptyList()
 
         return tripIdentifiers.map { tripIdentifier -> processFetchedTrip(tripIdentifier, currentUser) }
     }

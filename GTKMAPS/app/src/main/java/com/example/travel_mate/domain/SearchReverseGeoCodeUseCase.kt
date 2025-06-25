@@ -5,6 +5,7 @@ import com.example.travel_mate.data.Address
 import com.example.travel_mate.data.Coordinates
 import com.example.travel_mate.data.PhotonResponse
 import com.example.travel_mate.data.Place
+import com.example.travel_mate.data.ReverseGeoCodeResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -16,14 +17,14 @@ class SearchReverseGeoCodeUseCase(
 
         searchRepository.getReverseGeoCode(
             coordinates = coordinates
-        ).map(::processPhotonResponse)
+        ).map(::processReverseGeoCode)
 
-    /** [processPhotonResponse]
+    /** [processReverseGeoCode]
      * process the data returned by the network request to Photon
      * accepts the feature list of [PhotonResponse]
      * Returns a list of [Place]s
      */
-    private fun processPhotonResponse(response: PhotonResponse): List<Place> {
+    private fun processReverseGeoCode(response: ReverseGeoCodeResponse): List<Place> {
 
         val places: ArrayList<Place> = ArrayList()
 
@@ -56,9 +57,9 @@ class SearchReverseGeoCodeUseCase(
                     startPlace.setName(properties.name)
                     Log.d("Address", properties.name.toString())
                 }
-                if (properties.city != null) {
-                    address.setCity(properties.city)
-                    Log.d("Address_city", properties.city.toString())
+                if (properties.locality != null) {
+                    address.setCity(properties.locality)
+                    Log.d("Address_city", properties.locality.toString())
                 }
                 if (properties.street != null) {
                     address.setStreet(properties.street)

@@ -12,10 +12,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import org.koin.java.KoinJavaComponent.inject
 
-class UserRepositoryImpl(
-    private val firebaseAuthenticationSource: FirebaseAuthenticationSource
-): UserRepository {
+class UserRepositoryImpl: UserRepository {
+
+    private val firebaseAuthenticationSource: FirebaseAuthenticationSource by inject(
+        FirebaseAuthenticationSource::class.java)
 
     private val _userState = MutableStateFlow(UserState())
     override val userState: StateFlow<UserState> = _userState.asStateFlow()
@@ -39,9 +41,9 @@ class UserRepositoryImpl(
     //BEGINNING OF FIREBASE USER MANAGEMENT METHODS
     //----------------------------------------------------------------------------------------------------------------
 
-    override fun getCurrentUserUid(): String {
+    override fun getCurrentUserUid(): String? {
 
-        return _userState.value.user!!.uid
+        return _userState.value.user?.uid
     }
 
     /** [checkUser]

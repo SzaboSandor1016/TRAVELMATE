@@ -13,6 +13,7 @@ import com.example.travel_mate.databinding.FragmentSignInBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import org.koin.android.ext.android.inject
 
 /**[FragmentSignIn]
  * a [androidx.fragment.app.Fragment] to sign in
@@ -42,7 +43,7 @@ class FragmentSignIn : Fragment() {
             }
     }
 
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
+    private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
 
     private var _binding: FragmentSignInBinding? = null
     private val binding get() = _binding!!

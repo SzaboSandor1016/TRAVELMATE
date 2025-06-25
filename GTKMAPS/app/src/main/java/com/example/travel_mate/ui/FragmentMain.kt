@@ -30,6 +30,7 @@ import com.example.travel_mate.databinding.FragmentMainBinding
 import com.example.travel_mate.ui.ViewModelMain.ErrorGroup
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.osmdroid.api.IMapController
 import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
 import org.osmdroid.bonuspack.utils.BonusPackHelper
@@ -92,8 +93,8 @@ class FragmentMain : Fragment(), MapEventsReceiver {
     private var containedMarkers: ArrayList<Marker> = ArrayList()
     private var routePolyLines: ArrayList<Polyline> = ArrayList()
 
-    private val viewModelMain: ViewModelMain by activityViewModels { Application.Companion.factory }
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
+    private val viewModelMain: ViewModelMain by inject<ViewModelMain>()
+    private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
 
     private lateinit var mapController: IMapController
     private lateinit var startMarker: Marker
@@ -751,143 +752,79 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
         when(fragmentIndex) {
 
-            ViewModelMain.MainContent.SEARCH -> initSearchFragment()
-            ViewModelMain.MainContent.ROUTE -> initRouteFragment()
-            ViewModelMain.MainContent.INSPECT -> initTripFragment()
-            ViewModelMain.MainContent.CUSTOM -> initCustomPlaceFragment()
-            else -> initNavigationFragment()
+            ViewModelMain.MainContent.SEARCH -> replaceWithSearchFragment()
+            ViewModelMain.MainContent.ROUTE -> replaceWithRouteFragment()
+            ViewModelMain.MainContent.INSPECT -> replaceWithTripFragment()
+            ViewModelMain.MainContent.CUSTOM -> replaceWithCustomPlaceFragment()
+            else -> replaceWithNavigationFragment()
         }
     }
 
-    private fun initSearchFragment() {
+    private fun replaceWithSearchFragment() {
         val tag = "SEARCH_FRAGMENT"
 
-        val existingFragment = childFragmentManager.findFragmentByTag(tag)
+        val fragment = childFragmentManager.findFragmentByTag(tag) ?: FragmentSearch.Companion.newInstance()
 
-        if (existingFragment == null) {
-
-            val fragment = FragmentSearch.Companion.newInstance()
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.mainFragmentContainer.id, fragment, tag)
-            }
-
-        } else {
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.mainFragmentContainer.id, existingFragment, tag)
-            }
+        childFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(binding.mainFragmentContainer.id, fragment, tag)
         }
     }
 
-    private fun initTripFragment() {
+    private fun replaceWithTripFragment() {
         val tag = "TRIP_FRAGMENT"
 
-        val existingFragment = childFragmentManager.findFragmentByTag(tag)
+        val fragment = childFragmentManager.findFragmentByTag(tag) ?: FragmentInspectTrip.newInstance()
 
-        if (existingFragment == null) {
-
-            val fragment = FragmentInspectTrip.newInstance()
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.mainFragmentContainer.id, fragment, tag)
-            }
-
-        } else {
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.mainFragmentContainer.id, existingFragment, tag)
-            }
+        childFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(binding.mainFragmentContainer.id, fragment, tag)
         }
     }
 
-    private fun initRouteFragment() {
+    private fun replaceWithRouteFragment() {
         val tag = "ROUTE_FRAGMENT"
 
-        val existingFragment = childFragmentManager.findFragmentByTag(tag)
+        val fragment = childFragmentManager.findFragmentByTag(tag) ?: FragmentRoute.Companion.newInstance()
 
-        if (existingFragment == null) {
-
-            val fragment = FragmentRoute.Companion.newInstance()
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.mainFragmentContainer.id, fragment, tag)
-            }
-
-        } else {
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.mainFragmentContainer.id, existingFragment, tag)
-            }
+        childFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(binding.mainFragmentContainer.id, fragment, tag)
         }
     }
 
-    private fun initNavigationFragment() {
+    private fun replaceWithNavigationFragment() {
         val tag = "NAVIGATION_FRAGMENT"
 
-        val existingFragment = childFragmentManager.findFragmentByTag(tag)
+        val fragment = childFragmentManager.findFragmentByTag(tag) ?: FragmentNavigation.Companion.newInstance()
 
-        if (existingFragment == null) {
-
-            val fragment = FragmentNavigation.Companion.newInstance()
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.mainFragmentContainer.id, fragment, tag)
-            }
-
-        } else {
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.mainFragmentContainer.id, existingFragment, tag)
-            }
+        childFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(binding.mainFragmentContainer.id, fragment, tag)
         }
     }
 
-    private fun initCustomPlaceFragment() {
+    private fun replaceWithCustomPlaceFragment() {
         val tag = "CUSTOM_PLACE_FRAGMENT"
 
-        val existingFragment = childFragmentManager.findFragmentByTag(tag)
+        val fragment =
+            childFragmentManager.findFragmentByTag(tag) ?: FragmentCustomPlace.newInstance()
 
-        if (existingFragment == null) {
 
-            val fragment = FragmentCustomPlace.newInstance()
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.mainFragmentContainer.id, fragment, tag)
-            }
-
-        } else {
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.mainFragmentContainer.id, existingFragment, tag)
-            }
+        childFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(binding.mainFragmentContainer.id, fragment, tag)
         }
     }
 
     private fun initDetailsFragment() {
         val tag = "PLACE_DETAILS_FRAGMENT"
 
-        val existingFragment = childFragmentManager.findFragmentByTag(tag)
+        val fragment = childFragmentManager.findFragmentByTag(tag) ?: FragmentPlaceDetails.Companion.newInstance()
 
-        if (existingFragment == null) {
-
-            val fragment = FragmentPlaceDetails.Companion.newInstance()
-
-            childFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace(binding.bottomSheetContainer.id, fragment, tag)
-            }
-
+        childFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(binding.bottomSheetContainer.id, fragment, tag)
         }
 
         standardBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED

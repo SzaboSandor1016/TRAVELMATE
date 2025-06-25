@@ -20,6 +20,7 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -69,8 +70,7 @@ class FragmentSaveTrip : Fragment() {
     private var currentTrip: Trip? = null
     private var currentTripIdentifier: TripRepositoryImpl.TripIdentifier? = null
 
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
-    private val viewModelMain: ViewModelMain by activityViewModels{ Application.Companion.factory }
+    private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

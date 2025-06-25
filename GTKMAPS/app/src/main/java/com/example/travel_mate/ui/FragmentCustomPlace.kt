@@ -15,7 +15,9 @@ import com.example.travel_mate.Application
 import com.example.travel_mate.data.Address
 import com.example.travel_mate.data.Place
 import com.example.travel_mate.databinding.FragmentCustomPlaceBinding
+import com.example.travel_mate.ui.ViewModelMain.MainContent
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 /**
  * A simple [androidx.fragment.app.Fragment] subclass.
@@ -52,8 +54,7 @@ class FragmentCustomPlace : Fragment() {
 
     private var customPlace: Place? = null
 
-    private val viewModelMain: ViewModelMain by activityViewModels { Application.Companion.factory }
-    private val viewModelUser: ViewModelUser by activityViewModels { Application.Companion.factory }
+    private val viewModelMain: ViewModelMain by inject<ViewModelMain>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

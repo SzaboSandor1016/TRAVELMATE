@@ -1,5 +1,6 @@
 package com.example.travel_mate.domain
 
+/*
 import com.example.travel_mate.ui.ViewModelMain
 import com.example.travel_mate.ui.ViewModelMain.MainContent
 import java.util.Stack
@@ -17,4 +18,4 @@ class SetPrevMainContent {
 
         return null
     }
-}
+}*/

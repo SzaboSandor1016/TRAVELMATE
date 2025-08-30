@@ -286,6 +286,9 @@
     <string name="error_autocomplete">Hiba történt a kiindulási helyek keresése során...</string>
     <string name="error_show_search">Hiba történt a helyek megjelenítése során...</string>
     <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_dynamicfeature">TEST</string>
+    <!-- TODO: Remove or change this placeholder text -->
     <!-- TODO: Remove or change this placeholder text -->
     <!-- TODO: Remove or change this placeholder text -->
 

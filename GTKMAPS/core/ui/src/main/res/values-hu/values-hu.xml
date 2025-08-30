@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TravelMate</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="ok">Ok</string>
+    <string name="select_all">Összes kijelölése</string>
+
+    <string name="hospitality">Vendéglátóhelyek</string>
+    <string name="programs">Programok</string>
+    <string name="accommodation">Szálláshelyek</string>
+    <string name="landmarks">Látványosságok</string>
+    <string name="aquatics">Vízi tevékenységek</string>
+
+    <string name="restaurant">Éttermek</string>
+
+    <string name="church">Műemlékek, templomok</string>
+    <string name="museum">Múzeumok, kiállítások</string>
+    <string name="park">Parkok</string>
+    <string name="national_park">Nemzeti parkok</string>
+    <string name="adventure_park">Kalandparkok, vidámparkok</string>
+    <string name="castle">Várak, kastélyok</string>
+    <string name="shopping">Vásárlás</string>
+    <string name="farmers_market">Termelői piacok</string>
+    <string name="beach">Strandolás</string>
+    <string name="viewpoint">Kilátó, kilátás</string>
+    <string name="hiking">Túrázás, túra útvonalak</string>
+    <string name="bicycle">Kerékpározás, kerékpárutak</string>
+    <string name="sailing">Hajózás, vitorlázás</string>
+    <string name="spa">Gyógy- és wellnessfürdők</string>
+    <string name="festival">Zenei, művészeti fesztiválok</string>
+    <string name="concert">Koncertek</string>
+    <string name="theatre">Színházak</string>
+    <string name="sport">Sport</string>
+    <string name="other"> Egyéb</string>
+    <string name="within_15">15 perc</string>
+    <string name="within_30">30 perc</string>
+    <string name="within_45">45 perc</string>
+
+    <string name="current_location">Tartózkodási hely használata a kereséshez </string>
+    <string name="current_location_off">Nem sikerült meghatározni az Ön jelenlegi helyzetét \n Kérjük próbálja meg később!</string>
+    <string name="current">Tartózkodási hely</string>
+    <string name="search_place">Kiindulási hely</string>
+    <string name="distance">"Távolság (Perc):"</string>
+    <string name="categories">Kategóriák:</string>
+    <string name="search_button">Keresés</string>
+    <string name="add_search">Mentett keresések</string>
+    <string name="something_happened">Hiba történt az adatok lekérése során!</string>
+    <string name="there_is_no_such_place">Nem található ilyen hely!</string>
+    <string name="please_choose_distance">Válasszon egy távolságot!</string>
+    <string name="please_choose_transport_mode">Válasszon egy közlekedési formát!</string>
+    <string name="empty_category_list">Válassza ki a keresni kívánt kategóriákat!</string>
+    <string name="category_selection_error">Hiba lépett fel a kategóriák kiválasztása során!</string>
+    <string name="route_empty_place_list">Válasszon ki legalább egy érinteni kívánt helyet!</string>
+    <string name="route_planning_error">Nem sikerült a kívánt útvonal meghatározása! \n Kérjük próbálja újra később!</string>
+
+    <string name="load_current_location">Tartózkodási hely megjelenítése betöltéskor</string>
+    <!--<string name="save_options">Mentse az előző keresés adatait</string>-->
+
+
+    <string name="choose_transport">Válasszon közlekedési módot!</string>
+    <string name="transporte_form">Közlekedési forma:</string>
+    <string name="walk">Gyalog</string>
+    <string name="car">Autóval</string>
+    <string name="more_categories"> Több kategória</string>
+
+    <string name="detailed">Részletes keresés</string>
+    <string name="city">Város...</string>
+    <string name="street">Utca...</string>
+    <string name="housenumber">Házszám...</string>
+
+    <string name="from">Innen:</string>
+
+    <string name="route">Útvonal tervezés</string>
+
+    <string name="add_toast">A keresés sikeresen mentve</string>
+    <string name="delete_message">Törli a keresést?</string>
+    <string name="positive"> Igen</string>
+    <string name="negative">Nem</string>
+    <string name="search_title">"Cím* "</string>
+    <string name="new_search_title">Új cím (nem kötelező)</string>
+    <string name="save">Mentés</string>
+    <string name="dismiss">Mégse</string>
+    <string name="select">Kiválaszt</string>
+    <string name="delete">Törlés</string>
+    <string name="save_as">Mentés ... ként</string>
+    <string name="save_title_empty">Kérjük adjon címet a mentésnek!</string>
+
+    <string name="unknown">Ismeretlen</string>
+
+    <string name="start">Kezdőpont</string>
+    <string name="provide_start">A kereséshez adjon meg egy kiindulási helyet!</string>
+
+    <string name="email">"E-mail cím* "</string>
+    <string name="email_2">E-mail cím: </string>
+    <string name="username">Felhasználónév*</string>
+    <string name="username_2">Felhasználónév: </string>
+    <string name="forgot_password">Elfelejtett jelszó</string>
+    <string name="reset_password"> Jelszó visszaállítása</string>
+    <string name="confirm_forgot_password"> Adja meg a fiókjához tartozó E-mail címét, kattintson a \n \"Jelszó visszaállítása\" gombra, majd kövesse az E-mailben kapott utasításokat! </string>
+    <string name="email_sent">E-mail elküldve!</string>
+    <string name="email_not_sent">Az e-mail nem lett elküldve!</string>
+    <string name="password">Jelszó*</string>
+    <string name="password_2">Jelszó: </string>
+    <string name="new_password">Új jelszó* </string>
+    <string name="old_password">Régi jelszó</string>
+    <string name="password_again">Jelszó ismét*</string>
+    <string name="password_again_2">Jelszó ismét: </string>
+    <string name="new_password_again">Új jelszó ismét* </string>
+    <string name="birthdate">Születési dátum </string>
+    <string name="birthdate_year">Év </string>
+    <string name="birthdate_month">Hónap </string>
+    <string name="birthdate_day">Nap </string>
+    <string name="family_name">Családnév </string>
+    <string name="family_name_2">Családnév: </string>
+    <string name="given_name">Keresztnév </string>
+    <string name="given_name_2">Keresztnév: </string>
+    <string name="empty_log_in">Az e-mail cím és/vagy a jelszó mező üres! </string>
+
+    <string name="login">Bejelentkezés</string>
+    <string name="please_login">Kérjük jelentkezzen be a megosztáshoz!</string>
+    <string name="register">Regisztráció</string>
+    <string name="new_user">Új felhasználó vagyok.</string>
+    <string name="logout">Kijelentkezés</string>
+    <string name="change_data">Felhasználói adat változtatás</string>
+    <string name="change_success">Az adatváltoztatás sikeres!</string>
+    <string name="change_unsuccess">Az adatváltoztatás sikertelen!</string>
+    <string name="login_unsuccess">Sikertelen bejelentkezés!</string>
+    <string name="signup_unsuccess">Sikertelen regisztráció!</string>
+    <string name="empty_message">Kérjük töltse ki az összes mezőt!</string>
+    <string name="password_mismatch">*a jelszavak nem egyeznek</string>
+    <string name="old_password_mismatch">A régi jelszavak nem egyeznek!</string>
+    <string name="new_password_mismatch">Az új jelszavak nem egyeznek!</string>
+    <string name="used_username">Ez a felhasználónév már foglalt!</string>
+    <string name="share_title_empty">Kérjük adjon címet a megosztásnak!</string>
+    <string name="share_empty_place_list">Válasszon ki legalább egy megosztani kívánt helyet!</string>
+    <string name="empty_addressee">A címzett mező üres!</string>
+    <string name="empty_addressee_list">A címzett lista üres!</string>
+    <string name="share_success">A megosztás sikeres!</string>
+    <string name="share_unsuccess">A megosztás sikertelen!</string>
+    <string name="logged_as">Bejelentkezve mint: </string>
+    <string name="delete_account">Fiók törlése</string>
+    <string name="change_password">Jelszó változtatás</string>
+    <string name="confirm_delete_account_message">A fiók törlése eltávolít minden Ön által tárolt információt az adatbázisunkból. \n Ezt nem lehet visszavonni.</string>
+    <string name="confirm_delete"> A megerősítéshez adja meg a jelszavát</string>
+    <string name="delete_successful">A fiók törlése sikeres!</string>
+    <string name="delete_unsuccessful">A fiók törlése sikertelen!</string>
+    <string name="update_username_unsuccess"> A felhasználónév módosítása sikertelen!</string>
+
+    <string name="confirm_password_change_message">Erősítse meg az új jelszót!</string>
+    <string name="change_successful">A jelszó változtatás sikeres!</string>
+    <string name="change_unsuccessful">A jelszó változtatás sikertelen!</string>
+
+    <string name="personal">Személyes</string>
+    <string name="email_and_password">E-mail és jelszó</string>
+
+
+    <string name="delete_share_message">Törli a megosztást?</string>
+
+
+    <string name="cuisine"> Konyha/Kínálat: </string>
+    <string name="opening_hours"> Nyitvatartás: </string>
+    <string name="charge">Árak: </string>
+
+    <string name="shares">Megosztások</string>
+    <array name="shares_options">
+        <item>Korábbi címzettek</item>
+        <item>Velem megosztva</item>
+        <item>Megosztásaim</item>
+    </array>
+    <string name="account">Fiók</string>
+    <string name="edit_account">Fiók szerkesztése</string>
+    <array name="account_data">
+        <item>Felhasználói adatok</item>
+        <item>További beállítások</item>
+    </array>
+    <array name="further_settings_options">
+        <item>Jelszó változtatás</item>
+        <item>Fiók törlése</item>
+    </array>
+
+    <string name="share"> Megosztás </string>
+    <string name="update"> Módosítás </string>
+    <string name="update_share_success"> A megosztás módosítása sikeres!</string>
+    <string name="shared_with_me"> Velem megosztottak </string>
+    <string name="shared_by_me"> Megosztásaim </string>
+    <string name="shared_with">Megosztva vele: </string>
+    <string name="note">Megjegyzés </string>
+
+    <string name="share_message">
+        Adjon hozzá címzetteket a gomb segítségével, vagy válasszon az alábbi listából.
+    </string>
+    <string name="save_message"> Adja meg az új mentés címét.</string>
+
+    <string name="contacts"> Kapcsolatok/ korábbi címzettek</string>
+    <string name="contributors"> Résztvevők </string>
+    <string name="updated_addressees_success">A korábbi címzettek listája \n sikeresen frissítve!</string>
+    <string name="updated_addressees_unsuccess">A korábbi címzettek listájának \n frissítése sikertelen!</string>
+
+
+    <string name="delete_shared_with_me_warning">Nem fogja látni többet ezt a megosztást, hacsak nem osztják meg újból Önnel! </string>
+
+    <string name="accept_privacy_policy">A regisztrációval elfogadja az Adatkezelési Nyilatkozatot</string>
+    <string name="privacy_policy">Adatkezelési Nyilatkozat</string>
+    <string name="privacy_policy_text">
+Üdvözöljük az PANNON-MAPS mobilalkalmazásban! Az alábbiakban szeretnénk tájékoztatni Önt az általunk gyűjtött és kezelt adatokról, valamint azok felhasználásáról. Kérjük, olvassa el figyelmesen az alábbiakat:
+
+    \n\nAdatok gyűjtése és felhasználása:
+
+\n\n\tAz PANNON-MAPS mobilalkalmazás a következő adatokat gyűjti és kezeli:
+
+    \n\n\t\tBejelentkezéshez használt e-mail cím
+    \n\t\tRegisztráció során megadott név
+    \n\t\tRegisztráció során megadott felhasználónév
+    \n\t\tRegisztráció során megadott születési dátum
+
+    \n\n\tEzen adatok gyűjtésének és kezelésének célja az alkalmazásban történő azonosítás biztosítása, valamint statisztikák készítése és elemzése az alkalmazás teljesítményének és használatának javítása érdekében.
+    \n\n\tA fent említetteken kívül nem kezelünk és semmilyen formában (e-mail, telefon) nem kérünk más személyes adatot Öntől.
+
+    \n\nAdatbiztonság:
+
+\n\n\tAz Ön által megadott személyes adatokat biztonságosan kezeljük, és mindent megteszünk annak érdekében, hogy megakadályozzuk az illetéktelen hozzáférést, felhasználást vagy változtatást. Személyes adatait csak az alkalmazás céljainak megvalósításához használjuk fel, és semmilyen körülmények között nem adjuk ki vagy értékesítjük harmadik fél számára.
+
+    \n\nHozzájárulás:
+
+\n\n\tA mobilalkalmazás használatával Ön hozzájárul ahhoz, hogy az PANNON-MAPS mobilalkalmazás kezelje a fent említett személyes adatait az itt leírtaknak megfelelően.
+
+\n\nKérjük, vegye figyelembe, hogy az adatvédelmi gyakorlatunk időszakosan frissülhet, ezért javasoljuk, hogy rendszeresen ellenőrizze az alkalmazásban található adatvédelmi nyilatkozatot az esetleges változásokért.
+
+\n\nKöszönjük, hogy az PANNON-MAPS mobilalkalmazást választotta!</string>
+    <string name="add_to_trip">Hozzáadás utazáshoz</string>
+    <string name="add_to_tour">Hozzáadás körúthoz</string>
+    <string name="create_trip">Utazás létrehozása</string>
+    <string name="save_trip">Utazás mentése</string>
+    <string name="optimize_route">Javasolt útvonal</string>
+    <string name="relax">Kikapcsolódás</string>
+    <string name="cafe">Kávézók</string>
+    <string name="fast_food">Gyorséttermek</string>
+    <string name="pub_bar">Bárok</string>
+    <string name="casino">Kaszinók</string>
+    <string name="cinema">Mozik</string>
+    <string name="nightclub">Szórakozóhelyek</string>
+    <string name="others">Egyebek</string>
+    <string name="beach_resort">Strand</string>
+    <string name="zoo">Állatkert</string>
+    <string name="remove_from_trip">Eltávolítás az utazásból</string>
+    <string name="remove_from_tour">Eltávolítás a körútból</string>
+    <string name="required">*kötelező</string>
+    <string name="date">Dátum</string>
+    <string name="date_format">ÉÉÉÉ/HH/NN</string>
+    <string name="day_of_trip">Az utazás napja</string>
+    <!-- Strings used for fragments for navigation -->
+
+    <string name="not_signed_in">Nincs bejelentkezve</string>
+    <string name="my_trips">Saját utazásaim</string>
+    <string name="shared_by_others">Mások által megosztva</string>
+    <string name="shared_with_others">Másokkal megosztva</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="fragment_main_label">FragmentMain</string>
+    <string name="fragment_user_label">FragmentUser</string>
+    <string name="fragment_sign_in_label">FragmentSignIn</string>
+    <string name="fragment_sign_up_label">FragmentSignUp</string>
+    <string name="done">Kész</string>
+    <string name="add_contributor">Résztvevő hozzáadása</string>
+    <string name="duration_string">perc</string>
+    <string name="distance_string">méter</string>
+    <string name="start_navigation">Navigáció indítása</string>
+    <string name="can_update_trip">Módosíthatja az utazást</string>
+    <string name="created_by">Készítő</string>
+    <string name="trip_title">Utazás címe</string>
+    <string name="edit_places">Helyek szerkesztése</string>
+    <string name="place_name">Hely neve</string>
+    <string name="place_address">Hely címe</string>
+    <string name="set_as_start">Beállítás kezdőpontnak</string>
+    <string name="navigate_to">Navigáció ide</string>
+    <string name="to_next_goal">A következő állomáshoz</string>
+    <string name="error_search">Hiba történt a helyek keresése során...</string>
+    <string name="error_navigation">Hiba történt a navigáció során...</string>
+    <string name="error_location">Hiba a tartózkodási hely lekérése során...</string>
+    <string name="error_other">Hiba történt a művelet végrehajtása során...</string>
+    <string name="error_custom_place">Hiba történt a hely lekérése során...</string>
+    <string name="error_autocomplete">Hiba történt a kiindulási helyek keresése során...</string>
+    <string name="error_show_search">Hiba történt a helyek megjelenítése során...</string>
+    <string name="month_1">JAN</string>
+    <string name="month_2">FEB</string>
+    <string name="month_3">MÁR</string>
+    <string name="month_4">ÁPR</string>
+    <string name="month_5">MÁJ</string>
+    <string name="month_6">JÚN</string>
+    <string name="month_7">JÚL</string>
+    <string name="month_8">AUG</string>
+    <string name="month_9">SZEP</string>
+    <string name="month_10">OKT</string>
+    <string name="month_11">NOV</string>
+    <string name="month_12">DEC</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
+
+</resources>

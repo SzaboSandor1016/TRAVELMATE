@@ -1,0 +1,50 @@
+plugins {
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")
+    id("kotlin-parcelize")
+}
+
+android {
+    namespace = "com.example.core.remotedatasources.searchstartdatasource.data"
+    compileSdk = 35
+
+    defaultConfig {
+        minSdk = 29
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
+dependencies {
+
+    implementation(project(":core:remotedatasources"))
+    implementation(project(":core:remotedatasources:searchstartdatasource:domain"))
+
+    /*implementation("com.squareup.okhttp3:4.12.0")*/
+
+    implementation ("com.github.MKergall:osmbonuspack:6.9.0")
+
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.1")
+
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+
+    implementation("io.insert-koin:koin-android:4.1.0")
+}

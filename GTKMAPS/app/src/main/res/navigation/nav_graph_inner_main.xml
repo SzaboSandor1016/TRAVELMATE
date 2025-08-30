@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_inner_main"
+    app:startDestination="@id/fragmentSearch">
+
+    <fragment
+        android:id="@+id/fragmentSearch"
+        android:name="com.example.features.search.presentation.FragmentSearch"
+        android:label="fragment_search"
+        tools:layout="@layout/fragment_search" >
+
+        <deepLink
+            app:uri="android-app://com.example.features/search"/>
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentInspectTrip"
+        android:name="com.example.features.inspect.presentation.FragmentInspectTrip"
+        android:label="fragment_inspect_trip"
+        tools:layout="@layout/fragment_inspect_trip" >
+
+        <deepLink
+            app:uri="android-app://com.example.features/inspect"/>
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentCustomPlace"
+        android:name="com.example.features.findcustom.presentation.fragment.FragmentCustomPlace"
+        android:label="fragment_custom_place"
+        tools:layout="@layout/fragment_custom_place" >
+
+        <deepLink
+            app:uri="android-app://com.example.features/custom_place"/>
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentRoute"
+        android:name="com.example.features.route.presentation.FragmentRoute"
+        android:label="fragment_route"
+        tools:layout="@layout/fragment_route" >
+
+        <deepLink
+            app:uri="android-app://com.example.features/route"/>
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentNavigation"
+        android:name="com.example.features.navigation.presentation.FragmentNavigation"
+        android:label="FragmentNavigation" >
+
+        <deepLink
+            app:uri="android-app://com.example.features/navigation"/>
+    </fragment>
+</navigation>

@@ -1,42 +1,11 @@
 package com.example.travel_mate.ui
 
+/*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.travel_mate.data.RouteRepositoryImpl
-import com.example.travel_mate.domain.SearchOptionsRepository
-import com.example.travel_mate.domain.CheckUserUseCase
-import com.example.travel_mate.domain.CurrentTripRepository
-import com.example.travel_mate.domain.CustomPlaceRepository
-import com.example.travel_mate.domain.DeleteTripUseCase
-import com.example.travel_mate.domain.DeleteUserUseCase
-import com.example.travel_mate.domain.GetCurrentLocationUseCase
-import com.example.travel_mate.domain.GetLocalTripsUseCase
-import com.example.travel_mate.domain.InitSearchAndRouteWithLocationStartUseCase
-import com.example.travel_mate.domain.GetNewContributorDataUseCase
-import com.example.travel_mate.domain.GetRemoteContributedTripsUseCase
-import com.example.travel_mate.domain.GetRemoteTripsUseCase
-import com.example.travel_mate.domain.GetSelectableContributorsUseCase
-import com.example.travel_mate.domain.GetSelectedTripDataUseCase
-import com.example.travel_mate.domain.InitRouteUseCase
-import com.example.travel_mate.domain.InitSearchAndRouteWithSelectedStartUseCase
-import com.example.travel_mate.domain.InitSearchUseCase
-import com.example.travel_mate.domain.NavigateToNextPlaceUseCase
-import com.example.travel_mate.domain.NavigationRepository
-import com.example.travel_mate.domain.SaveTripUseCase
-import com.example.travel_mate.domain.SaveTripWithUpdatedPlacesUseCase
-import com.example.travel_mate.domain.SearchAutocompleteUseCase
-import com.example.travel_mate.domain.SearchPlacesUseCase
-import com.example.travel_mate.domain.SearchRepository
-import com.example.travel_mate.domain.SetCurrentTripContributorsUseCase
-import com.example.travel_mate.domain.SetCustomPlaceUseCase
-import com.example.travel_mate.domain.SetSearchMinuteUseCase
-import com.example.travel_mate.domain.SetSearchTransportModeUseCase
-import com.example.travel_mate.domain.SetUserPermissionUseCase
-import com.example.travel_mate.domain.SignInUserUseCase
-import com.example.travel_mate.domain.SignOutUserUseCase
-import com.example.travel_mate.domain.SignUpUserUseCase
-import com.example.travel_mate.domain.TripRepository
-import com.example.travel_mate.domain.UserRepository
+import com.example.features.findcustom.domain.repositories.CustomPlaceRepository
+import com.example.features.search.domain.repositories.SearchOptionsRepository
+import com.example.features.search.domain.repositories.SearchRepository
 
 class ViewModelFactory(
     private val searchRepository: SearchRepository,
@@ -121,4 +90,4 @@ class ViewModelFactory(
         }
     }
 
-}
+}*/

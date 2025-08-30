@@ -1,0 +1,19 @@
+<vector android:height="36dp"
+    android:viewportHeight="24" android:viewportWidth="24"
+    android:width="36dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path
+        android:fillColor="@color/marker_outside_color"
+        android:pathData="M12,2C8.13,2 5,5.13 5,9c0,5.25 7,13 7,13s7,-7.75 7,-13c0,-3.87 -3.13,-7 -7,-7z" />
+
+    <!-- Inner icon, scaled and translated -->
+    <group
+        android:translateX="7.35"
+        android:translateY="3.8"
+        android:scaleX="0.4"
+        android:scaleY="0.4">
+
+        <path
+            android:fillColor="@color/marker_inside_color"
+            android:pathData="M6,3l0,6c0,2.97 2.16,5.43 5,5.91V19H8v2h8v-2h-3v-4.09c2.84,-0.48 5,-2.94 5,-5.91l0,-6H6zM16,8H8l0,-3h8C16,5 16,8 16,8z" />
+    </group>
+</vector>

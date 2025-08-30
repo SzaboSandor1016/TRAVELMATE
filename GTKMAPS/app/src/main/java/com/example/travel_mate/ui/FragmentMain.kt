@@ -11,23 +11,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.travel_mate.Application
-import com.example.travel_mate.R
-import com.example.travel_mate.data.Coordinates
-import com.example.travel_mate.data.Place
-import com.example.travel_mate.data.Route
+import androidx.navigation.NavController
+import androidx.navigation.NavDeepLinkRequest
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
+import com.example.core.ui.R
+import com.example.features.selectedplace.presentation.FragmentPlaceDetails
 import com.example.travel_mate.databinding.FragmentMainBinding
-import com.example.travel_mate.ui.ViewModelMain.ErrorGroup
+import com.example.travel_mate.ui.models.CoordinatesMapPresentationModel
+import com.example.travel_mate.ui.models.MapDataMapPresentationModel
+import com.example.travel_mate.ui.models.PlaceDataMapPresentationModel
+import com.example.travel_mate.ui.viewmodel.ViewModelMain
+import com.example.core.utils.ClassCategoryManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -48,7 +53,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
 /**
- * A simple [androidx.fragment.app.Fragment] subclass.
+ * A simple [Fragment] subclass.
  * Use the [FragmentMain.newInstance] factory method to
  * create an instance of this fragment.
  */
@@ -79,12 +84,13 @@ class FragmentMain : Fragment(), MapEventsReceiver {
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
 
+    //TODO MAAYBEEE INJECT IT
     private var categoryManager: ClassCategoryManager? = null
     private var resources: Resources? = null
 
     private lateinit var standardBottomSheetBehavior: BottomSheetBehavior<FrameLayout>
 
-    var startPlace: Place = Place()
+    //var startPlace: PlaceDataMapPresentationModel = PlaceDataMapPresentationModel()
 
     private var locationMarker: Marker? = null
 
@@ -94,7 +100,7 @@ class FragmentMain : Fragment(), MapEventsReceiver {
     private var routePolyLines: ArrayList<Polyline> = ArrayList()
 
     private val viewModelMain: ViewModelMain by inject<ViewModelMain>()
-    private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
+    //private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
 
     private lateinit var mapController: IMapController
     private lateinit var startMarker: Marker
@@ -103,7 +109,11 @@ class FragmentMain : Fragment(), MapEventsReceiver {
     private lateinit var containedOverlay: FolderOverlay
     private lateinit var mapEventsOverlay: MapEventsOverlay
 
-    private lateinit var fragmentManager: FragmentManager
+    private var uiState: String = MapDataMapPresentationModel.Search().javaClass.name
+
+    private lateinit var navController: NavController;
+
+        private lateinit var fragmentManager: FragmentManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -142,13 +152,17 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
         Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context))
 
+        val navHostFragment = childFragmentManager
+            .findFragmentById(com.example.travel_mate.R.id.nav_host_fragment_content_main) as NavHostFragment
+        navController = navHostFragment.navController
+
         mapController = binding.map.controller
         startMarker= Marker(binding.map)
 
         /*
         In theory this would make the map not to show constantly
         and limit the scrollable area
-        if fully zoomed out but actually it breaks the application
+        if fully zoomed out, but actually it breaks the application
          */
         /*binding.map.isVerticalMapRepetitionEnabled = false
         binding.map.setScrollableAreaLimitLatitude(90.0,90.0,0)*/
@@ -174,37 +188,60 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
         fragmentManager = childFragmentManager
 
-        viewModelUser.checkCurrentUser()
+        standardBottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheetContainer)
 
-        viewModelMain.getInitialCurrentLocation()
+        standardBottomSheetBehavior.addBottomSheetCallback(bottomSheetCallback)
 
-        replaceCurrentMainFragment(ViewModelMain.MainContent.SEARCH) //set the current main fragment to FragmentSearch
+        /*viewModelUser.checkCurrentUser()
 
-/**Observe the [ViewModelMain.chipsState], [ViewModelMain.placeState], [ViewModelMain.mainInspectTripState] and the [ViewModelMain.mainSearchState] located in [viewModelMain]
- *
- **/
+        viewModelMain.getInitialCurrentLocation()*/
+
+        //replaceCurrentMainFragment(ViewModelMain.MainContent.SEARCH) //set the current main fragment to FragmentSearch
+
+        /**Observe the [com.example.travel_mate.ui.ViewModelMain.chipsState], [com.example.travel_mate.ui.ViewModelMain.placeState], [com.example.travel_mate.ui.ViewModelMain.mainInspectTripState] and the [com.example.travel_mate.ui.ViewModelMain.mainSearchState] located in [viewModelMain]
+         *
+         **/
 //_________________________________________________________________________________________________________________________
 // BEGINNING OF MAIN VIEWMODEL OBSERVER
 //_________________________________________________________________________________________________________________________
 
+        //TODO When the selected place changes center the map to its position
 
-        /** [ViewModelMain.mainSearchState] observer
-         *  observe the [viewModelMain]'s [ViewModelMain.mainSearchState]
+        /** [com.example.travel_mate.ui.ViewModelMain.mainSearchState] observer
+         *  observe the [viewModelMain]'s [com.example.travel_mate.ui.ViewModelMain.mainSearchState]
          *  on state update
          *  - the [handleStartPlaceChange] function is called
          *  - [handlePhotonObserve] function is called
          *   if its [startPlaces] is not empty
          *  - [showMapContent] function is called
          *  - [handleRouteStopsChange] function is called
-         *  - [ViewModelMain.getCurrentPlaceByUUID] function is called
+         *  - [com.example.travel_mate.ui.ViewModelMain.getCurrentPlaceByUUID] function is called
          *   if there is a currentPlace selected
          *
          */
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModelMain.mainSearchState.collect {
 
-                    Log.d("isStartPlacesEmpty", it.startPlaces.isEmpty().toString())
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                viewModelMain.mapState.collect {
+
+                    replaceCurrentMainFragment(it.mapData)
+
+                    updateMapContentWith(it.mapData)
+
+                    if (it.mapData is MapDataMapPresentationModel.Search) {
+
+                        viewModelMain.initRouteWith(it.mapData.startPlace)
+
+                        viewModelMain.initSaveWith()
+                    }
+
+                    if(it.mapData is MapDataMapPresentationModel.Inspect) {
+
+                        viewModelMain.initRouteWith(it.mapData.startPlace)
+                    }
+
+                    /*Log.d("isStartPlacesEmpty", it.startPlaces.isEmpty().toString())
 
                     showMapContent(
                         places = it.places
@@ -215,108 +252,21 @@ class FragmentMain : Fragment(), MapEventsReceiver {
                             uuid = it.currentPlaceUUID
                         )
 
-                    Log.d("tripEmpty", it.isTripEmpty.toString())
+                    Log.d("tripEmpty", it.isTripEmpty.toString())*/
                 }
             }
         }
 
-        /** [ViewModelMain.placeState] observer
-         *  observe the [viewModelMain]'s [ViewModelMain.placeState]
-         *  on state update
-         *  - sets the [standardBottomSheetBehavior]'s peekHeight
-         *      on the measured height read from the state
-         */
-
         viewLifecycleOwner.lifecycleScope.launch {
+
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                viewModelMain.placeState.collect {
+                viewModelMain.navigationLocationState.collect {
 
-                    if (it.currentPlace == null) {
-                        standardBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    if (it != null) {
+
+                        showNavigationData(it)
                     }
-                    /*if (it.currentPlace != null)
-                        updateCurrentPlace(it.currentPlace)*/
-                    standardBottomSheetBehavior.peekHeight = it.containerHeight
-
-                    Log.d("refresh", "refresh")
-                }
-            }
-        }
-
-        /** [ViewModelMain.mainStartPlaceState] observer
-         *  observe the [viewModelMain]'s [ViewModelMain.mainStartPlaceState]
-         *  on state update
-         *  - call [handleStartPlaceChange]
-         */
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-                viewModelMain.mainStartPlaceState.collect {
-
-                    handleStartPlaceChange(
-                        startPlace = it.startPlace
-                    )
-
-                    Log.d("refresh", "refresh")
-                }
-
-            }
-        }
-
-        /** [ViewModelMain.mainNavigationState] observer
-         *  observe the [viewModelMain]'s [ViewModelMain.mainNavigationState]
-         *  on state update
-         *  - call [showNavigationData]
-         *  - call [handleRouteStopsChange]
-         */
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-                viewModelMain.mainNavigationState.collect {
-
-                    showNavigationData(
-                        coordinates = it.currentLocation,
-                    )
-
-                    handleNavigationChange(
-                        routePolyline = it.navigationPolyline
-                    )
-
-                    Log.d("refresh", "refresh")
-                }
-            }
-        }
-
-        /** [ViewModelMain.mainRouteState] observer
-         *  observe the [viewModelMain]'s [ViewModelMain.mainRouteState]
-         *  on state update
-         *  - call [handleRouteChange]
-         */
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-                viewModelMain.mainRouteState.collect {
-
-                    if (it.selectedRouteNodePosition != null) {
-
-                        updateMapOnRouteStopSelected(
-                            coordinates = it.selectedRouteNodePosition
-                        )
-
-                        viewModelMain.setSelectedRouteNodePosition(
-                            coordinates = null
-                        )
-                    }
-
-                    handleRouteChange(
-                        route = it.route
-                    )
-
-                    Log.d("routePolysFragment",  it.route.getRouteNodes().size.toString())
-
-                    Log.d("refresh", "refresh")
                 }
             }
         }
@@ -325,47 +275,13 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                viewModelMain.mainContentState.collect {
+                viewModelMain.selectedPlaceOptions.collect {
 
-                    Log.d("contentId", it.currentContentId.toString())
-
-                    replaceCurrentMainFragment(
-                        fragmentIndex = it.currentContentId
-                    )
+                    standardBottomSheetBehavior.setPeekHeight(it.containerHeight, true)
                 }
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-                viewModelMain.mainCustomPlaceState.collect {
-
-                    showCustomPlace(
-                        uuid = it.customPlace?.uUID,
-                        coordinates = it.customPlace?.getCoordinates()
-                    )
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-                viewModelMain.mainErrorState.collect {
-
-                    showErrorMessage(
-                        errorType = it
-                    )
-
-                    viewModelMain.setErrorGroupType(
-                        errorType = ErrorGroup.NOTHING
-                    )
-                }
-            }
-        }
 
 //_________________________________________________________________________________________________________________________
 // END OF MAIN VIEWMODEL OBSERVER
@@ -395,10 +311,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 //_________________________________________________________________________________________________________________________
 // END OF MAP LISTENER
 // _________________________________________________________________________________________________________________________
-
-        standardBottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheetContainer)
-
-        standardBottomSheetBehavior.addBottomSheetCallback(bottomSheetCallback)
     }
 
     override fun onDestroyView() {
@@ -420,7 +332,7 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         binding.map.onPause()
     }
 
-//Callback for bottom sheet state changes
+    //Callback for bottom sheet state changes
 //_________________________________________________________________________________________________________________________
 // BEGINNING OF BOTTOM SHEET CALLBACK
 //_________________________________________________________________________________________________________________________
@@ -431,12 +343,12 @@ class FragmentMain : Fragment(), MapEventsReceiver {
             when (newState) {
                 BottomSheetBehavior.STATE_COLLAPSED -> {
                     // Bezárt állapot
-                    viewModelMain.setContainerState("collapsed")
+                    viewModelMain.setSelectedPlaceContainerState("collapsed")
 
                 }
                 BottomSheetBehavior.STATE_EXPANDED -> {
                     // Kinyitott állapot
-                    viewModelMain.setContainerState("expanded")
+                    viewModelMain.setSelectedPlaceContainerState("expanded")
                 }
                 // További állapotok kezelése...
                 BottomSheetBehavior.STATE_DRAGGING -> {
@@ -450,6 +362,9 @@ class FragmentMain : Fragment(), MapEventsReceiver {
                     if (fragment != null) {
                         fragmentManager.beginTransaction().remove(fragment).commitNowAllowingStateLoss()
                     }
+
+                    //TODO A FLAG TO BE ABLE TO GET BACK HERE EASIER
+                    // MAYBE RESET THE SELECTED PLACE HERE
                 }
 
                 BottomSheetBehavior.STATE_SETTLING -> {
@@ -465,33 +380,93 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 // END OF BOTTOM SHEET CALLBACK
 //_________________________________________________________________________________________________________________________
 
+
+    private fun updateMapContentWith(mapData: MapDataMapPresentationModel) {
+
+        when (mapData) {
+
+            is MapDataMapPresentationModel.Search -> {
+
+                //binding.map.overlays.add(mapEventsOverlay)
+
+                removeMapData(addMapEventsOverlay = true)
+
+                handleStartPlaceChange(mapData.startPlace)
+
+                showMapContent(mapData.places)
+            }
+            is MapDataMapPresentationModel.CustomPlace -> {
+
+                removeMapData(addMapEventsOverlay = false)
+
+                showCustomPlace(mapData.place.uuid, mapData.place.coordinates)
+            }
+
+            is MapDataMapPresentationModel.Inspect -> {
+
+                removeMapData(addMapEventsOverlay = false)
+
+                handleStartPlaceChange(
+                    mapData.startPlace
+                )
+
+                showMapContent(mapData.days.flatMap { it.places })
+            }
+            is MapDataMapPresentationModel.Navigation -> {
+
+                removeMapData(addMapEventsOverlay = false)
+
+                handleNavigationChange(
+                    mapData.route,
+                    mapData.goal
+                )
+            }
+            is MapDataMapPresentationModel.Route -> {
+
+                removeMapData(addMapEventsOverlay = false)
+
+                handleStartPlaceChange(mapData.startPlace)
+
+                showMapContent(mapData.places)
+
+                handleRouteChange(mapData.polylines)
+            }
+
+            MapDataMapPresentationModel.NavigationArrived -> {
+
+                removeMapData(addMapEventsOverlay = false)
+            }
+        }
+    }
+
+
 //Methods related to the search text field
 //_________________________________________________________________________________________________________________________
 // BEGINNING OF METHODS FOR SEARCH TEXT FIELD
 //_________________________________________________________________________________________________________________________
 
     /** [handleStartPlaceChange]
-     *  on start place change in the [ViewModelMain] caused by an update in [com.example.travel_mate.data.SearchRepositoryImpl]
+     *  on start place change in the [com.example.travel_mate.ui.ViewModelMain] caused by an update in [com.example.data.repositories.SearchRepositoryImpl]
      *  first remove all content from the map
      *  then call [showStart], [setStartTextFiled]
      *  and set the visibility of the category chips.
      */
 
-    private fun handleStartPlaceChange(startPlace: Place?) {
-
-        resetUiOnStartPlaceChange()
+    private fun handleStartPlaceChange(startPlace: PlaceDataMapPresentationModel?) {
 
         showStart(
             startPlace = startPlace
         )
     }
+
+
 //_________________________________________________________________________________________________________________________
 // END OF METHODS FOR SEARCH TEXT FIELD
 //_________________________________________________________________________________________________________________________*/
 
-/*Methods of map related operations
-*
- */
+    /*Methods of map related operations
+    *
+     */
 //_________________________________________________________________________________________________________________________
 // BEGINNING OF METHODS FOR MAP
 //_________________________________________________________________________________________________________________________
@@ -506,15 +481,15 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
     override fun longPressHelper(p: GeoPoint?): Boolean {
 
-        viewModelMain.getCustomPlace(
-            position = p!!
+        viewModelMain.setCustomPlace(
+            geoPoint = p!!
         )
         Log.d("mapLongPress", "press")
 
         return true
     }
 
-    private fun showCustomPlace(uuid: String?, coordinates: Coordinates?) {
+    private fun showCustomPlace(uuid: String?, coordinates: CoordinatesMapPresentationModel?) {
 
         binding.map.overlays.remove(customPlace)
 
@@ -531,9 +506,9 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
     /** [createMarkersOnMap]
      * [createMarkersOnMap] creates and returns a list of the markers
-     *  *  based on the list of [ViewModelMain.PlaceProcessed] classes passed as he functions parameter
+     *  *  based on the list of [com.example.travel_mate.ui.ViewModelMain.PlaceProcessed] classes passed as he functions parameter
      */
-    private fun createMarkersOnMap(places: List<ViewModelMain.PlaceProcessed>): List<Marker> {
+    private fun createMarkersOnMap(places: List<PlaceDataMapPresentationModel>): List<Marker> {
 
         val markers: ArrayList<Marker> = ArrayList()
 
@@ -546,7 +521,7 @@ class FragmentMain : Fragment(), MapEventsReceiver {
             )
             val titleMarker = createTitleMarker(
                 uuid = place.uuid,
-                title = place.title,
+                title = place.name.toString(),
                 coordinates = place.coordinates
             )
 
@@ -565,10 +540,10 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         return markers
     }
 
-    private fun createMarker(uuid: String, category: String?, coordinates: Coordinates): Marker {
+    private fun createMarker(uuid: String, category: String?, coordinates: CoordinatesMapPresentationModel): Marker {
 
         val marker = Marker(binding.map)
-        val position = GeoPoint(coordinates.getLatitude(), coordinates.getLongitude())
+        val position = GeoPoint(coordinates.latitude, coordinates.longitude)
         marker.position = position
         marker.icon = categoryManager?.getMarkerIcon(category)
 
@@ -577,10 +552,10 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         return marker
     }
 
-    private fun createTitleMarker(uuid: String, title: String, coordinates: Coordinates): Marker {
+    private fun createTitleMarker(uuid: String, title: String, coordinates: CoordinatesMapPresentationModel): Marker {
 
         val titleMarker = Marker(binding.map)
-        val position = GeoPoint(coordinates.getLatitude(), coordinates.getLongitude())
+        val position = GeoPoint(coordinates.latitude, coordinates.longitude)
         titleMarker.position = position
         titleMarker.setTextIcon(title)
 
@@ -596,16 +571,16 @@ class FragmentMain : Fragment(), MapEventsReceiver {
             /** get the related object of the clicked marker
             that is the uuid of the place associated with it
             then calls an update on the current place in the ViewModel
-            [ViewModelMain.getCurrentPlaceByUUID]
+            [com.example.travel_mate.ui.ViewModelMain.getCurrentPlaceByUUID]
             set the [com.google.android.material.bottomsheet.BottomSheetDialog]'s
             state as "collapsed"
              */
 
             val relatedPlace = m.relatedObject as String
 
-            viewModelMain.getCurrentPlaceByUUID(relatedPlace)
+            viewModelMain.setSelectedPlace(relatedPlace)
 
-            viewModelMain.setContainerState("collapsed")
+            viewModelMain.setSelectedPlaceContainerState("collapsed")
 
             initDetailsFragment()
 
@@ -618,31 +593,31 @@ class FragmentMain : Fragment(), MapEventsReceiver {
     /** [showMapContent]
      *  handles state update events for all data related to the map
      *  - creates the marker list for [markerClusterer] with the places needed to be clustered
-     *  which are the ones that are not part of the current [com.example.travel_mate.data.Route]
-     *  - create an other list for [Marker]'s that are part of the current [com.example.travel_mate.data.Route]
+     *  which are the ones that are not part of the current [com.example.domain.models.Route]
+     *  - create an other list for [Marker]'s that are part of the current [com.example.domain.models.Route]
      *  these are not clustered and always visible on the map
-     *  - adds all the [Polyline]'s of the current [com.example.travel_mate.data.Route]
+     *  - adds all the [Polyline]'s of the current [com.example.domain.models.Route]
      *  to the map too
      */
     private fun showMapContent(
-        places: List<ViewModelMain.PlaceProcessed>
+        places: List<PlaceDataMapPresentationModel>
     ) {
 
-        binding.map.overlays.remove(containedOverlay)
-        binding.map.overlays.removeAll(containedMarkers)
+        //binding.map.overlays.remove(containedOverlay)
+        //binding.map.overlays.removeAll(containedMarkers)
 
-        containedOverlay = FolderOverlay()
+        //containedOverlay = FolderOverlay()
 
         unContainedMarkers.clear()
-        containedMarkers.clear()
+        //containedMarkers.clear()
 
-        unContainedMarkers.addAll(createMarkersOnMap(places = places.filter { !it.containedByRoute }))
-        containedMarkers.addAll(createMarkersOnMap(places = places.filter { it.containedByRoute }))
+        unContainedMarkers.addAll(createMarkersOnMap(places = places/*.filter { !it.containedByRoute }*/))
+        //containedMarkers.addAll(createMarkersOnMap(places = places.filter { it.containedByRoute }))
 
-        containedMarkers.forEach {
+        /*containedMarkers.forEach {
             containedOverlay.add(it)
         }
-        binding.map.overlays.add(containedOverlay)
+        binding.map.overlays.add(containedOverlay)*/
 
         binding.map.invalidate()
 
@@ -690,17 +665,17 @@ class FragmentMain : Fragment(), MapEventsReceiver {
     }
 
     /** [showStart]
-     * handles the change of the current [com.example.travel_mate.data.Search]'s start place change
+     * handles the change of the current [com.example.model.Search]'s start place change
      * when it changes the function creates a new marker for it
      * then adds it to the map's overlays
      */
-    private fun showStart(startPlace: Place?) {
+    private fun showStart(startPlace: PlaceDataMapPresentationModel?) {
 
         if (startPlace != null) {
 
             val geo = GeoPoint(
-                startPlace.getCoordinates().getLatitude(),
-                startPlace.getCoordinates().getLongitude()
+                startPlace.coordinates.latitude,
+                startPlace.coordinates.longitude
             )
             mapController.setCenter(geo)
             val start = Marker(binding.map)
@@ -714,28 +689,29 @@ class FragmentMain : Fragment(), MapEventsReceiver {
                 requireContext().theme
             )
 
-            binding.map.overlays.add(mapEventsOverlay)
+            //binding.map.overlays.add(mapEventsOverlay)
 
             binding.map.invalidate()
         }
     }
 
-    private fun updateMapOnRouteStopSelected(coordinates: Coordinates) {
+    private fun updateMapOnRouteStopSelected(coordinates: CoordinatesMapPresentationModel) {
 
         mapController.setZoom(15.0)
-        val updatedCenter = GeoPoint(coordinates.getLatitude(), coordinates.getLongitude())
+        val updatedCenter = GeoPoint(coordinates.latitude, coordinates.latitude)
         mapController.setCenter(updatedCenter)
 
     }
 
-    /** [resetUiOnStartPlaceChange]
-     * reset the UI elements related to searching when the start[Place] is changed
+    /** [removeMapData]
+     * reset the UI elements related to searching when the start[com.example.model.Place] is changed
      */
-    private fun resetUiOnStartPlaceChange(){
+    private fun removeMapData(addMapEventsOverlay: Boolean){
 
         binding.map.overlays.removeAll(binding.map.overlays)
 
-        binding.map.overlays.add(mapEventsOverlay)
+        if (addMapEventsOverlay)
+            binding.map.overlays.add(mapEventsOverlay)
 
         binding.map.invalidate()
     }
@@ -748,19 +724,84 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 // BEGINNING OF METHODS FOR INTERNAL FRAGMENTS
 //_________________________________________________________________________________________________________________________
 
-    private fun replaceCurrentMainFragment(fragmentIndex: ViewModelMain.MainContent) {
+    private fun replaceCurrentMainFragment(fragment: MapDataMapPresentationModel) {
 
-        when(fragmentIndex) {
+        val request: NavDeepLinkRequest
 
-            ViewModelMain.MainContent.SEARCH -> replaceWithSearchFragment()
-            ViewModelMain.MainContent.ROUTE -> replaceWithRouteFragment()
-            ViewModelMain.MainContent.INSPECT -> replaceWithTripFragment()
-            ViewModelMain.MainContent.CUSTOM -> replaceWithCustomPlaceFragment()
-            else -> replaceWithNavigationFragment()
+        val fragmentClassName: String
+
+        when (fragment) {
+
+            is MapDataMapPresentationModel.Search -> {
+
+                fragmentClassName = fragment.javaClass.name
+
+                request = buildNavDeepLinkRequest(
+                    "android-app://com.example.features/search"
+                )
+            }
+
+            is MapDataMapPresentationModel.Route -> {
+
+                fragmentClassName = fragment.javaClass.name
+
+                request = buildNavDeepLinkRequest(
+                    "android-app://com.example.features/route"
+                )
+            }
+
+            is MapDataMapPresentationModel.Inspect -> {
+
+                fragmentClassName = fragment.javaClass.name
+
+                request = buildNavDeepLinkRequest(
+                    "android-app://com.example.features/inspect"
+                )
+            }
+
+            is MapDataMapPresentationModel.CustomPlace -> {
+
+                fragmentClassName = fragment.javaClass.name
+
+                request = buildNavDeepLinkRequest(
+                    "android-app://com.example.features/custom_place"
+                )
+            }
+
+            is MapDataMapPresentationModel.Navigation -> {
+
+                fragmentClassName = fragment.javaClass.name
+
+                request = buildNavDeepLinkRequest(
+                    "android-app://com.example.features/navigation"
+                )
+            }
+
+            MapDataMapPresentationModel.NavigationArrived -> {
+
+                fragmentClassName = fragment.javaClass.name
+
+                request = buildNavDeepLinkRequest(
+                    "android-app://com.example.features/navigation"
+                )
+            }
+        }
+        if (fragmentClassName != uiState) {
+
+            uiState = fragmentClassName
+
+            navController.navigate(request)
         }
     }
 
-    private fun replaceWithSearchFragment() {
+    private fun buildNavDeepLinkRequest(uriString: String): NavDeepLinkRequest {
+
+        return NavDeepLinkRequest.Builder.fromUri(
+            uriString.toUri()
+        ).build()
+    }
+
+    /*private fun replaceWithSearchFragment() {
         val tag = "SEARCH_FRAGMENT"
 
         val fragment = childFragmentManager.findFragmentByTag(tag) ?: FragmentSearch.Companion.newInstance()
@@ -815,7 +856,7 @@ class FragmentMain : Fragment(), MapEventsReceiver {
             setReorderingAllowed(true)
             replace(binding.mainFragmentContainer.id, fragment, tag)
         }
-    }
+    }*/
 
     private fun initDetailsFragment() {
         val tag = "PLACE_DETAILS_FRAGMENT"
@@ -835,25 +876,45 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
 
     private fun handleRouteChange(
-        route: Route
+        route: List<Polyline>
     ) {
 
-        val routePolylines = when(route.getTransportMode()) {
+        //TODO REMINDER: I GET A LIST OF POLYLINES
+        /*val routePolylines = when(route.getTransportMode()) {
             "driving-car" -> route.getRouteNodes().mapNotNull { it.carPolyLine }
             else -> route.getRouteNodes().mapNotNull { it.walkPolyLine }
-        }
+        }*/
 
         showRouteDataOnMap(
-            routePolylines = routePolylines
+            routePolylines = route
         )
     }
 
     private fun handleNavigationChange(
-        routePolyline: Polyline?
+        routePolyline: Polyline,
+        goal: CoordinatesMapPresentationModel
     ) {
+
+        createLocationMarker(goal)
+
         showRouteDataOnMap(
-            routePolylines = listOf(routePolyline).mapNotNull { it }
+            routePolylines = listOf(routePolyline)
         )
+    }
+
+    private fun createLocationMarker(location: CoordinatesMapPresentationModel) {
+
+        val locationMarker = Marker(binding.map)
+
+        locationMarker.position = GeoPoint(location.latitude, location.longitude)
+
+        locationMarker.icon = ResourcesCompat.getDrawable(
+            requireContext().resources,
+            R.drawable.ic_other_marker,
+            requireContext().theme
+        )
+
+        binding.map.overlays.add(locationMarker)
     }
 
     /*private fun showNavigationStart(navigationRouteNode: RouteNode, mode: String) {
@@ -884,15 +945,14 @@ class FragmentMain : Fragment(), MapEventsReceiver {
     }*/
 
     private fun showRouteDataOnMap(
-        routePolylines: List<Polyline>?
+        routePolylines: List<Polyline>
     ) {
 
         binding.map.overlays.removeAll(routePolyLines)
 
         routePolyLines.clear()
 
-        if (routePolylines != null)
-            routePolyLines.addAll(routePolylines)
+        routePolyLines.addAll(routePolylines)
 
         binding.map.overlays.addAll(routePolyLines)
 
@@ -901,7 +961,7 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private fun showNavigationData(coordinates: Coordinates?) {
+    private fun showNavigationData(coordinates: CoordinatesMapPresentationModel?) {
 
 
         if (locationMarker!= null) {
@@ -911,8 +971,8 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         if (coordinates !=null) {
 
             val geo = GeoPoint(
-                coordinates.getLatitude(),
-                coordinates.getLongitude()
+                coordinates.latitude,
+                coordinates.longitude
             )
             mapController.setCenter(geo)
             locationMarker = Marker(binding.map)
@@ -930,20 +990,20 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         }
     }
 
-    private fun showErrorMessage(errorType: ErrorGroup) {
+    /*private fun showErrorMessage(errorType: ViewModelMain.ErrorGroup) {
 
         val message = when(errorType) {
-            ErrorGroup.OTHER -> {R.string.error_other}
-            ErrorGroup.CUSTOM_PLACE -> {R.string.error_custom_place}
-            ErrorGroup.LOCATION -> {R.string.error_location}
-            ErrorGroup.INIT_SEARCH -> {R.string.error_show_search}
-            ErrorGroup.SEARCH_AUTO -> {R.string.error_autocomplete}
-            ErrorGroup.REVERSE_GEO_CODE -> {R.string.error_location}
-            ErrorGroup.SEARCH -> {R.string.error_search}
-            ErrorGroup.NAVIGATION -> {R.string.error_navigation}
+            ViewModelMain.ErrorGroup.OTHER -> {R.string.error_other}
+            ViewModelMain.ErrorGroup.CUSTOM_PLACE -> {R.string.error_custom_place}
+            ViewModelMain.ErrorGroup.LOCATION -> {R.string.error_location}
+            ViewModelMain.ErrorGroup.INIT_SEARCH -> {R.string.error_show_search}
+            ViewModelMain.ErrorGroup.SEARCH_AUTO -> {R.string.error_autocomplete}
+            ViewModelMain.ErrorGroup.REVERSE_GEO_CODE -> {R.string.error_location}
+            ViewModelMain.ErrorGroup.SEARCH -> {R.string.error_search}
+            ViewModelMain.ErrorGroup.NAVIGATION -> {R.string.error_navigation}
             else -> return
         }
 
         //Toast.makeText(this.context,message, Toast.LENGTH_LONG).show()
-    }
+    }*/
 }

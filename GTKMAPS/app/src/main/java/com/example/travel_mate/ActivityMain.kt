@@ -18,6 +18,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
+import com.example.navigation.OuterDestination
+import com.example.navigation.OuterNavigator
 import com.example.travel_mate.databinding.ActivityMainBinding
 
 
@@ -35,7 +37,7 @@ private operator fun <E> Set<E>.get(i: Int): Any {
 // | markCoordinatesOnMap                                                                                      |
 // -------------------------------------------------------------------------------------------------------------
 
-class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsListener */{
+class ActivityMain : AppCompatActivity(), OuterNavigator/*, FragmentPlaceDetails.PlaceDetailsListener */{
 
     interface BottomSheetStateListener {
         fun onStateExpanded()
@@ -221,6 +223,13 @@ class ActivityMain : AppCompatActivity()/*, FragmentPlaceDetails.PlaceDetailsLis
         resources!!.flushLayoutCache()*/
     }
 
+    override fun navigateTo(destination: OuterDestination) {
+
+        when(destination) {
+            OuterDestination.Save -> findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.action_FragmentMain_to_fragmentSaveTrip)
+            OuterDestination.User -> findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.action_FragmentMain_to_FragmentUser)
+        }
+    }
 
 
 }

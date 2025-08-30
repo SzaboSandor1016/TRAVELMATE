@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="night">#3C3F41</color>
+    <color name="night_light">#828586</color>
+    <color name="light">#FFFFFF</color>
+    <color name="night_dialog">#424242</color>
+    <color name="transparent">#00000000</color>
+    <color name="red">#FFFF0000</color>
+
+    <color name="layout_group_color">#27FFFFFF</color>
+
+    <color name="bar">#1A2C53</color>
+    <color name="beach">#38A643</color>
+    <color name="beach_resort">#38A643</color>
+    <color name="beach_resort_alt">#197022</color>
+    <color name="boat">#1E5714</color>
+    <color name="cafe">#1A2C53</color>
+    <color name="camp_site">#1F3461</color>
+    <color name="caravan_site">#1F3461</color>
+    <color name="casino">#385BA6</color>
+    <color name="castle">#38A65D</color>
+    <color name="church">#38A65D</color>
+    <color name="cinema">#385BA6</color>
+    <color name="community">#256E2C</color>
+    <color name="community_alt">#1E8528</color>
+    <color name="cycling">#28731A</color>
+    <color name="farm">#42BF2C</color>
+    <color name="gallery">#1A2C53</color>
+    <color name="guest_house">#1F3461</color>
+    <color name="hiking">#2F851F</color>
+    <color name="hotel">#1F3461</color>
+    <color name="mall">#38A67A</color>
+    <color name="massage">#2B8034</color>
+    <color name="museum">#2B4783</color>
+    <color name="music">#31913B</color>
+    <color name="music_alt">#1E8528</color>
+    <color name="national_park">#12350C</color>
+    <color name="nightclub">#385BA6</color>
+    <color name="palette">#2B4783</color>
+    <color name="park">#25A131</color>
+    <color name="restaurant">#1A2C53</color>
+    <color name="sailing">#1E5714</color>
+    <color name="shop">#38A67A</color>
+    <color name="sports">#256E2C</color>
+    <color name="store">#38A67A</color>
+    <color name="surfing">#197022</color>
+    <color name="theatre">#385BA6</color>
+    <color name="theatre_alt">#389DA6</color>
+    <color name="theme_park">#2CBF3A</color>
+    <color name="viewpoint">#369A24</color>
+
+    <color name="light_instruction_color">#C65A24</color>
+    <color name="night_instruction_color">#FFD5BC</color>
+
+    <color name="light_marker_color">#C65A24</color>
+    <color name="night_marker_color">#26211F</color>
+
+    <color name="light_marker_inside_color">#F7F2EF</color>
+    <color name="night_marker_inside_color">#FFD5BC</color>
+
+    <color name="light_marker_color_variant1">#24C3C6</color>
+    <color name="night_marker_color_variant1">#1F2626</color>
+
+    <color name="chip_background_night">#1D1B20</color>
+    <color name="chip_background_light">#F7F2FA</color>
+
+    <color name="light_icon_color_variant">#49454F</color>
+    <color name="light_button_background_color">#24C3C6</color>
+
+    <color name="icon_button_pressed_color">#5B7171</color>
+
+    <color name="light_button_label_color_unselected">#454F4F</color>
+    <color name="light_button_label_color_selected">#EFF7F7</color>
+    <color name="night_button_label_color_unselected">#C4D0D0</color>
+    <color name="night_button_label_color_selected">#1E7172</color>
+
+    <color name="light_button_pressed_label_color_unselected">#454F4F</color>
+    <color name="light_button_pressed_label_color_selected">#C4D0CF</color>
+    <color name="night_button_pressed_label_color_unselected">#2F3535</color>
+    <color name="night_button_pressed_label_color_selected">#1E7172</color>
+
+    <color name="light_outlined_button_pressed_color_selected">#EFF7F7</color>
+    <color name="night_outlined_button_pressed_color_selected">#2F3535</color>
+    <color name="light_outlined_button_pressed_color_unselected">#454F4F</color>
+    <color name="night_outlined_button_pressed_color_unselected">#C4D0D0</color>
+
+    <color name="light_outlined_button_pressed_color_selected_variant1">#F7F2EF</color>
+    <color name="night_outlined_button_pressed_color_selected_variant1">#35312F</color>
+    <color name="light_outlined_button_pressed_color_unselected_variant1">#4F4845</color>
+    <color name="night_outlined_button_pressed_color_unselected_variant1">#D0C8C4</color>
+
+    <color name="light_outlined_button_pressed_outline_color_selected">#C4D0D0</color>
+    <color name="night_outlined_button_pressed_outline_color_selected">#454F4F</color>
+    <color name="light_outlined_button_pressed_outline_color_unselected">#C4D0D0</color>
+    <color name="night_outlined_button_pressed_outline_color_unselected">#454F4F</color>
+
+    <color name="light_button_pressed_icon_color_unselected">#454F4F</color>
+    <color name="light_button_pressed_icon_color_selected">#EFF7F7</color>
+    <color name="night_button_pressed_icon_color_unselected">#2F3535</color>
+    <color name="night_button_pressed_icon_color_selected">#1E7172</color>
+
+    <color name="light_button_pressed_icon_color_unselected_variant1">#4F4845</color>
+    <color name="light_button_pressed_icon_color_selected_variant1">#F7F2EF</color>
+    <color name="night_button_pressed_icon_color_unselected_variant1">#35312F</color>
+    <color name="night_button_pressed_icon_color_selected_variant1">#723D1E</color>
+
+    <color name="light_button_icon_color_unselected">#454F4F</color>
+    <color name="light_button_icon_color_selected">#EFF7F7</color>
+    <color name="night_button_icon_color_unselected">#C4D0D0</color>
+    <color name="night_button_icon_color_selected">#2F3535</color>
+
+    <color name="light_outlined_button_outline_color_selected">#EDF7F7</color>
+    <color name="night_outlined_button_outline_color_selected">#C4D0D0</color>
+    <color name="light_outlined_button_outline_color_unselected">#2F3535</color>
+    <color name="night_outlined_button_outline_color_unselected">#454F4F</color>
+
+    <color name="light_icon_button_background_color_selected">#2F3535</color>
+    <color name="light_icon_button_background_color_unselected">#BCFCFF</color>
+    <color name="night_icon_button_background_color_selected">#BCFCFF</color>
+    <color name="night_icon_button_background_color_unselected">#1F2626</color>
+
+    <color name="light_icon_button_background_color_selected_variant1">#35312F</color>
+    <color name="light_icon_button_background_color_unselected_variant1">#C65A24</color>
+    <color name="night_icon_button_background_color_selected_variant1">#EDBCAE</color>
+    <color name="night_icon_button_background_color_unselected_variant1">#26211F</color>
+
+    <color name="light_icon_button_icon_color_unselected">#454F4F</color>
+    <color name="light_icon_button_icon_color_selected">#C4D0D0</color>
+    <color name="night_icon_button_icon_color_unselected">#C4D0D0</color>
+    <color name="night_icon_button_icon_color_selected">#1E7172</color>
+
+    <color name="light_icon_button_icon_color_unselected_variant1">#4F4845</color>
+    <color name="light_icon_button_icon_color_selected_variant1">#D0C8C4</color>
+    <color name="night_icon_button_icon_color_unselected_variant1">#D0C8C4</color>
+    <color name="night_icon_button_icon_color_selected_variant1">#72371E</color>
+
+    <color name="light_segmented_button_background_color_selected">#35312F</color>
+    <color name="light_segmented_button_background_color_unselected">#24C3C6</color>
+    <color name="night_segmented_button_background_color_selected">#BCFCFF</color>
+    <color name="night_segmented_button_background_color_unselected">#292C2C</color>
+
+    <color name="light_segmented_button_pressed_color_selected">#EFF7F7</color>
+    <color name="night_segmented_button_pressed_color_selected">#2F3535</color>
+    <color name="light_segmented_button_pressed_color_unselected">#454F4F</color>
+    <color name="night_segmented_button_pressed_color_unselected">#C4D0D0</color>
+
+    <color name="light_filter_chip_surface_color">#50A3A4</color>
+    <color name="night_filter_chip_surface_color">#BCFEFF</color>
+
+    <color name="light_filter_chip_background_color_unselected">#F2FAFA</color>
+    <color name="light_filter_chip_background_color_selected">#DEF8F8</color>
+    <color name="night_filter_chip_background_color_unselected">#1B2020</color>
+    <color name="night_filter_chip_background_color_selected">#445858</color>
+
+    <color name="light_chip_ripple_color_selected">#DEF8F8</color>
+    <color name="night_chip_ripple_color_selected">#C4D0D0</color>
+    <color name="light_chip_ripple_color_unselected">#DEF8F8</color>
+    <color name="night_chip_ripple_color_unselected">#DEF8F8</color>
+
+    <color name="light_text_button_text_color">#50A4A3</color>
+    <color name="night_text_button_text_color">#C4D0D0</color>
+
+    <color name="light_tab_layout_active_indicator_color">#A46250</color>
+    <color name="night_tab_layout_active_indicator_color">#EDBCAE</color>
+
+    <color name="light_tab_layout_tab_text_active_color">#A46850</color>
+    <color name="night_tab_layout_tab_text_active_color">#EDBCAE</color>
+    <color name="light_tab_layout_tab_text_inactive_color">#4F4845</color>
+    <color name="night_tab_layout_tab_text_inactive_color">#D0C8C4</color>
+
+    <color name="light_tab_layout_tab_icon_active_color">#A46550</color>
+    <color name="night_tab_layout_tab_icon_active_color">#EDBCAE</color>
+    <color name="light_tab_layout_tab_icon_inactive_color">#4F4845</color>
+    <color name="night_tab_layout_tab_icon_inactive_color">#D0C8C4</color>
+
+    <color name="light_text_input_layout_background_color">#E0E9E9</color>
+    <color name="night_text_input_layout_background_color">#1B2020</color>
+
+    <color name="light_text_input_layout_outline_color">#50A4A3</color>
+    <color name="night_text_input_layout_outline_color">#C4D0D0</color>
+
+    <color name="light_text_input_layout_text_color">#1B201F</color>
+    <color name="night_text_input_layout_text_color">#E0E9E9</color>
+
+    <color name="light_text_input_layout_hint_color">#454F4D</color>
+    <color name="night_text_input_layout_hint_color">#C4D0CE</color>
+
+    <color name="light_card_view_background_color">#E0E9E9</color>
+    <color name="night_card_view_background_color">#1F2626</color>
+
+    <color name="light_fragment_background_color">#E0E9E9</color>
+    <color name="night_fragment_background_color">#1F2626</color>
+
+    <color name="light_recycler_view_background_color">#C65A24</color>
+    <color name="night_recycler_view_background_color">#EDBCAE</color>
+
+    <color name="light_recycler_view_background_color_variant1">#50A4A3</color>
+    <color name="night_recycler_view_background_color_variant1">#C4D0D0</color>
+
+    <color name="light_recycler_view_ripple_color">#4F4845</color>
+    <color name="night_recycler_view_ripple_color">#D0C8C4</color>
+
+    <color name="light_recycler_view_ripple_color_variant1">#DEF8F8</color>
+    <color name="night_recycler_view_ripple_color_variant1">#C4D0D0</color>
+
+    <color name="light_assignable_places_layout_background_color">#E0E9E9</color>
+    <color name="night_assignable_places_layout_background_color">#1F2626</color>
+
+</resources>

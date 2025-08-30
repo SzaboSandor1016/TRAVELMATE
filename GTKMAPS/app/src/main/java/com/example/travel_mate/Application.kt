@@ -3,83 +3,42 @@ package com.example.travel_mate
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
-import com.example.travel_mate.data.AppDatabase
-import com.example.travel_mate.data.CurrentTripRepositoryImpl
-import com.example.travel_mate.data.CustomPlaceRepositoryImpl
-import com.example.travel_mate.data.FirebaseAuthenticationSource
-import com.example.travel_mate.data.FirebaseAuthenticationSourceImpl
-import com.example.travel_mate.data.FirebaseRemoteDataSource
-import com.example.travel_mate.data.FirebaseRemoteDataSourceImpl
-import com.example.travel_mate.data.LocationLocalDataSource
-import com.example.travel_mate.data.LocationRepositoryImpl
-import com.example.travel_mate.data.NavigationRepositoryImpl
-import com.example.travel_mate.data.OverpassRemoteDataSource
-import com.example.travel_mate.data.OverpassRemoteDataSourceImpl
-import com.example.travel_mate.data.PhotonRemoteDataSource
-import com.example.travel_mate.data.PhotonRemoteDataSourceImpl
-import com.example.travel_mate.data.RoomLocalDataSource
-import com.example.travel_mate.data.RoomLocalDataSourceImpl
-import com.example.travel_mate.data.RouteNodeRepositoryImpl
-import com.example.travel_mate.data.RouteRemoteDataSource
-import com.example.travel_mate.data.RouteRemoteDataSourceImpl
-import com.example.travel_mate.data.RouteRepositoryImpl
-import com.example.travel_mate.data.SearchOptionsRepositoryImpl
-import com.example.travel_mate.data.SearchRepositoryImpl
-import com.example.travel_mate.data.TripRepositoryImpl
-import com.example.travel_mate.data.UserRepositoryImpl
-import com.example.travel_mate.domain.CheckUserUseCase
-import com.example.travel_mate.domain.CurrentTripRepository
-import com.example.travel_mate.domain.CustomPlaceRepository
-import com.example.travel_mate.domain.DeleteLocalTripUseCase
-import com.example.travel_mate.domain.DeleteRemoteTripUseCase
-import com.example.travel_mate.domain.DeleteTripUseCase
-import com.example.travel_mate.domain.DeleteUserUseCase
-import com.example.travel_mate.domain.GetCurrentLocationUseCase
-import com.example.travel_mate.domain.GetLocalTripsUseCase
-import com.example.travel_mate.domain.InitSearchAndRouteWithLocationStartUseCase
-import com.example.travel_mate.domain.GetNewContributorDataUseCase
-import com.example.travel_mate.domain.GetRemoteContributedTripsUseCase
-import com.example.travel_mate.domain.GetRemoteTripsUseCase
-import com.example.travel_mate.domain.GetSelectableContributorsUseCase
-import com.example.travel_mate.domain.GetSelectedTripDataUseCase
-import com.example.travel_mate.domain.GetUsersByUIDsUseCase
-import com.example.travel_mate.domain.InitRouteUseCase
-import com.example.travel_mate.domain.InitSearchAndRouteWithSelectedStartUseCase
-import com.example.travel_mate.domain.InitSearchUseCase
-import com.example.travel_mate.domain.LocationRepository
-import com.example.travel_mate.domain.NavigateToNextPlaceUseCase
-import com.example.travel_mate.domain.NavigationRepository
-import com.example.travel_mate.domain.ProcessTripIdentifiersUseCase
-import com.example.travel_mate.domain.RouteNodeRepository
-import com.example.travel_mate.domain.RouteRepository
-import com.example.travel_mate.domain.SaveLocalTripUseCase
-import com.example.travel_mate.domain.SaveRemoteTripUseCase
-import com.example.travel_mate.domain.SaveTripUseCase
-import com.example.travel_mate.domain.SaveTripWithUpdatedPlacesUseCase
-import com.example.travel_mate.domain.SearchAutocompleteUseCase
-import com.example.travel_mate.domain.SearchOptionsRepository
-import com.example.travel_mate.domain.SearchPlacesUseCase
-import com.example.travel_mate.domain.SearchRepository
-import com.example.travel_mate.domain.SearchReverseGeoCodeUseCase
-import com.example.travel_mate.domain.SetCurrentTripContributorsUseCase
-import com.example.travel_mate.domain.SetCustomPlaceUseCase
-import com.example.travel_mate.domain.SetSearchMinuteUseCase
-import com.example.travel_mate.domain.SetSearchTransportModeUseCase
-import com.example.travel_mate.domain.SetUserPermissionUseCase
-import com.example.travel_mate.domain.SignInUserUseCase
-import com.example.travel_mate.domain.SignOutUserUseCase
-import com.example.travel_mate.domain.SignUpUserUseCase
-import com.example.travel_mate.domain.TripRepository
-import com.example.travel_mate.domain.UpdateUserUseCase
-import com.example.travel_mate.domain.UserRepository
-import com.example.travel_mate.ui.ViewModelFactory
-import com.example.travel_mate.ui.ViewModelMain
-import com.example.travel_mate.ui.ViewModelUser
+import com.example.core.database.data.datasource.RoomLocalDataSourceImpl
+import com.example.core.database.domain.datasource.RoomLocalDataSource
+import com.example.app.location.data.datasource.LocationLocalDataSourceImpl
+import com.example.app.location.data.repository.LocationRepositoryImpl
+import com.example.core.database.AppDatabase
+import com.example.di.authModule
+import com.example.di.findCustomModule
+import com.example.di.inspectModule
+import com.example.di.navigationModule
+import com.example.di.reverseGeoCodeModule
+import com.example.di.routeDataSourceModule
+import com.example.di.routeModule
+import com.example.di.saveTripModule
+import com.example.di.searchModule
+import com.example.di.searchPlacesDataSourceModule
+import com.example.di.searchStartDataSourceModule
+import com.example.di.selectedPlaceModule
+import com.example.di.selectedPlaceOptionsModule
+import com.example.di.tripRemoteDataSourceModule
+import com.example.di.tripsModule
+import com.example.di.userModule
+import com.example.app.location.domain.datasource.LocationLocalDataSource
+import com.example.app.location.domain.repository.LocationRepository
+import com.example.app.location.domain.usecases.GetCurrentLocationUseCase
+import com.example.di.locationModule
+import com.example.navigation.NavigateToOuterDestinationUseCase
+import com.example.navigation.OuterNavigator
+import com.example.travel_mate.ui.viewmodel.ViewModelMain
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
-import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /** [Application]
@@ -92,7 +51,7 @@ class Application: Application() {
     companion object {
         lateinit var appContext: Context
             private set
-        lateinit var factory: ViewModelFactory
+        //lateinit var factory: ViewModelFactory
 
         lateinit var appDatabase: AppDatabase
     }
@@ -108,7 +67,31 @@ class Application: Application() {
             name = "trip_local_database"
         ).build()
 
-        val modules = module{
+        val databaseModule = module {
+
+            single<RoomLocalDataSource> { RoomLocalDataSourceImpl(appDatabase.tripDao()) }
+        }
+
+        val appModule =  module {
+
+            single(named("ApplicationScope")) {
+                CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            }
+
+            singleOf(::ViewModelMain)
+        }
+
+        val appNavigationModule = module {
+
+
+            single<OuterNavigator> { (activity: ActivityMain) -> activity }
+
+            factory { (outerNavigator: OuterNavigator) ->
+                NavigateToOuterDestinationUseCase(outerNavigator)
+            }
+        }
+
+        /*val modules = module{
 
             single<PhotonRemoteDataSource> { PhotonRemoteDataSourceImpl() }
             singleOf(::LocationLocalDataSource)
@@ -166,7 +149,7 @@ class Application: Application() {
             singleOf(::ViewModelMain)
             singleOf(::ViewModelUser)
 
-        }
+        }*/
 
         startKoin {
             // Log Koin into Android logger
@@ -174,7 +157,28 @@ class Application: Application() {
             // Reference Android context
             androidContext(this@Application)
             // Load modules
-            modules(modules)
+            modules(
+                appNavigationModule,
+                authModule,
+                databaseModule,
+                findCustomModule,
+                inspectModule,
+                locationModule,
+                navigationModule,
+                reverseGeoCodeModule,
+                routeDataSourceModule,
+                routeModule,
+                saveTripModule,
+                searchModule,
+                searchPlacesDataSourceModule,
+                searchStartDataSourceModule,
+                selectedPlaceModule,
+                selectedPlaceOptionsModule,
+                tripRemoteDataSourceModule,
+                tripsModule,
+                userModule,
+                appModule
+            )
         }
 
         //done
@@ -440,5 +444,48 @@ class Application: Application() {
             setCurrentTripContributorsUseCase = setCurrentTripContributorsUseCase
         )*/
     }
+
+    /*
+    For Flows: mapSafe / mapSafeOrPrevious
+    fun <T> Flow<T?>.mapSafeOrPrevious(): Flow<T?> = flow {
+    var lastValue: T? = null
+    collect { value ->
+        val emitValue = value ?: lastValue
+        emit(emitValue)
+        if (value != null) lastValue = value
+    }
+    }
+    Usage:
+    val usernameFlow: Flow<String?> = firebaseAuthSource.userFlow()
+    .map { it?.uid?.let { uid -> firebaseAuthSource.getUsernameByUID(uid) } }
+    .mapSafeOrPrevious()
+
+    If the fetch returns null, it emits the previous known value.
+
+If the fetch succeeds, it updates lastValue.
+
+Useful for network calls or DB lookups that may temporarily fail.
+
+2. For suspend functions
+
+If you just need a one-off call and fallback to a previous value:
+
+suspend fun <T> safeOrPrevious(
+    previous: T?,
+    block: suspend () -> T?
+): T? = try {
+    block() ?: previous
+} catch (e: Exception) {
+    previous
+}
+Usage:
+val previousUsername: String? = ...
+val username = safeOrPrevious(previousUsername) {
+    firebaseAuthSource.getUsernameByUID(userId)
+}
+If getUsernameByUID returns null or throws, it returns previousUsername.
+
+Keeps your state consistent without crashing.
+    */
 
 }

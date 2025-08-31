@@ -117,14 +117,6 @@ class FragmentSignIn : Fragment() {
         _binding = null
     }
 
-    fun updateSignInFragment(){
-
-        //Todo update sign In fragment
-    }
-
-    /** [launchResetPasswordDialog]
-     * create a dialog that allows resetting the password of an use account
-     */
     private fun launchResetPasswordDialog() {
 
         val resetPasswordInput: TextInputEditText = resetView.findViewById(com.example.features.user.presentation.R.id.reset_password)

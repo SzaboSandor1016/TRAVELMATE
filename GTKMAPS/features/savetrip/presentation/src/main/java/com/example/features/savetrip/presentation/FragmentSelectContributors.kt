@@ -110,7 +110,6 @@ class FragmentSelectContributors : Fragment() {
                     contributorUID = uid,
                     select = setSelected
                 )
-                //Log.d("selectedContributor", recentContributors[uid].selected.toString())
             }
         })
 
@@ -137,17 +136,6 @@ class FragmentSelectContributors : Fragment() {
 
         binding.done.setOnClickListener { _ ->
 
-            val usernames = recentContributors.associate { Pair(it.uid.toString(), true) }
-
-            //TODO REMINDER: IT is also solved in an other way: Contained by the state in the repository.
-            //viewModelSaveTrip.setCurrentTripContributors()
-
-            //TODO DO THIS TOO (I also forgot this one) To update the contributors of the user afterwards
-            /*viewModelSaveTrip.setRecentContributors(
-                contributors = usernames
-            )*/
-
-            //TODO FIND THAT F*ing navController already
             findNavController().navigate(R.id.action_fragmentSelectContributors_to_fragmentSaveTrip)
         }
 

@@ -23,14 +23,8 @@ fun Pair<RouteResponse, RouteResponse>.mapToNavigationRouteNode(startLat: Double
     val walkRoutePolyLine = Polyline()
     val carRoutePolyLine = Polyline()
 
-    var walkSteps: ArrayList<RouteStepNavigationDomainModel> = ArrayList()
-    var carSteps: ArrayList<RouteStepNavigationDomainModel> = ArrayList()
-
-    var distanceWalk = 0
-    var distanceCar = 0
-
-    var durationWalk = 0
-    var durationCar = 0
+    val walkSteps: ArrayList<RouteStepNavigationDomainModel> = ArrayList()
+    val carSteps: ArrayList<RouteStepNavigationDomainModel> = ArrayList()
 
     this.component1().routes.forEach {
 
@@ -62,22 +56,10 @@ fun Pair<RouteResponse, RouteResponse>.mapToNavigationRouteNode(startLat: Double
                 instruction = step.instruction,
                 type = step.type
             )
-
         }
-
-        distanceWalk = it.summary.distance.toInt()
-
-        durationWalk = (it.summary.duration / 60).toInt()
-
     }
 
     this.component2().routes.forEach {
-
-        /*it.properties.segments.forEach {
-            it.steps.forEach {
-                it.
-            }
-        }*/
 
         val points: MutableList<MutableList<Double>> =
             decodeGeometry(it.geometry)
@@ -107,11 +89,6 @@ fun Pair<RouteResponse, RouteResponse>.mapToNavigationRouteNode(startLat: Double
             )
 
         }
-
-        distanceCar = it.summary.distance.toInt()
-
-        durationCar = (it.summary.duration / 60).toInt()
-
     }
 
     return RouteNodeNavigationDomainModel(
@@ -131,7 +108,7 @@ fun Pair<RouteResponse, RouteResponse>.mapToNavigationRouteNode(startLat: Double
  */
 private fun decodeGeometry(encodedGeometry: String): MutableList<MutableList<Double>> {
 
-    val geometry: MutableList<MutableList<Double>> = ArrayList<MutableList<Double>>()
+    val geometry: MutableList<MutableList<Double>> = ArrayList()
     var index = 0
     val len = encodedGeometry.length
     var lat = 0
@@ -157,7 +134,7 @@ private fun decodeGeometry(encodedGeometry: String): MutableList<MutableList<Dou
         } while (b >= 0x1f)
         lng += if ((result and 1) != 0) (result shr 1).inv() else (result shr 1)
 
-        val point: MutableList<Double> = ArrayList<Double>()
+        val point: MutableList<Double> = ArrayList()
         point.add(lat / 1E5)
         point.add(lng / 1E5)
         geometry.add(point)
@@ -182,9 +159,6 @@ fun StateFlow<NavigationStateNavigationDomainModel>.toFlowOfNavigationInfoDomain
         when(it.navigation) {
             is NavigationNavigationDomainModel.Default -> NavigationInfoNavigationDomainModel.Default
             is NavigationNavigationDomainModel.Navigation -> NavigationInfoNavigationDomainModel.NavigationInfo(
-                /*startedFrom = it.navigation.startedFrom,
-                endOfRoute = it.navigation.endOfRoute,
-                endOfNavigation = it.navigation.endOfNavigation,*/
                 currentStepName = it.navigation.currentRouteStep.name,
                 currentStepInstruction = it.navigation.currentRouteStep.instruction,
                 currentStepInstructionType = it.navigation.currentRouteStep.type!!,
@@ -222,8 +196,6 @@ fun StateFlow<CurrentLocationStateNavigationDomainModel>.toFlowOfCurrentLocation
         Flow<CurrentLocationNavigationDomainModel> {
 
     return this.map {
-
-        Log.d("updateCurrentLocation", "mappedCurrentLocation ${this.value.currentLocation?.latitude}, ${this.value.currentLocation?.longitude} ")
 
         return@map CurrentLocationNavigationDomainModel(
             it.currentLocation

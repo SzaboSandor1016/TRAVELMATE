@@ -6,12 +6,9 @@ import com.example.features.savetrip.domain.repository.SaveTripRepository
 
 class InitSaveFromSearch(
     private val saveTripRepository: SaveTripRepository,
-    //private val userRepository: UserRepository,
 ) {
 
     suspend operator fun invoke(startPlace: PlaceSaveTripDomainModel) {
-
-        //val userUID = userRepository.getCurrentUserID()
 
         saveTripRepository.initSaveFromSearchWithStartPlace(
             startPlace = startPlace

@@ -125,11 +125,6 @@ class FragmentCustomPlace : Fragment() {
         super.onDestroyView()
         Log.d("FragmentLifecycle", "Parent/Child Fragment Destroyed")
 
-        //dismissDialog()
-
-        //binding.distanceGroup.clearOnButtonCheckedListeners()
-        //binding.transportGroup.clearOnButtonCheckedListeners()
-
         _binding = null
     }
 

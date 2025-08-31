@@ -24,7 +24,6 @@ val tripsModule = module {
 
     factory { DeleteLocalTripUseCase(get()) }
     factory { DeleteRemoteTripUseCase(get()) }
-    //factory { DeleteTripsOfDeletedUserUseCase(get()) }
     factory { DeleteTripUseCase(get(), get()) }
     factory { GetLocalTripsUseCase(get()) }
     factory { GetRemoteTripsUseCase(get()) }

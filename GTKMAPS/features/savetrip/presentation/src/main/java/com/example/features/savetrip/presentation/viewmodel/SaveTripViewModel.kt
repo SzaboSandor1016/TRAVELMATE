@@ -164,14 +164,6 @@ class SaveTripViewModel(
         }
     }
 
-    fun removeDayFromTrip(dayIndex: Int) {
-
-        viewModelScope.launch {
-
-            removeDayFromTripUseCase(index = dayIndex)
-        }
-    }
-
     fun removePlaceFromDayOfTrip(placeUUID: String) {
 
         viewModelScope.launch {

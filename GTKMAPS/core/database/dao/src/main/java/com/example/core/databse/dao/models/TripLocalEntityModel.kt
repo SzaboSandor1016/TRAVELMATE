@@ -12,9 +12,6 @@ data class TripLocalEntityModel(
     @ColumnInfo(name = "id")
     var uUID: String,
     @Embedded var startPlace: PlaceLocalEntityModel,
-    //@Ignore var places: List<PlaceEntityModel>,
-    /*private var creatorUID: String? = null
-    private var contributors: Map<String, Boolean> = hashMapOf()*/
     @ColumnInfo(name = "date_of_trip") var date: String?,
     @ColumnInfo(name = "trip_title") var title: String,
     @ColumnInfo(name = "trip_note") var note: String?,

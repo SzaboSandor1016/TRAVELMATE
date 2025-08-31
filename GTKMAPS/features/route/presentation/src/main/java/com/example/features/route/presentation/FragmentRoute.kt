@@ -56,8 +56,6 @@ class FragmentRoute : Fragment() {
 
     private var _binding: FragmentRouteBinding? = null
     private val binding get() = _binding!!
-
-    //private var startPlaces: ArrayList<Place> = ArrayList()
     private var routeStops: ArrayList<RouteInfoNodeRoutePresentationModel> = ArrayList()
 
     private val viewModelRoute: RouteViewModel by inject<RouteViewModel>()
@@ -90,12 +88,7 @@ class FragmentRoute : Fragment() {
         categoryManager= ClassCategoryManager(requireContext())
         resources = getResources()
 
-        /** [com.example.travel_mate.ui.ViewModelMain.mainRouteState] observer
-         *  observe the [viewModelRoute]'s [com.example.travel_mate.ui.ViewModelMain.mainRouteState]
-         *  on state update
-         *  - call [handleRouteStopsChange]
-         *  - call [handleRouteNavigationChange]
-         */
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
@@ -237,8 +230,6 @@ class FragmentRoute : Fragment() {
 
                         Log.d("targetIndex", targetIndex.toString())
 
-                        //Log.d("draggedIndex", routeNode. .toString())
-
                         viewModelRoute.reorderRoute(
                             newPosition = targetIndex,
                             placeUUID = routeNode.placeUUID
@@ -261,35 +252,15 @@ class FragmentRoute : Fragment() {
                 uuid: String?,
                 coordinates: CoordinatesRoutePresentationModel?
             ) {
-                /**
-                 * set the current place based on the uuid of the [com.example.model.Place]
-                 * associated with the selected [com.example.domain.models.RouteNode]
-                 */
+
                 viewModelRoute.setSelectedPlace(
                     uuid = uuid!!
                 )
-
-                //TODO REMINDER THE MAINFRAGMENT UPDATES THE MAP ON SELECTED PLACE CHANGE
-                /**
-                 * call the [updateMapOnRouteStopSelected] method
-                 */
-                /*viewModelRoute.setSelectedRouteNodePosition(
-                    coordinates = coordinates!!
-                )*/
-
             }
         })
 
-        /**
-         * check the walk mode as the default mode for route planning
-         */
         handleRouteModeSelect(index = 0)
 
-        /**
-         * add an [OnButtonCheckedListener] for the route transport mode selector
-         * button group
-         * on check change update the transport mode
-         */
         binding.routeSelectWalk.setOnClickListener { _ ->
 
             handleRouteModeSelect(
@@ -309,15 +280,9 @@ class FragmentRoute : Fragment() {
             viewModelRoute.startNavigation()
         }
 
-        /**
-         * add an [OnclickListener] for the [dismissRoutePlan] button
-         * when clicked reset the route [com.example.travel_mate.ui.ViewModelMain.resetRoute]
-         */
         binding.dismissRoutePlan.setOnClickListener { l ->
 
             viewModelRoute.resetRoute()
-
-            //viewModelRoute.returnToPrevContent()
 
             viewModelRoute.resetSelectedPlace()
         }
@@ -326,9 +291,6 @@ class FragmentRoute : Fragment() {
             viewModelRoute.optimizeRoute()
         }
 
-//_________________________________________________________________________________________________________________________
-// END OF ROUTE METHODS BLOCK
-//_________________________________________________________________________________________________________________________
     }
 
     override fun onDestroyView() {
@@ -339,23 +301,6 @@ class FragmentRoute : Fragment() {
         _binding = null
     }
 
-    /** Route methods block
-     *  initializes the [routeStopsAdapter] with a default empty [routeStops]
-     *  sets a layout manager for the [binding.routeStopsList] recycler view
-     *   and an adapter which is the initialized [routeStopsAdapter]
-     *  sets an [onClickListener] for the same adapter too
-     **/
-//_________________________________________________________________________________________________________________________
-// BEGINNING OF ROUTE METHODS BLOCK
-//_________________________________________________________________________________________________________________________
-
-    //Methods related to route
-//_________________________________________________________________________________________________________________________
-// BEGINNING OF METHODS FOR ROUTE
-//_________________________________________________________________________________________________________________________
-    /** [handleRouteStopsChange]
-     * call [showRouteData] and [showHideSearchAndRouteElementsOnRouteStopsChange]
-     */
     fun handleRouteStopsChange(route: RouteInfoRoutePresentationModel) {
 
         showRouteData(
@@ -385,12 +330,6 @@ class FragmentRoute : Fragment() {
         }
     }
 
-
-    /** [showRouteData]
-     * refresh the [routeStopsAdapter]'s list with the currently added places
-     * set the calculated full duration of the route (by car/on foot)
-     * as the text of the route mode selection buttons
-     */
     private fun showRouteData(routeInfo: RouteInfoRoutePresentationModel) {
 
         this.routeStops.clear()
@@ -405,10 +344,4 @@ class FragmentRoute : Fragment() {
         binding.routeSelectWalk.text =  fullWalkDuration
         binding.routeSelectCar.text =  fullCarDuration
     }
-
-//_________________________________________________________________________________________________________________________
-// END OF METHODS FOR ROUTE
-//_________________________________________________________________________________________________________________________
-
-
 }

@@ -17,11 +17,7 @@ class SearchAutocompleteUseCase(
 
         return searchRepository.searchAutocomplete(query).map(::processPhotonResponse)
     }
-    /** [processPhotonResponse]
-     * process the data returned by the network request to Photon
-     * accepts the feature list of [com.example.remotedatasources.responses.PhotonResponse]
-     * Returns a list of [com.example.model.Place]s
-     */
+
     private fun processPhotonResponse(response: PhotonResponse): ArrayList<PlaceSearchDomainModel> {
 
         val places: ArrayList<PlaceSearchDomainModel> = ArrayList()
@@ -44,47 +40,6 @@ class SearchAutocompleteUseCase(
                 )
             }?: AddressSearchDomainModel()
 
-            /*if (feature.geometry != null) {
-
-                val geometry = feature.geometry
-
-                if (geometry != null) {
-
-                    val coordinates = geometry.coordinates
-
-                    if (coordinates != null) {
-                        placeCoordinates.latitude = (coordinates[1].toDouble())
-                        placeCoordinates.setLongitude(coordinates[0].toDouble())
-                    }
-                }
-
-            }*/
-            /*if (feature.properties != null) {
-
-                val properties = feature.properties
-
-                if (properties.name != null) {
-                    startPlace.setName(properties.name)
-                    Log.d("Address", properties.name.toString())
-                }
-                if (properties.city != null) {
-                    address.setCity(properties.city)
-                    Log.d("Address_city", properties.city.toString())
-                }
-                if (properties.street != null) {
-                    address.setStreet(properties.street)
-                    Log.d("Address_street", properties.street.toString())
-                }
-                if (properties.houseNumber != null) {
-                    address.setHouseNumber(properties.houseNumber)
-                    Log.d("Address_hn", properties.houseNumber.toString())
-                }
-                if (properties.country != null) {
-                    address.setCountry(properties.country)
-                }
-
-            }*/
-
             val startPlace = PlaceSearchDomainModel(
                 uUID = UUID.randomUUID().toString(),
                 name = feature.properties?.name?: "",
@@ -96,13 +51,9 @@ class SearchAutocompleteUseCase(
                 category = "start"
             )
 
-            /*startPlace.setUUId()
-            startPlace.setAddress(address)
-            startPlace.setCoordinates(placeCoordinates)*/
             places.add(startPlace)
-
-
         }
+
         return places
     }
 }

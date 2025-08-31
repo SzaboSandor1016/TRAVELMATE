@@ -90,8 +90,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
     private lateinit var standardBottomSheetBehavior: BottomSheetBehavior<FrameLayout>
 
-    //var startPlace: PlaceDataMapPresentationModel = PlaceDataMapPresentationModel()
-
     private var locationMarker: Marker? = null
 
     private var customPlace: Marker? = null
@@ -100,7 +98,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
     private var routePolyLines: ArrayList<Polyline> = ArrayList()
 
     private val viewModelMain: ViewModelMain by inject<ViewModelMain>()
-    //private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
 
     private lateinit var mapController: IMapController
     private lateinit var startMarker: Marker
@@ -121,9 +118,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
             /*param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)*/
         }
-
-        //viewModelUser = ViewModelProvider(this, MyApplication.factory)[ViewModelUser::class.java]
-        //viewModelMain = ViewModelProvider(this, MyApplication.factory)[ViewModelMain::class.java]
     }
 
     override fun onCreateView(
@@ -159,14 +153,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         mapController = binding.map.controller
         startMarker= Marker(binding.map)
 
-        /*
-        In theory this would make the map not to show constantly
-        and limit the scrollable area
-        if fully zoomed out, but actually it breaks the application
-         */
-        /*binding.map.isVerticalMapRepetitionEnabled = false
-        binding.map.setScrollableAreaLimitLatitude(90.0,90.0,0)*/
-
         binding.map.setTileSource(TileSourceFactory.MAPNIK)
         mapController.setZoom(15.0)
         val firstPoint = GeoPoint(47.09327, 17.91149)
@@ -192,33 +178,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
         standardBottomSheetBehavior.addBottomSheetCallback(bottomSheetCallback)
 
-        /*viewModelUser.checkCurrentUser()
-
-        viewModelMain.getInitialCurrentLocation()*/
-
-        //replaceCurrentMainFragment(ViewModelMain.MainContent.SEARCH) //set the current main fragment to FragmentSearch
-
-        /**Observe the [com.example.travel_mate.ui.ViewModelMain.chipsState], [com.example.travel_mate.ui.ViewModelMain.placeState], [com.example.travel_mate.ui.ViewModelMain.mainInspectTripState] and the [com.example.travel_mate.ui.ViewModelMain.mainSearchState] located in [viewModelMain]
-         *
-         **/
-//_________________________________________________________________________________________________________________________
-// BEGINNING OF MAIN VIEWMODEL OBSERVER
-//_________________________________________________________________________________________________________________________
-
-        //TODO When the selected place changes center the map to its position
-
-        /** [com.example.travel_mate.ui.ViewModelMain.mainSearchState] observer
-         *  observe the [viewModelMain]'s [com.example.travel_mate.ui.ViewModelMain.mainSearchState]
-         *  on state update
-         *  - the [handleStartPlaceChange] function is called
-         *  - [handlePhotonObserve] function is called
-         *   if its [startPlaces] is not empty
-         *  - [showMapContent] function is called
-         *  - [handleRouteStopsChange] function is called
-         *  - [com.example.travel_mate.ui.ViewModelMain.getCurrentPlaceByUUID] function is called
-         *   if there is a currentPlace selected
-         *
-         */
         viewLifecycleOwner.lifecycleScope.launch {
 
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -240,19 +199,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
                         viewModelMain.initRouteWith(it.mapData.startPlace)
                     }
-
-                    /*Log.d("isStartPlacesEmpty", it.startPlaces.isEmpty().toString())
-
-                    showMapContent(
-                        places = it.places
-                    )
-
-                    if (it.currentPlaceUUID != null)
-                        viewModelMain.getCurrentPlaceByUUID(
-                            uuid = it.currentPlaceUUID
-                        )
-
-                    Log.d("tripEmpty", it.isTripEmpty.toString())*/
                 }
             }
         }
@@ -282,45 +228,24 @@ class FragmentMain : Fragment(), MapEventsReceiver {
             }
         }
 
-
-//_________________________________________________________________________________________________________________________
-// END OF MAIN VIEWMODEL OBSERVER
-//_________________________________________________________________________________________________________________________
-
-        /**Listener to handle navigating on map
-         * when a scroll or a zoom event is detected on the map
-         * the [checkBoundingBox] function is called
-         */
-//_________________________________________________________________________________________________________________________
-// BEGINNING OF MAP LISTENERS
-// _________________________________________________________________________________________________________________________
         binding.map.addMapListener(object : MapListener {
             override fun onScroll(event: ScrollEvent): Boolean {
-                //if (!isNavi!!) checkBoundingBox(allMarkers!!) else checkBoundingBox(routeMarkers!!)
+
                 checkBoundingBox(unContainedMarkers)
                 return true
             }
 
             override fun onZoom(event: ZoomEvent): Boolean {
-                //if (!isNavi!!) checkBoundingBox(allMarkers!!) else checkBoundingBox(routeMarkers!!)
+
                 checkBoundingBox(unContainedMarkers)
                 return true
             }
         })
-
-//_________________________________________________________________________________________________________________________
-// END OF MAP LISTENER
-// _________________________________________________________________________________________________________________________
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         Log.d("FragmentLifecycle", "Parent/Child Fragment Destroyed")
-
-        //dismissDialog()
-
-        //binding.distanceGroup.clearOnButtonCheckedListeners()
-        //binding.transportGroup.clearOnButtonCheckedListeners()
 
         resources?.flushLayoutCache()
 
@@ -332,25 +257,21 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         binding.map.onPause()
     }
 
-    //Callback for bottom sheet state changes
-//_________________________________________________________________________________________________________________________
-// BEGINNING OF BOTTOM SHEET CALLBACK
-//_________________________________________________________________________________________________________________________
     private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
 
         override fun onStateChanged(bottomSheet: View, newState: Int) {
             // Do something for new state.
             when (newState) {
                 BottomSheetBehavior.STATE_COLLAPSED -> {
-                    // Bezárt állapot
+
                     viewModelMain.setSelectedPlaceContainerState("collapsed")
 
                 }
                 BottomSheetBehavior.STATE_EXPANDED -> {
-                    // Kinyitott állapot
+
                     viewModelMain.setSelectedPlaceContainerState("expanded")
                 }
-                // További állapotok kezelése...
+
                 BottomSheetBehavior.STATE_DRAGGING -> {
                 }
 
@@ -358,13 +279,11 @@ class FragmentMain : Fragment(), MapEventsReceiver {
                 }
 
                 BottomSheetBehavior.STATE_HIDDEN -> {
+
                     val fragment = fragmentManager.findFragmentByTag("PLACE_DETAILS_FRAGMENT")
                     if (fragment != null) {
                         fragmentManager.beginTransaction().remove(fragment).commitNowAllowingStateLoss()
                     }
-
-                    //TODO A FLAG TO BE ABLE TO GET BACK HERE EASIER
-                    // MAYBE RESET THE SELECTED PLACE HERE
                 }
 
                 BottomSheetBehavior.STATE_SETTLING -> {
@@ -376,18 +295,12 @@ class FragmentMain : Fragment(), MapEventsReceiver {
             // Do something for slide offset.
         }
     }
-//_________________________________________________________________________________________________________________________
-// END OF BOTTOM SHEET CALLBACK
-//_________________________________________________________________________________________________________________________
-
 
     private fun updateMapContentWith(mapData: MapDataMapPresentationModel) {
 
         when (mapData) {
 
             is MapDataMapPresentationModel.Search -> {
-
-                //binding.map.overlays.add(mapEventsOverlay)
 
                 removeMapData(addMapEventsOverlay = true)
 
@@ -439,38 +352,12 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         }
     }
 
-
-//Methods related to the search text field
-//_________________________________________________________________________________________________________________________
-// BEGINNING OF METHODS FOR SEARCH TEXT FIELD
-//_________________________________________________________________________________________________________________________
-
-    /** [handleStartPlaceChange]
-     *  on start place change in the [com.example.travel_mate.ui.ViewModelMain] caused by an update in [com.example.data.repositories.SearchRepositoryImpl]
-     *  first remove all content from the map
-     *  then call [showStart], [setStartTextFiled]
-     *  and set the visibility of the category chips.
-     */
-
     private fun handleStartPlaceChange(startPlace: PlaceDataMapPresentationModel?) {
 
         showStart(
             startPlace = startPlace
         )
     }
-
-
-//_________________________________________________________________________________________________________________________
-// END OF METHODS FOR SEARCH TEXT FIELD
-//_________________________________________________________________________________________________________________________*/
-
-    /*Methods of map related operations
-    *
-     */
-//_________________________________________________________________________________________________________________________
-// BEGINNING OF METHODS FOR MAP
-//_________________________________________________________________________________________________________________________
-
 
     override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
 
@@ -504,10 +391,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         }
     }
 
-    /** [createMarkersOnMap]
-     * [createMarkersOnMap] creates and returns a list of the markers
-     *  *  based on the list of [com.example.travel_mate.ui.ViewModelMain.PlaceProcessed] classes passed as he functions parameter
-     */
     private fun createMarkersOnMap(places: List<PlaceDataMapPresentationModel>): List<Marker> {
 
         val markers: ArrayList<Marker> = ArrayList()
@@ -568,14 +451,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
         marker.setOnMarkerClickListener{ m, mapView ->
 
-            /** get the related object of the clicked marker
-            that is the uuid of the place associated with it
-            then calls an update on the current place in the ViewModel
-            [com.example.travel_mate.ui.ViewModelMain.getCurrentPlaceByUUID]
-            set the [com.google.android.material.bottomsheet.BottomSheetDialog]'s
-            state as "collapsed"
-             */
-
             val relatedPlace = m.relatedObject as String
 
             viewModelMain.setSelectedPlace(relatedPlace)
@@ -590,47 +465,19 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         return marker
     }
 
-    /** [showMapContent]
-     *  handles state update events for all data related to the map
-     *  - creates the marker list for [markerClusterer] with the places needed to be clustered
-     *  which are the ones that are not part of the current [com.example.domain.models.Route]
-     *  - create an other list for [Marker]'s that are part of the current [com.example.domain.models.Route]
-     *  these are not clustered and always visible on the map
-     *  - adds all the [Polyline]'s of the current [com.example.domain.models.Route]
-     *  to the map too
-     */
     private fun showMapContent(
         places: List<PlaceDataMapPresentationModel>
     ) {
 
-        //binding.map.overlays.remove(containedOverlay)
-        //binding.map.overlays.removeAll(containedMarkers)
-
-        //containedOverlay = FolderOverlay()
-
         unContainedMarkers.clear()
-        //containedMarkers.clear()
 
-        unContainedMarkers.addAll(createMarkersOnMap(places = places/*.filter { !it.containedByRoute }*/))
-        //containedMarkers.addAll(createMarkersOnMap(places = places.filter { it.containedByRoute }))
-
-        /*containedMarkers.forEach {
-            containedOverlay.add(it)
-        }
-        binding.map.overlays.add(containedOverlay)*/
+        unContainedMarkers.addAll(createMarkersOnMap(places = places))
 
         binding.map.invalidate()
 
         checkBoundingBox(unContainedMarkers)
     }
 
-    /** [checkBoundingBox]
-     *  check the bounding box of currently visible parts of the map
-     *  it has a parameter of a list of markers that are needed to be checked if inside
-     *  the current bounding box
-     *  in case they are - add them to the [markerClusterer] and show them on map
-     *  else - do not
-     */
     private fun checkBoundingBox(markers: List<Marker>) {
         setupMarkerClusterer(requireContext(),binding.map)
         val boundingBox = binding.map.boundingBox
@@ -644,13 +491,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         binding.map.invalidate()
     }
 
-    /** [setupMarkerClusterer]
-     * creates a new [markerClusterer] if it does not exists
-     * else - first remove it from the map's overlays then create a new instance
-     * with the icon, radius and zoom level at below which the clustering must happen
-     * (overlays cannot be removed from the clusterer therefor it must be reinitialized every time
-     * the data set changes)
-     */
     private fun setupMarkerClusterer(context: Context, map: MapView) {
         if (markerClusterer != null) {
             map.overlays.remove(markerClusterer)
@@ -664,11 +504,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         markerClusterer!!.setMaxClusteringZoomLevel(14)
     }
 
-    /** [showStart]
-     * handles the change of the current [com.example.model.Search]'s start place change
-     * when it changes the function creates a new marker for it
-     * then adds it to the map's overlays
-     */
     private fun showStart(startPlace: PlaceDataMapPresentationModel?) {
 
         if (startPlace != null) {
@@ -689,8 +524,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
                 requireContext().theme
             )
 
-            //binding.map.overlays.add(mapEventsOverlay)
-
             binding.map.invalidate()
         }
     }
@@ -703,9 +536,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
     }
 
-    /** [removeMapData]
-     * reset the UI elements related to searching when the start[com.example.model.Place] is changed
-     */
     private fun removeMapData(addMapEventsOverlay: Boolean){
 
         binding.map.overlays.removeAll(binding.map.overlays)
@@ -715,14 +545,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
         binding.map.invalidate()
     }
-//_________________________________________________________________________________________________________________________
-// END OF METHODS FOR MAP
-//_________________________________________________________________________________________________________________________
-
-//Methods related to internal fragments
-//_________________________________________________________________________________________________________________________
-// BEGINNING OF METHODS FOR INTERNAL FRAGMENTS
-//_________________________________________________________________________________________________________________________
 
     private fun replaceCurrentMainFragment(fragment: MapDataMapPresentationModel) {
 
@@ -801,63 +623,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
         ).build()
     }
 
-    /*private fun replaceWithSearchFragment() {
-        val tag = "SEARCH_FRAGMENT"
-
-        val fragment = childFragmentManager.findFragmentByTag(tag) ?: FragmentSearch.Companion.newInstance()
-
-        childFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace(binding.mainFragmentContainer.id, fragment, tag)
-        }
-    }
-
-    private fun replaceWithTripFragment() {
-        val tag = "TRIP_FRAGMENT"
-
-        val fragment = childFragmentManager.findFragmentByTag(tag) ?: FragmentInspectTrip.newInstance()
-
-        childFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace(binding.mainFragmentContainer.id, fragment, tag)
-        }
-    }
-
-    private fun replaceWithRouteFragment() {
-        val tag = "ROUTE_FRAGMENT"
-
-        val fragment = childFragmentManager.findFragmentByTag(tag) ?: FragmentRoute.Companion.newInstance()
-
-        childFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace(binding.mainFragmentContainer.id, fragment, tag)
-        }
-    }
-
-    private fun replaceWithNavigationFragment() {
-        val tag = "NAVIGATION_FRAGMENT"
-
-        val fragment = childFragmentManager.findFragmentByTag(tag) ?: FragmentNavigation.Companion.newInstance()
-
-        childFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace(binding.mainFragmentContainer.id, fragment, tag)
-        }
-    }
-
-    private fun replaceWithCustomPlaceFragment() {
-        val tag = "CUSTOM_PLACE_FRAGMENT"
-
-        val fragment =
-            childFragmentManager.findFragmentByTag(tag) ?: FragmentCustomPlace.newInstance()
-
-
-        childFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace(binding.mainFragmentContainer.id, fragment, tag)
-        }
-    }*/
-
     private fun initDetailsFragment() {
         val tag = "PLACE_DETAILS_FRAGMENT"
 
@@ -870,20 +635,10 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
         standardBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
     }
-//_________________________________________________________________________________________________________________________
-// END OF METHODS FOR INTERNAL FRAGMENTS
-//_________________________________________________________________________________________________________________________
-
 
     private fun handleRouteChange(
         route: List<Polyline>
     ) {
-
-        //TODO REMINDER: I GET A LIST OF POLYLINES
-        /*val routePolylines = when(route.getTransportMode()) {
-            "driving-car" -> route.getRouteNodes().mapNotNull { it.carPolyLine }
-            else -> route.getRouteNodes().mapNotNull { it.walkPolyLine }
-        }*/
 
         showRouteDataOnMap(
             routePolylines = route
@@ -916,33 +671,6 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
         binding.map.overlays.add(locationMarker)
     }
-
-    /*private fun showNavigationStart(navigationRouteNode: RouteNode, mode: String) {
-
-        val geo = when (mode) {
-            "foot-walking" -> GeoPoint(
-                navigationRouteNode.walkRouteSteps[0].coordinates.getLatitude(),
-                navigationRouteNode.walkRouteSteps[0].coordinates.getLongitude()
-            )
-
-            else -> GeoPoint(
-                navigationRouteNode.carRouteSteps[0].coordinates.getLatitude(),
-                navigationRouteNode.carRouteSteps[0].coordinates.getLongitude()
-            )
-        }
-        mapController.setCenter(geo)
-        locationMarker = Marker(binding.map)
-        locationMarker?.position = geo
-        locationMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-
-        binding.map.overlays.add(locationMarker)
-        locationMarker?.icon = ResourcesCompat.getDrawable(
-            requireContext().resources,
-            R.drawable.ic_instruction_depart,
-            requireContext().theme
-        )
-        binding.map.invalidate()
-    }*/
 
     private fun showRouteDataOnMap(
         routePolylines: List<Polyline>
@@ -989,21 +717,4 @@ class FragmentMain : Fragment(), MapEventsReceiver {
 
         }
     }
-
-    /*private fun showErrorMessage(errorType: ViewModelMain.ErrorGroup) {
-
-        val message = when(errorType) {
-            ViewModelMain.ErrorGroup.OTHER -> {R.string.error_other}
-            ViewModelMain.ErrorGroup.CUSTOM_PLACE -> {R.string.error_custom_place}
-            ViewModelMain.ErrorGroup.LOCATION -> {R.string.error_location}
-            ViewModelMain.ErrorGroup.INIT_SEARCH -> {R.string.error_show_search}
-            ViewModelMain.ErrorGroup.SEARCH_AUTO -> {R.string.error_autocomplete}
-            ViewModelMain.ErrorGroup.REVERSE_GEO_CODE -> {R.string.error_location}
-            ViewModelMain.ErrorGroup.SEARCH -> {R.string.error_search}
-            ViewModelMain.ErrorGroup.NAVIGATION -> {R.string.error_navigation}
-            else -> return
-        }
-
-        //Toast.makeText(this.context,message, Toast.LENGTH_LONG).show()
-    }*/
 }

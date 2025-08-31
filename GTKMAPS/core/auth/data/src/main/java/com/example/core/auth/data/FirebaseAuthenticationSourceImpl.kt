@@ -24,11 +24,6 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-/** [FirebaseAuthenticationSourceImpl]
- * implements the [com.example.travel_mate.data.FirebaseAuthenticationSource] interface
- * A class to manage every user related operations in [com.google.firebase.Firebase] database
- * and [com.google.firebase.auth.FirebaseAuth]
- */
 class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
 
     companion object {
@@ -54,9 +49,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
 
     override suspend fun getCurrentUserID(): String? = firebaseAuth.currentUser?.uid
 
-    /** [checkUser]
-     * checks if there is a user currently signed in
-     */
+
     override suspend fun checkUser(): FirebaseUser?{
 
         return withContext(Dispatchers.IO) {
@@ -66,10 +59,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
             return@withContext user
         }
     }
-    /** [createUser]
-     * signs the user up with the email address of [email] and password of [password]
-     * then calls the [createUserInDatabase] method
-     */
+
     override suspend fun createUser(email: String, password: String, username: String): FirebaseUser?
     = suspendCancellableCoroutine { continuation ->
         firebaseAuth.createUserWithEmailAndPassword(email, password)
@@ -96,22 +86,13 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
             }
     }
 
-    //todo check out the IdTokenListener
-    /** [signOut]
-     * sign the currently signed in user out
-     * returns a null [com.google.firebase.auth.FirebaseUser]
-     */
     override fun signOut(): FirebaseUser? {
 
         firebaseAuth.signOut()
 
         return null
     }
-    /** [signIn]
-     * sign the user in with the email address of [email] and
-     * password of [password]
-     * then return the [com.google.firebase.auth.FirebaseUser] of that user
-     */
+
     override suspend fun signIn(email: String, password: String): FirebaseUser?
     = suspendCancellableCoroutine { continuation ->
 
@@ -129,9 +110,6 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
         }
     }
 
-    /** [getUsernameByUID]
-     * return the username of the user whose uid is the same as the one given in parameter
-     */
     override suspend fun getUsernameByUID(uid: String): String?
             = suspendCancellableCoroutine { continuation ->
 
@@ -152,9 +130,6 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
 
     }
 
-    /** [findUserByUsername]
-     * returns the uid-username pair of a user whose username is passed as parameter
-     */
     override suspend fun findUserByUsername(username: String): Pair<String, String>?
     = suspendCancellableCoroutine { continuation ->
 
@@ -189,9 +164,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
             })
 
     }
-    /** [getUserPairsByUsernames]
-     * returns the uid-username pairs of users whose usernames are in the list passed as parameter
-     */
+
     override suspend fun getUserPairsByUsernames(usernames: List<String>): Map<String, String> {
 
         return withContext(Dispatchers.IO) {
@@ -206,9 +179,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
             results.filterNotNull().toMap()
         }
     }
-    /** [findUserByUidFromUsernameToUid]
-     *  returns the uid-username pair of a user whose uid is passed as parameter
-     */
+
     override suspend fun findUserByUidFromUsernameToUid(uid: String): Pair<String, String>? =
         suspendCancellableCoroutine { continuation ->
 
@@ -241,9 +212,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
                     }
                 })
         }
-    /** [getUserPairsByUIds]
-     * returns the uid-username pairs of users whose uid is in the list passed as parameter
-     */
+
     override suspend fun getUserPairsByUIds(uIds: List<String>): Map<String, String> {
         return coroutineScope {
 
@@ -257,10 +226,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
                 .toMap() // Convert List<Pair<String, String>?> to Map<String, String>
         }
     }
-    /** [setRecentContributors]
-     * updates the currently signed in user's [uid] contributor list with the
-     * uid-true pairs provided as parameter [users]
-     */
+
     override suspend fun setRecentContributors(uid: String, users: Map<String, Boolean>) {
 
         withContext(Dispatchers.IO) {
@@ -283,10 +249,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
                 }
         }
     }
-    /** [getRecentContributorsOfUser]
-     * Returns the UIDs of the recent contributors of the currently signed in user
-     * accepts the uid of the current user as parameter
-     */
+
     override suspend fun getRecentContributorsOfUser(uid: String): List<String>
     = suspendCancellableCoroutine { continuation ->
 
@@ -313,19 +276,14 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
 
             })
     }
-    /**
-     *
-     */
+
     private fun parseContributorsDataSnapshot(dataSnapshot: DataSnapshot): List<String> {
 
         return dataSnapshot.children.map { childSnapshot ->
             childSnapshot.key!!
         }
     }
-    /** [createUserInDatabase]
-     * creates a branch for the user in the [com.google.firebase.database.FirebaseDatabase] database
-     * and create a uid-username pair too
-     */
+
     suspend fun createUserInDatabase(uid: String, username: String) {
 
         withContext(Dispatchers.Default) {
@@ -363,9 +321,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
                 }
         }
     }
-    /** [resetPassword]
-     *  send a password reset Email to the given e-mail address in parameter
-     */
+
     override suspend fun resetPassword(email: String): Boolean
     = suspendCancellableCoroutine { continuation ->
 
@@ -380,9 +336,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
                 }
             }
     }
-    /** [changePassword]
-     *  change the password of the currently signed in user
-     */
+
     override suspend fun changePassword(currentPassword: String, newPassword: String): Boolean
     = suspendCancellableCoroutine { continuation ->
 
@@ -435,9 +389,6 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
         )
     }
 
-    /** [deleteUser]
-     * deletes the current user's account from [com.google.firebase.auth.FirebaseAuth]
-     */
     override suspend fun deleteUser(password: String): Boolean
     = suspendCancellableCoroutine { continuation ->
 
@@ -471,9 +422,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
                 }
         }
     }
-    /** [deleteUserData]
-     * delete the current user's data from the "users" branch of the [com.google.firebase.database.FirebaseDatabase] database
-     */
+
     override suspend fun deleteUserData(uid: String): Boolean
     = suspendCancellableCoroutine { continuation ->
 
@@ -491,9 +440,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
                 continuation.resume(true)
             }
     }
-    /** [deleteUserUsernameUIDPair]
-     * delete the reference of the current user's uid-username pair
-     */
+
     override suspend fun deleteUserUsernameUIDPair(uid: String): Boolean
             = suspendCancellableCoroutine { continuation ->
 
@@ -516,10 +463,7 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
                 }
             })
     }
-    /** [deleteUserUIDFromRecentContributors]
-     * delete all the reference of the current user's [uid] among other users' contributors
-     * calls the [getReferencesOfUIDFromContributors] to get the references
-     */
+
     override suspend fun deleteUserUIDFromRecentContributors(uid: String) {
 
         withContext(Dispatchers.IO) {
@@ -552,9 +496,6 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
         }
     }
 
-    /** [getReferencesOfUIDFromContributors]
-     * get the reference of each instance the [uid] of the current user appears among other users contributors
-     */
     suspend fun getReferencesOfUIDFromContributors(uid: String): List<DatabaseReference> =
         suspendCancellableCoroutine { continuation ->
             database.child(USER_DATABASE_REFERENCE_STRING)
@@ -573,5 +514,4 @@ class FirebaseAuthenticationSourceImpl: FirebaseAuthenticationSource {
                     }
                 })
         }
-
 }

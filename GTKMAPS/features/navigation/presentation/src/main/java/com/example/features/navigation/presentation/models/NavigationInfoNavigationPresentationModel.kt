@@ -5,9 +5,6 @@ sealed interface NavigationInfoNavigationPresentationModel {
     data object Default: NavigationInfoNavigationPresentationModel
 
     data class Navigation(
-        /*val startedFrom: Int,
-        val endOfRoute: Boolean,
-        val endOfNavigation: Boolean,*/
         val currentStepName: String?,
         val currentStepInstruction: String?,
         val currentStepInstructionType: Int,

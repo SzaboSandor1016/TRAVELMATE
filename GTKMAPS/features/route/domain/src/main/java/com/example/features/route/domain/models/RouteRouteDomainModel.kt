@@ -30,21 +30,9 @@ data class RouteRouteDomainModel(
     val fullCarDuration: Int get() = routeNodes.sumOf { it.carDuration }
     val fullCarDistance: Int get() = routeNodes.sumOf { it.carDistance }
 
-    /*private var head: RouteNodeRouteDomainModel? = null
-
-    fun setStartPlace(startPlace: PlaceRouteDomainModel){
-        this.startPlace = startPlace
-    }
-    fun getStartPlace(): PlaceRouteDomainModel?{
-        return this.startPlace
-    }*/
-
     fun setRouteNodes(routeNodes: ArrayList<RouteNodeRouteDomainModel>): RouteRouteDomainModel{
         return this.copy(routeNodes = routeNodes)
     }
-    /*fun getRouteNodes(): List<RouteNodeRouteDomainModel> {
-        return this.routeNodes
-    }*/
     fun addRouteNode(routeNode: RouteNodeRouteDomainModel): RouteRouteDomainModel{
         return this.copy(routeNodes = this.routeNodes.plus(routeNode))
     }
@@ -75,19 +63,6 @@ data class RouteRouteDomainModel(
             return this.copy(routeNodes = this.routeNodes.minus(node))
         return this
     }
-
-    /*fun updateRouteByPosition(route: Route, index1: Int, index2: Int): Route {
-
-
-
-    }
-*/
-    /** [updateRouteByUUID]
-     * update a [RouteNodeRouteDomainModel]'s [org.osmdroid.views.overlay.Polyline]'s
-     * with new ones
-     * Parameters: [uuid] of the node to be updated, and [newNode]
-     * which has the new [org.osmdroid.views.overlay.Polyline]s
-     */
     fun updateRouteByUUID(uuid: String, newNode: RouteNodeRouteDomainModel?): RouteRouteDomainModel {
 
         if (newNode==null)
@@ -115,10 +90,6 @@ data class RouteRouteDomainModel(
         )
     }
 
-    /** [move]
-     * move a [RouteNodeRouteDomainModel] to an other position
-     * specified in the parameters [position], [node]
-     */
     fun move(position: Int,node: RouteNodeRouteDomainModel): RouteRouteDomainModel {
 
         val mutableList = this.routeNodes.toMutableList()
@@ -133,13 +104,6 @@ data class RouteRouteDomainModel(
         )
     }
 
-    /** [replace]
-     *  replace a [RouteNodeRouteDomainModel] with an other [RouteNodeRouteDomainModel]
-     *  in the given [List] of [RouteNodeRouteDomainModel]s
-     *
-     *  Parameters: the [List], the target [RouteNodeRouteDomainModel]
-     *  and the replacement [RouteNodeRouteDomainModel]
-     */
     private fun replace(list: List<RouteNodeRouteDomainModel>, target: RouteNodeRouteDomainModel, replacement: RouteNodeRouteDomainModel): List<RouteNodeRouteDomainModel> {
 
         val mutableList = list.toMutableList()
@@ -153,9 +117,6 @@ data class RouteRouteDomainModel(
         return mutableList.toList()
     }
 
-    /** [getLastRouteNode]
-     * return the last [RouteNodeRouteDomainModel] in the list
-     */
     fun getLastRouteNode(): RouteNodeRouteDomainModel? {
 
         return this.routeNodes.last()
@@ -164,100 +125,4 @@ data class RouteRouteDomainModel(
     fun setTransportMode(transportMode: String): RouteRouteDomainModel{
         return this.copy(transportMode = transportMode)
     }
-    /*fun getTransportMode(): String{
-        return this.transportMode
-    }*/
-
-    /** [resetRoute]
-     * returns the copy of the [RouteRouteDomainModel]
-     * but delete every other [RouteNodeRouteDomainModel] than the first
-     */
-    fun resetRoute(): RouteRouteDomainModel {
-        return this.copy(
-            routeNodes = listOf(this.routeNodes.first()),
-            transportMode = "foot-walking"
-        )
-    }
-
-
-    /*fun getRouteHead(): RouteNode? {
-
-        return this.head
-    }
-
-    fun setRouteHead(routeNode: RouteNode?) {
-
-        this.head = routeNode
-    }*/
-
-    /*fun getLastNode(): RouteNode? {
-
-        if (this.head == null) return null
-
-        return this.head?.prev
-    }
-
-    fun insertNode(routeNode: RouteNode) {
-
-        if (this.head == null) {
-
-            routeNode.next = routeNode
-            routeNode.prev = routeNode
-            this.head = routeNode
-        } else {
-            val last = this.head!!.prev
-
-            last!!.next = routeNode
-            routeNode.prev = last
-
-            routeNode.next = this.head
-            this.head!!.prev = routeNode
-        }
-    }
-
-    fun deleteNodeByUUID(uuid: String): RouteNode? {
-
-        val toBeDeleted = findNodeByUUID(
-            uuid = uuid
-        )
-        if (toBeDeleted != null) {
-
-            if (toBeDeleted == this.head) {
-
-                if (this.head?.next == this.head) {
-
-                    this.head = null
-                } else {
-
-                    this.head = toBeDeleted.next
-
-                    this.head?.prev = toBeDeleted.prev
-
-                    toBeDeleted.prev?.next = this.head
-                }
-            } else {
-
-                toBeDeleted.next?.prev = toBeDeleted.prev
-
-                toBeDeleted.prev?.next = toBeDeleted.next
-            }
-        }
-
-        return toBeDeleted
-    }
-
-    fun findNodeByUUID(uuid: String): RouteNode? {
-        var current = this.head
-
-        if (current == null) return null // Empty list check
-
-        do {
-            if (current?.placeUUID == uuid) {
-                return current
-            }
-            current = current?.next
-        } while (current != this.head) // Stop when we've looped back
-
-        return null // UUID not found
-    }*/
 }

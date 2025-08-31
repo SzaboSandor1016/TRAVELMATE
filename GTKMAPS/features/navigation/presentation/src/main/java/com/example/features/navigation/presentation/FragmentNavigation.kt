@@ -126,8 +126,6 @@ class FragmentNavigation : Fragment() {
         binding.cancelNavigation.setOnClickListener { l ->
 
             viewModelNavigation.endNavigation()
-
-            //viewModelNavigation.returnToPrevContent()
         }
 
         binding.nextGoal.setOnClickListener { l ->
@@ -139,11 +137,6 @@ class FragmentNavigation : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         Log.d("FragmentLifecycle", "Parent/Child Fragment Destroyed")
-
-        //dismissDialog()
-
-        //binding.distanceGroup.clearOnButtonCheckedListeners()
-        //binding.transportGroup.clearOnButtonCheckedListeners()
 
         resources?.flushLayoutCache()
 
@@ -163,7 +156,6 @@ class FragmentNavigation : Fragment() {
         }
     }
 
-    //TODO HANDLE WHEN ARRIVED
     private fun handleNextGoalVisibility(hasNextDestination: Boolean) {
 
         when(hasNextDestination) {
@@ -179,8 +171,6 @@ class FragmentNavigation : Fragment() {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private fun showNavigationData(
-        //startedFrom: Int,
-        //showToNextDestination: Boolean,
         prevRouteStepName: String?,
         prevRouteStepInstruction: String?,
         prevRouteStepInstructionType: Int?,

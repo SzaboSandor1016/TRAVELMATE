@@ -71,29 +71,6 @@ class SearchViewModel(
         )
     }
 
-    /*private val _chipsState = MutableStateFlow(MainChipsState())
-    val chipsState: StateFlow<MainChipsState> = _chipsState.asStateFlow()*/
-
-    /*init {
-        viewModelScope.launch {
-
-            combine(
-                searchOptionsRepository.searchOptions,
-                _chipsState
-            ) {searchOptions, chipsState ->
-
-                chipsState.copy(
-                    transportMode = searchOptions.transportMode,
-                    distance = searchOptions.distance
-                )
-
-            }.collect { newState ->
-
-                _chipsState.value = newState
-            }
-        }
-    }*/
-
     val searchStartState: StateFlow<SearchStartStatePresentationModel> by lazy {
         getSearchStartUseCase().map { searchInfo ->
 
@@ -111,32 +88,9 @@ class SearchViewModel(
         )
     }
 
-    /*val searchOptionsState: StateFlow<SearchOptionsStatePresentationModel> by lazy {
-        getSearchOptionsUseCase().map { searchOptions ->
-
-            if (searchOptions.parametersSelected) {
-                SearchOptionsStatePresentationModel.Selected(searchOptions.toSearchOptionsPresentationModel())
-            } else {
-                SearchOptionsStatePresentationModel.None
-            }
-        }.flowOn(
-            Dispatchers.Main
-        ).stateIn(
-            viewModelScope,
-            SharingStarted.Companion.WhileSubscribed(5000),
-            SearchOptionsStatePresentationModel.None
-        )
-    }*/
-
     private val _searchAutocompleteState: MutableStateFlow<List<PlaceSearchPresentationModel>> =
         MutableStateFlow(emptyList())
     val searchAutocompleteState: StateFlow<List<PlaceSearchPresentationModel>> = _searchAutocompleteState.asStateFlow()
-    /*fun searchAutocomplete(expression: String): Flow<List<PlaceSearchPresentationModel>>
-        = searchAutocompleteUseCase(expression).map {
-            it.map { place ->
-                place.toPlaceSearchPresentationModel()
-            }
-        }*/
 
     init {
 
@@ -281,21 +235,11 @@ class SearchViewModel(
         }
     }
 
-
-
-
-
     fun setExtendedSearchVisible(isExtended: Boolean) {
         _chipsState.update {
             it.copy(extendedSearchVisible = isExtended)
         }
     }
-
-    /*fun setExtendedSearchSelected(isSelected: Boolean) {
-        _chipsState.update {
-            it.copy(extendedSearchSelected = isSelected)
-        }
-    }*/
 
     fun resetExtendedSearch() {
 

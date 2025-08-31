@@ -28,15 +28,7 @@ class FragmentUser : Fragment() {
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
 
-    //private var user: FirebaseUser? = null
-
-    //private lateinit var uiControllerUser: UiControllerFragmentUser
-
     private val viewModelUser: ViewModelUser by inject<ViewModelUser>()
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,21 +39,11 @@ class FragmentUser : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //this may cause some problems in that case check this first
-        //uiControllerUser = UiControllerFragmentUser(binding, requireContext(), this)
-
-
-        //viewModelUser.checkCurrentUser()
-        /**
-         * observe the [com.example.presentation.ViewModelUser]'s [com.example.presentation.ViewModelUser.userUiState] state flow
-         */
         viewLifecycleOwner.lifecycleScope.launch {
 
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 viewModelUser.userUiState.collect{
-
-                    //user = it.user
 
                     when(it) {
 
@@ -72,21 +54,6 @@ class FragmentUser : Fragment() {
                             setSignedInUIState(it.username)
                         }
                     }
-                    /*
-                    clear the ArrayList containing the trips
-                    then refresh it with a new data set read from the StateFlow
-                     */
-
-                    //TODO REMINDER: SEPARATED TO TRIPS AND USER
-                    /*
-                    trips.clear()
-
-                    trips.addAll(it.trips)
-
-                    tripsAdapter.notifyDataSetChanged()
-
-                    Log.d("trips3", tripsAdapter.itemCount.toString())*/
-
                 }
             }
         }
@@ -145,20 +112,7 @@ class FragmentUser : Fragment() {
             }
     }
 
-    fun updateUserFragment() {
-        //Todo update user fragment
-    }
-
-
-
-    /** [returnAndClear]
-     * clear the current [com.example.model.Trip]
-     * then return to the [com.example.features.map.presentation.fragment.FragmentMain]
-     */
     private fun returnAndClear() {
-
-        //TODO it WILL be necessary to reset, will figure out if actually here or not.
-        //viewModelUser.resetCurrentTrip()
 
         val request = NavDeepLinkRequest.Builder.fromUri(
             "android-app://app/main".toUri()
@@ -167,11 +121,6 @@ class FragmentUser : Fragment() {
         findNavController().navigate(request)
     }
 
-
-
-    /** [setSignedInUIState]
-     * update the ui if there is a user signed in
-     */
     private fun setSignedInUIState(username :String) {
 
         binding.signedIn.setText(username)

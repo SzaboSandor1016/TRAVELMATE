@@ -114,15 +114,6 @@ data class SelectedPlaceViewModel(
                         )
 
                     }
-
-                    /*isPlaceContainedByRouteUseCase(selected.uuid).collect { isContained ->
-
-                        _tripRouteState.update {
-                            it.copy(
-                                containedByRoute = isContained
-                            )
-                        }
-                    }*/
                 }.collectLatest { newState ->
 
                     _tripRouteState.value = newState

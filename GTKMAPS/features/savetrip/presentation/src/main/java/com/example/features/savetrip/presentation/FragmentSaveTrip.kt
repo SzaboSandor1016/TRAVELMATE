@@ -87,20 +87,12 @@ class FragmentSaveTrip : Fragment() {
 
     private var datePicker: MaterialDatePicker<androidx.core.util.Pair<Long, Long>>? = null
 
-/*    private var selectedContributors: Map<String,String> = emptyMap()
-    private var updatedFrom: String = ""
-
-    private var currentTrip: Trip? = null
-    private var currentTripIdentifier: TripRepositoryImpl.TripIdentifier? = null*/
-
     private val viewModelSaveTrip: SaveTripViewModel by inject<SaveTripViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            //this.trip = it.getParcelable(TRIP)!!
         }
-        //trip = viewModelMain.getCurrentTrip()
     }
 
     override fun onCreateView(
@@ -175,10 +167,6 @@ class FragmentSaveTrip : Fragment() {
             }
         })
 
-        /**
-         * observe the [com.example.presentation.ViewModelUser.currentTripUiState] [kotlinx.coroutines.flow.StateFlow]
-         * and call the functions that updates the UI based on the read values
-         */
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
@@ -191,24 +179,6 @@ class FragmentSaveTrip : Fragment() {
                         contributorsUsernames = it.contributorUsernames,
                         days = it.daysOfTrip
                     )
-
-
-                    //if (it.note != ) {
-
-                        //TODO This is also not necessary
-                        //currentTrip = it.currentTrip
-                        //currentTripIdentifier = it.tripIdentifier
-
-
-
-                        //Log.d("FirebaseDatabaseSaveTrip", it.currentTrip.uUID.toString())
-
-                        //Log.d("FragmentSaveTrip", it.currentTrip.title.toString())
-
-                        //updatedFrom = it.updatedFrom
-
-                        //Log.d("FragmentSaveTrip", updatedFrom.toString())
-                    //}
                 }
             }
         }
@@ -293,27 +263,6 @@ class FragmentSaveTrip : Fragment() {
                 binding.saveTitleLayout.error = resources.getString(R.string.required)
             }else {
 
-                /*viewModelUser.setCurrentTripStateTitle(
-                    title = title
-                )
-
-                viewModelUser.setCurrentTripStateNote(
-                    note = binding.saveNote.getText().toString().trim()
-                )
-
-                viewModelUser.setCurrentTripStateDate(
-                    date = binding.saveDate.getText().toString().trim()
-                )*/
-
-                /*currentTrip?.title = title
-                currentTripIdentifier?.title = title
-
-                currentTrip?.date = binding.saveDate.getText().toString().trim()
-                currentTrip?.note = binding.saveNote.getText().toString().trim()*/
-
-                /**
-                 * save the trip
-                 */
                 viewModelSaveTrip.saveTripWith(
                     title = title,
                     startDate = date,
@@ -322,7 +271,6 @@ class FragmentSaveTrip : Fragment() {
 
                 returnAndClear()
             }
-
         }
 
         binding.back.setOnClickListener { l ->
@@ -332,9 +280,7 @@ class FragmentSaveTrip : Fragment() {
 
         binding.addContributors.setOnClickListener { l ->
 
-            //TODO CHECK THIS ONE TOO
-            //if (viewModelSaveTrip.userUiState.value.username != null)
-                findNavController().navigate(com.example.features.savetrip.presentation.R.id.action_fragmentSaveTrip_to_fragmentSelectContributors)
+            findNavController().navigate(com.example.features.savetrip.presentation.R.id.action_fragmentSaveTrip_to_fragmentSelectContributors)
         }
 
         binding.hideAssignablePlaces.setOnClickListener { _ ->
@@ -351,22 +297,12 @@ class FragmentSaveTrip : Fragment() {
         clearDatePicker()
     }
 
-    fun updateSaveTrip(){
-
-        //this.trip = viewModelMain.getCurrentTrip()
-
-    }
-
-
     /** [returnAndClear]
      * reset the current trip in the [com.example.presentation.ViewModelUser]
      * and navigate back either to the [com.example.features.map.presentation.fragment.FragmentMain] or to the [com.example.travel_mate.ui.FragmentUser]
      * (it depends on where this fragment is initiated from)
      */
     private fun returnAndClear() {
-
-        //TODO This WON'T BE NECESSARY I THINK BUT DOUBLE CHECK LATER
-        //viewModelSaveTrip.resetCurrentTrip()
 
         val request = NavDeepLinkRequest.Builder.fromUri(
             "android-app://com.example.features/user".toUri()
@@ -395,30 +331,7 @@ class FragmentSaveTrip : Fragment() {
         setContributorsList( contributorsList = contributorsUsernames )
 
         updateDaysList(days = days)
-
-        //TODO create UI elements for showing days of trip
-
-        //if (trip!= null) {
-
-            /*Log.d("FirebaseDatabaseUID", tripIdentifier.uuid.toString())
-            Log.d("FirebaseDatabaseTitle", tripIdentifier.title.toString())
-            Log.d("FirebaseDatabaseLocation", tripIdentifier.location.toString())
-            Log.d("FirebaseDatabaseCreator", tripIdentifier.creatorUID.toString())
-            Log.d("FirebaseDatabaseContributorUID", tripIdentifier.contributors.map { it.key }.toString())
-*/
-            /*binding.saveTitle.setText(trip.title.toString().trim())
-
-            binding.saveDate.setText(trip.date.toString().trim())
-
-            binding.saveNote.setText(trip.note.toString().trim())
-
-            val usernames = tripIdentifier.contributors.values.toList().map { it.username.toString() }
-
-            setContributorsList( contributorsList = usernames )*/
-        //}
     }
-
-
 
     private fun showAssignablePlaces() {
 
@@ -479,10 +392,6 @@ class FragmentSaveTrip : Fragment() {
         }
 
     }
-
-    /** [setupDatePicker]
-     * set up a [MaterialDatePicker] dialog to select the day of the trip
-     */
     @OptIn(ExperimentalTime::class)
     private fun setupDatePicker(){
 
@@ -597,8 +506,6 @@ class FragmentSaveTrip : Fragment() {
     }
 
     operator fun LocalDate.rangeTo(other: LocalDate) = DateProgression(this, other)
-
-    //TODO maybe store the id and the dayOfMont in a separate field
 
     fun getMonthLabel(intValue: Int): String {
 

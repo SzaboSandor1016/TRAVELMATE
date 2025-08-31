@@ -10,8 +10,6 @@ class InitSaveBySelectingTripToUpdateUseCase(
 
     suspend operator fun invoke(tripData: SaveTripDataSaveTripDomainModel) {
 
-        //setSelectableContributorsUseCase()
-
         saveTripRepository.initSaveBySelectingTripToUpdate(
             tripData = tripData
         )

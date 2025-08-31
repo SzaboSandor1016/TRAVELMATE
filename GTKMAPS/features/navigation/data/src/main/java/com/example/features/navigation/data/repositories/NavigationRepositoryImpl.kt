@@ -37,25 +37,12 @@ import kotlin.math.sqrt
 
 class NavigationRepositoryImpl: NavigationRepository {
 
-    companion object {
-        private val DEFAULT_ROUTE_STEP = RouteStepNavigationDomainModel()
-    }
-
     private val routeNodeRepository: RouteNodeRepository by inject(RouteNodeRepository::class.java)
     private val locationRepository: LocationRepository by inject(LocationRepository::class.java)
 
     private val routeUtilityClass = RouteUtilityClass()
 
     private val _navigationState = MutableStateFlow(NavigationStateNavigationDomainModel())
-    //override val navigationState: StateFlow<NavigationDataStateModel> = _navigationState.asStateFlow()
-
-    /*private val _navigationInfoState = MutableStateFlow(
-        NavigationInfoStateModel(
-            currentRouteStep = DEFAULT_ROUTE_STEP,
-            prevRouteStep = DEFAULT_ROUTE_STEP
-        )
-    )*/
-    //override val navigationInfoState: StateFlow<NavigationInfoStateModel> = _navigationInfoState.asStateFlow()
 
     private val currentLocationState = MutableStateFlow(CurrentLocationStateNavigationDomainModel())
 
@@ -70,6 +57,8 @@ class NavigationRepositoryImpl: NavigationRepository {
     private val navigationProximityDistance = 0.040
     private val duration = 3000L
     private var extrapolationDuration: Long = 50 //ms
+
+    private val wrongDirectionMax = 4
     private var lastKnownLocation: CoordinatesNavigationDomainModel =
         CoordinatesNavigationDomainModel()
 
@@ -93,18 +82,6 @@ class NavigationRepositoryImpl: NavigationRepository {
 
         return _navigationState.value.parameters.currentNavigationRouteNodeIndex
     }
-
-    /*override fun setEndOfNavigation(isEnd: Boolean) {
-
-        _navigationState.update {
-
-            it.copy(
-                (it.navigation as NavigationNavigationDomainModel.Navigation).copy(
-                    endOfNavigation = isEnd
-                )
-            )
-        }
-    }*/
 
     override fun initNavigation(navigationMode: String, destinationCoordinates: List<CoordinatesNavigationDomainModel>) {
 
@@ -133,35 +110,7 @@ class NavigationRepositoryImpl: NavigationRepository {
 
         navigationScope.launch {
 
-            /*val goalLocationNode = RouteNodeNavigationDomainModel(
-                placeUUID = destination.placeUUID,
-                name = destination.placeUUID,
-                walkPolyLine = destination.walkPolyLine,
-                carPolyLine = destination.carPolyLine,
-                coordinate = destination.coordinate
-            )*/
 
-
-
-            /*_navigationState.update {
-
-                it.copy(
-                    navigation = NavigationNavigationDomainModel.Navigation(
-                        goal = nextRouteNodeCoordinates,
-                        currentNavigationRouteNodeIndex = 1,
-                        navigationMode = transportMode,
-                        //navigationGoal = goalLocationNode
-                    )
-                )
-            }
-
-            _navigationInfoState.update {
-
-                it.copy(
-                    startedFrom = 0,
-                    isStarted = true
-                )
-            }*/
 
             val nextRouteNodeCoordinates = _navigationState.value.parameters.destinationCoordinates[_navigationState.value.parameters.currentNavigationRouteNodeIndex]
 
@@ -170,72 +119,6 @@ class NavigationRepositoryImpl: NavigationRepository {
             )
         }
     }
-
-    /*override fun navigateToNextPlaceInRoute(nextRouteNodeCoordinates: CoordinatesNavigationDomainModel *//*nextRouteNode: RouteNodeNavigationDomainModel*//*) {
-
-        navigationScope.launch {
-
-            //Todo create a usesCase for navigation to next place in route and
-            // get the next destination there
-
-                _navigationState.update {
-                    it.copy(
-                        goal = nextRouteNodeCoordinates,
-                        currentNavigationRouteNodeIndex = it.currentNavigationRouteNodeIndex + 1,
-                        //navigationGoal = nextRouteNode
-                    )
-                }
-
-                _navigationInfoState.update {
-
-                    it.copy(
-                        startedFrom = 1,
-                        endOfRoute = false,
-                        isStarted = true
-                    )
-                }
-
-                startNavigationJobs(
-                    goalCoordinates = nextRouteNodeCoordinates
-                )
-        }
-    }*/
-
-    /*override fun navigateToCustomPlace(
-        latitude: Double,
-        longitude: Double,
-        transportMode: String
-    ) {
-
-        navigationScope.launch {
-
-            *//*val goalLocationNode = RouteNodeNavigationDomainModel(
-                coordinate = goalCoordinates
-            )*//*
-
-            _navigationState.update {
-                it.copy(
-                    goal = CoordinatesNavigationDomainModel(latitude, longitude),
-                    navigationMode = transportMode,
-                   // navigationGoal = goalLocationNode
-                )
-            }
-            _navigationInfoState.update {
-
-                it.copy(
-                    startedFrom = 1,
-                    isStarted = true
-                )
-            }
-
-            startNavigationJobs(
-                goalCoordinates = CoordinatesNavigationDomainModel(
-                    latitude = latitude,
-                    longitude = longitude
-                )
-            )
-        }
-    }*/
 
     fun startNavigationJob(goalCoordinates: CoordinatesNavigationDomainModel /*goalLocationNode: RouteNodeNavigationDomainModel*/) {
 
@@ -279,12 +162,6 @@ class NavigationRepositoryImpl: NavigationRepository {
             }
 
             lastKnownLocation = initialLocation
-
-            /*
-            update the last known location of the user
-            if the initial location is null then use the CoordinatesNavigationDomainModel of the start point
-            TODO That is actually the same that is an issue
-            */
             onNewMatchedLocation(initialLocation)
 
             //initial increase count, last distance ant the target segment index
@@ -294,14 +171,6 @@ class NavigationRepositoryImpl: NavigationRepository {
             var lastDistance = Double.MAX_VALUE
             var targetSegmentIndex = 1
 
-            /*//update the UI with the initial values
-            _navigationInfoState.update {
-
-                it.copy(
-                    endOfRoute = false,
-                    currentRouteStep = currentRoute[0]
-                )
-            }*/
             _navigationState.update {
 
                 it.copy(
@@ -315,7 +184,7 @@ class NavigationRepositoryImpl: NavigationRepository {
                 )
             }
 
-            //in every 'duration' milliseconds (currently 1500)
+            //in every 'duration' milliseconds
             while (isActive) {
 
                 //get the users current location
@@ -395,22 +264,11 @@ class NavigationRepositoryImpl: NavigationRepository {
                         Log.d("restartNavigation", "count reset")
                     } else if (targetSegmentIndex == currentRoute.size - 1 ) {
 
-                        //todo include this check in the use case for navigation
-
-                        /*_navigationInfoState.update {
-
-                            it.copy(
-                                endOfRoute = true
-                            )
-                        }*/
-
                         delay(duration*2)
 
                         val hasNext = _navigationState.value.parameters.currentNavigationRouteNodeIndex < _navigationState.value.parameters.destinationCoordinates.size - 1
 
-                        stopNavigationJobs(
-                            //removeData = false
-                        )
+                        stopNavigationJobs()
 
                         _navigationState.update {
 
@@ -455,13 +313,11 @@ class NavigationRepositoryImpl: NavigationRepository {
                     // set the last distance's value as the current distance
                     lastDistance = avgDistance
 
-                    //if the counter is at least 4
-                    if (distanceIncreaseCount >= 4) {
+                    //if the counter is at least 'wrongDirectionMax'
+                    if (distanceIncreaseCount >= wrongDirectionMax) {
 
                         restartNavigation(
-                            goalCoordinates,
-                            //goalLocationNode = goalLocationNode,
-                            //removeData = true
+                            goalCoordinates
                         )
                         Log.d("restartNavigation", "navigation restarted")
 
@@ -473,38 +329,14 @@ class NavigationRepositoryImpl: NavigationRepository {
 
     }
 
-    private fun stopNavigationJob(/*removeData: Boolean*/) {
+    private fun stopNavigationJob() {
 
         navigationJob?.cancel()
 
         locationRepository.stopLocationUpdates()
-
-        //if(removeData) {
-
-        /*_navigationState.update {
-
-            it.copy(
-                routePolyLines = null,
-                //navigationGoal = null,
-            )
-        }
-        _navigationInfoState.update {
-
-            it.copy(
-                isStarted = false,
-                //currentRouteStep = DEFAULT_ROUTE_STEP,
-                //prevRouteStep = DEFAULT_ROUTE_STEP
-            )
-        }
-        currentLocationState.update {
-            it.copy(
-                currentLocation = null
-            )
-        }*/
-        //}
     }
 
-    private fun startNavigationJobs(goalCoordinates: CoordinatesNavigationDomainModel /*goalLocationNode: RouteNodeNavigationDomainModel*/) {
+    private fun startNavigationJobs(goalCoordinates: CoordinatesNavigationDomainModel) {
 
         startNavigationJob(
             goalCoordinates = goalCoordinates
@@ -514,9 +346,9 @@ class NavigationRepositoryImpl: NavigationRepository {
 
     }
 
-    override fun stopNavigationJobs(/*removeData: Boolean*/) {
+    override fun stopNavigationJobs() {
 
-        stopNavigationJob(/*removeData*/).also {
+        stopNavigationJob().also {
             stopExtrapolationLoop()
         }
     }
@@ -535,8 +367,6 @@ class NavigationRepositoryImpl: NavigationRepository {
                     to = extrapolationEnd,
                     secondsAhead = secondsAhead
                 )
-
-                //Log.d("extrapolate", "${moved.latitude}, ${moved.longitude}")
 
                 currentLocationState.update {
 
@@ -557,9 +387,9 @@ class NavigationRepositoryImpl: NavigationRepository {
     }
 
 
-    private fun restartNavigation(goalCoordinates: CoordinatesNavigationDomainModel /*goalLocationNode: RouteNodeNavigationDomainModel*/, /*removeData: Boolean*/) {
+    private fun restartNavigation(goalCoordinates: CoordinatesNavigationDomainModel) {
 
-        stopNavigationJobs(/*removeData = removeData*/)
+        stopNavigationJobs()
 
         startNavigationJobs(
             goalCoordinates = goalCoordinates
@@ -595,7 +425,6 @@ class NavigationRepositoryImpl: NavigationRepository {
     }
 
     fun onNewMatchedLocation(newLocation: CoordinatesNavigationDomainModel) {
-        // Just update the interpolation values; coroutine will pick it up
 
         extrapolationStart = lastKnownLocation
         extrapolationEnd = newLocation
@@ -660,10 +489,10 @@ class NavigationRepositoryImpl: NavigationRepository {
             val dx = bx - ax
             val dy = by - ay
 
-            if (dx == 0.0 && dy == 0.0) return@withContext segmentC1 // a == b
+            if (dx == 0.0 && dy == 0.0) return@withContext segmentC1
 
             val t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)
-            val clampedT = t.coerceIn(0.0, 1.0) // ensures projection is on the segment
+            val clampedT = t.coerceIn(0.0, 1.0)
 
             val closestX = ax + clampedT * dx
             val closestY = ay + clampedT * dy
@@ -822,13 +651,6 @@ class NavigationRepositoryImpl: NavigationRepository {
 
             return@withContext upperPart / lowerPart
         }
-    }
-
-    fun findNextInstruction(currentRouteStepModelIndex: Int, RouteStepModels: List<RouteStepNavigationDomainModel>): Int {
-
-        val nextInstruction = RouteStepModels.first { RouteStepModels.indexOf(it) > currentRouteStepModelIndex && it.instruction != null }
-
-        return RouteStepModels.indexOf(nextInstruction)
     }
 
     override suspend fun updateCurrentLocation(): CoordinatesNavigationDomainModel?{

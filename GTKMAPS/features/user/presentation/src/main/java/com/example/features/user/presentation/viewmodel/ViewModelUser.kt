@@ -21,27 +21,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ViewModelUser (
-    //private val currentTripRepository: CurrentTripRepository,
     private val getCurrentUserDataUseCase: GetCurrentUserDataUseCase,
     private val userRepository: UserRepository,
     private val signUpUserUseCase: SignUpUserUseCase,
     private val signInUserUseCase: SignInUserUseCase,
     private val signOutUserUseCase: SignOutUserUseCase,
     private val deleteUserUseCase: DeleteUserUseCase,
-    /*private val setUserPermissionUseCase: SetUserPermissionUseCase,
-    private val getNewContributorDataUseCase: GetNewContributorDataUseCase,
-    private val saveTripUseCase: SaveTripUseCase,
-    private val deleteTripUseCase: DeleteTripUseCase,
-    private val getLocalTripsUseCase: GetLocalTripsUseCase,
-    private val getRemoteTripsUseCase: GetRemoteTripsUseCase,
-    private val getRemoteContributedTripsUseCase: GetRemoteContributedTripsUseCase,
-    private val getSelectedTripDataUseCase: GetSelectedTripDataUseCase,
-    private val getSelectableContributorsUseCase: GetSelectableContributorsUseCase,
-    private val saveTripWithUpdatedPlacesUseCase: SaveTripWithUpdatedPlacesUseCase,
-    private val setCurrentTripContributorsUseCase: SetCurrentTripContributorsUseCase*/
 ): ViewModel() {
-
-    //private val _userUiState = MutableStateFlow(UserStateUserPresentationModel())
     val userUiState: StateFlow<UserUserPresentationModel> by lazy {
         getCurrentUserDataUseCase().map {
             it.toUserPresentationModel()

@@ -32,7 +32,7 @@ class AdapterSuggestion(private val context: Context, private val resource: Int,
             listItemView = LayoutInflater.from(context).inflate(resource,parent,false)
         }
         val currentItem = getItem(position)
-        val textView = listItemView?.findViewById<TextView>(com.example.features.search.presentation.R.id.layout_autocomplete_content)
+        val textView = listItemView?.findViewById<TextView>(R.id.layout_autocomplete_content)
         textView?.text = currentItem
 
 

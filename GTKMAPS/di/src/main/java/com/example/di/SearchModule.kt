@@ -23,7 +23,6 @@ import com.example.features.search.domain.usecases.SetSearchMinuteUseCase
 import com.example.features.search.domain.usecases.SetSearchTransportModeUseCase
 import com.example.features.search.presentation.SearchViewModel
 import com.example.navigation.OuterNavigator
-import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module

@@ -9,12 +9,8 @@ class DeleteUserUseCase(
 
     suspend operator fun invoke(password: String) {
 
-        //
-
         userRepository.deleteCurrentUser(
             password = password
         )
-
-        //updateUserUseCase(UserUserDomainModel.SignedOut)
     }
 }

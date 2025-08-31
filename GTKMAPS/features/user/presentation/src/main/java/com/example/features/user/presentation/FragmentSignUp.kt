@@ -122,9 +122,4 @@ class FragmentSignUp : Fragment() {
 
         _binding = null
     }
-
-    fun updateSignUpFragment() {
-
-        //TODO update sign up fragment
-    }
 }

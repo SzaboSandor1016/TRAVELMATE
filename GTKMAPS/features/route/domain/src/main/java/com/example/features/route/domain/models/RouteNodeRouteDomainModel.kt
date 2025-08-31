@@ -18,8 +18,4 @@ data class RouteNodeRouteDomainModel(
     var carRouteSteps: List<RouteStepRouteDomainModel> = emptyList()
 ) {
 
-    /*
-        var prev: RouteNode? = null,
-        var next: RouteNode? = null,*/
-
 }

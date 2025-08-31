@@ -8,8 +8,7 @@ class SelectUnselectContributorUseCase(
 
     suspend operator fun invoke(uid: String, select: Boolean) {
         saveTripRepository.selectUnselectContributor(
-            uid= uid,
-            //select = select
+            uid= uid
         )
     }
 }

@@ -25,11 +25,6 @@ import org.koin.android.ext.android.inject
  * a [Fragment] to show important information about a [com.example.model.Place]
  */
 class FragmentPlaceDetails : Fragment(){
-    // TODO: Rename and change types of parameters
-    interface PlaceDetailsListener {
-        fun onTitleContainerMeasured(height: Int)
-    }
-
 
     private var _binding: FragmentPlaceDetailsBinding? = null
     private val binding get() = _binding!!
@@ -39,28 +34,13 @@ class FragmentPlaceDetails : Fragment(){
     private var isContainedByRoute: Boolean = false
     private var containerState: String = "collapsed"
 
-    //private lateinit var place: SelectedPlaceSelectedPlacePresentationModel
-    /*
-    private val viewModelDetails: ViewModelFragmentPlaceDetails by activityViewModels()*/
     private val viewModelSelectedPlace: SelectedPlaceViewModel by inject<SelectedPlaceViewModel>()
-
-    private var listener: PlaceDetailsListener? = null
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        listener = context as? PlaceDetailsListener
-    }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                /*place = it.getParcelable(PLACE)!!
-                isContainedByTrip = it.getBoolean(CONTAINED)*/
-            //}
         }
-        //viewModelMain = ViewModelProvider(this, MyApplication.factory)[ViewModelMain::class.java]
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,11 +48,6 @@ class FragmentPlaceDetails : Fragment(){
 
         Log.d("FragmentLifecycle", lifecycle.currentState.toString())
 
-        /**
-         * observe the [com.example.travel_mate.ui.ViewModelMain.placeState] [kotlinx.coroutines.flow.StateFlow]
-         * if there is a [com.example.model.Place] selected update its TextViews
-         * and Buttons based on the [com.example.model.Place]'s data
-         */
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
@@ -99,27 +74,6 @@ class FragmentPlaceDetails : Fragment(){
                                 }
                             }
                         }
-                        /*if (it.currentPlace != null) {
-
-                            place = it.currentPlace
-
-                            containerState = it.containerState
-
-                            isContainedByTrip = it.currentPlace.isContainedByTrip()
-                            isContainedByRoute = it.currentPlace.isContainedByRoute()
-
-                            setPlaceDetails(it.currentPlace)
-
-                            handleContainerState(
-                                state = it.containerState,
-                                isContainedByTrip = it.currentPlace.isContainedByTrip(),
-                                isContainedByRoute = it.currentPlace.isContainedByRoute()
-                            )
-
-                            view.post {
-                                handleContainerHeightMeasurement()
-                            }
-                        }*/
                     } finally {
                         Log.d("LifecycleTest", "Collecting stopped")
                     }
@@ -168,10 +122,6 @@ class FragmentPlaceDetails : Fragment(){
             }
         }
 
-        /**
-         * calls the [com.example.travel_mate.ui.ViewModelMain.addRemovePlaceToTrip] function
-         * updates the ui by calling the [handleContainerState] function
-         */
         binding.placeAddRemoveTrip.setOnClickListener{ l ->
 
             viewModelSelectedPlace.addPlaceToTrip()
@@ -182,10 +132,6 @@ class FragmentPlaceDetails : Fragment(){
                 isContainedByRoute = isContainedByRoute)
         }
 
-        /**
-         * calls the [com.example.travel_mate.ui.ViewModelMain.addRemovePlaceToRoute] function
-         * updates the ui by calling the [handleContainerState] function
-         */
         binding.placeAddRemoveRoute.setOnClickListener { l ->
 
             viewModelSelectedPlace.addPlaceToRoute()
@@ -230,22 +176,13 @@ class FragmentPlaceDetails : Fragment(){
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(/*place: ClassPlace, isPlaceContainedByTrip: Boolean*/) =
+        fun newInstance() =
             FragmentPlaceDetails().apply {
                 arguments = Bundle().apply {
-                    /*putParcelable(PLACE, place)
-                    putBoolean(CONTAINED, isPlaceContainedByTrip)*/
                 }
             }
     }
 
-    /** [handleContainerState]
-     * updates the UI based on the parameters passed
-     * [state] is the [com.google.android.material.bottomsheet.BottomSheetDialog]'s
-     * state that contains this fragment
-     * [isContainedByTrip] tells if the specific place is contained by the [com.example.model.Trip] currently being planned
-     * [isContainedByRoute] tells if the specific place is contained by the [com.example.domain.models.Route] currently being planned
-     */
     fun handleContainerState(state: String, isContainedByTrip: Boolean, isContainedByRoute: Boolean) {
 
         when (state) {
@@ -273,9 +210,6 @@ class FragmentPlaceDetails : Fragment(){
 
     }
 
-    /** [setPlaceDetails]
-     * update the UI elements containing the place' important information
-     */
     fun setPlaceDetails(place: SelectedPlaceSelectedPlacePresentationModel.Selected){
 
         binding.placeName.text = place.name
@@ -348,20 +282,6 @@ class FragmentPlaceDetails : Fragment(){
 
             binding.placeAddRemoveTrip.visibility = View.GONE
         }
-
-        /*if (it.prevContents.isNotEmpty()) {
-            
-            when(origin) {
-                
-                
-            }
-
-            if (it.currentContentId == ViewModelMain.MainContent.INSPECT
-                || it.prevContents.peek() == ViewModelMain.MainContent.INSPECT
-            ) {
-                
-            }
-        }*/
     }
 
     fun updateTripButtons(isContainedByTrip: Boolean, isOpen: Boolean) {

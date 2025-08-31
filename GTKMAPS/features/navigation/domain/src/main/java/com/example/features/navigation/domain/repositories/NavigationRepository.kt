@@ -8,10 +8,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface NavigationRepository {
 
-    //val navigationState: StateFlow<NavigationDataStateModel>
-
-    //val navigationInfoState: StateFlow<NavigationInfoStateModel>
-
     fun getNavigationInfo(): Flow<NavigationInfoNavigationDomainModel>
 
     fun getNavigationCurrentLocation(): Flow<CurrentLocationNavigationDomainModel>
@@ -20,25 +16,13 @@ interface NavigationRepository {
 
     fun getCurrentNodeIndex(): Int
 
-    //fun setEndOfNavigation(isEnd: Boolean)
-
     fun initNavigation(navigationMode: String, destinationCoordinates: List<CoordinatesNavigationDomainModel>)
 
     fun resetNavigation()
 
     fun navigateToPlaceInRoute()
 
-    //fun navigateToNextPlaceInRoute(nextRouteNodeCoordinates: CoordinatesNavigationDomainModel)
-
-    //fun navigateToCustomPlace(latitude: Double, longitude: Double, transportMode: String)
-
-    //fun stopNavigationJob(/*removeData: Boolean*/)
-
-    fun stopNavigationJobs(/*removeData: Boolean*/)
-
-    //fun stopExtrapolationLoop()
-
-    //fun restartNavigation(goalCoordinates: CoordinatesNavigationDomainModel/*, removeData: Boolean*/)
+    fun stopNavigationJobs()
 
     suspend fun updateCurrentLocation(): CoordinatesNavigationDomainModel?
 }

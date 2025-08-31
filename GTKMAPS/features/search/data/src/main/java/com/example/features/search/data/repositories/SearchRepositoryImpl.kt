@@ -26,12 +26,10 @@ class SearchRepositoryImpl: SearchRepository  {
 
     private val overpassRemoteDataSource: OverpassRemoteDataSource by inject(OverpassRemoteDataSource::class.java)
     private val photonRemoteDataSource: PhotonRemoteDataSource by inject(PhotonRemoteDataSource::class.java)
-    //private val routeRemoteDataSource: RouteRemoteDataSource by inject(RouteRemoteDataSource::class.java)
 
     private val searchCoroutineDispatcher: CoroutineDispatcher = Dispatchers.IO
 
     private val _searchState = MutableStateFlow(SearchStateSearchDomainModel())
-    //override val searchState: StateFlow<SearchStateSearchDomainModel> = _searchState.asStateFlow()
 
     override fun getSearchStartInfo(): Flow<SearchStartInfoSearchDomainModel> {
 
@@ -51,86 +49,6 @@ class SearchRepositoryImpl: SearchRepository  {
         return _searchState.toFlowOfSearchDataDomainModel()
     }
 
-    /*override suspend fun testInitNewSearch(
-        startPlace: PlaceSearchDomainModel,
-        places: List<PlaceSearchDomainModel>
-    ): SearchSearchDomainModel {
-        return withContext(searchCoroutineDispatcher) {
-
-            _searchState.update {
-
-                val search = SearchSearchDomainModel(
-                    startPlace = startPlace,
-                    places = places
-                )
-
-                it.copy(
-                    search = search
-                )
-            }
-
-            return@withContext _searchState.value.search
-        }
-    }
-
-    override suspend fun testRemovePlacesByCategory(category: String): SearchSearchDomainModel {
-
-        return withContext(searchCoroutineDispatcher) {
-
-            val newPlacesList = _searchState.value.search.getPlaces().filter { it.getCategory() != category }
-
-            val newSearch = _searchState.value.search.setPlaces(
-                newPlacesList
-            )
-
-            _searchState.update {
-
-                it.copy(
-
-                    search = newSearch
-                )
-            }
-
-            return@withContext _searchState.value.search
-        }
-    }
-
-    override suspend fun testResetSearchDetails(all: Boolean): SearchSearchDomainModel {
-
-        return withContext(searchCoroutineDispatcher) {
-
-            when(all) {
-
-                true -> _searchState.update {
-
-                    it.copy(
-                        search = SearchSearchDomainModel()
-                    )
-                }
-
-                false -> _searchState.update {
-
-                    it.copy(
-
-                        search = it.search.setStartPlace(
-                            startPlace = it.search.getStartPlace()
-                        )
-                    )
-                }
-            }
-            return@withContext _searchState.value.search
-        }
-    }*/
-
-
-    /*override suspend fun getSearchStartPlace(): PlaceSearchDomainModel? {
-        return _searchState.value.search.getStartPlace();
-    }
-
-    override suspend fun getSearchPlaces(): List<PlaceSearchDomainModel> {
-        return _searchState.value.search.getPlaces();
-    }*/
-
     override suspend fun searchAutocomplete(query: String): Flow<PhotonResponse> {
 
         return withContext(searchCoroutineDispatcher) {
@@ -140,72 +58,6 @@ class SearchRepositoryImpl: SearchRepository  {
             )
         }
     }
-
-    /*override suspend fun testFetchPlacesByDistance(
-        distance: Double,
-        content: String,
-        coordinates: CoordinatesSearchDomainModel,
-        category: String
-    ) : SearchSearchDomainModel {
-        return withContext(searchCoroutineDispatcher) {
-
-            val places = overpassRemoteDataSource.fetchPlacesByCoordinates(
-                content = content,
-                lat = coordinates.latitude.toString(),
-                lon = coordinates.longitude.toString(),
-                dist = distance,
-                category = category
-            )
-
-            _searchState.update {
-
-                it.copy(
-
-                    search = it.search.addPlaces(places)
-                )
-            }
-            return@withContext _searchState.value.search
-        }
-    }*/
-
-    /*override suspend fun testFetchPlacesByCity(
-        content: String,
-        city: String,
-        category: String
-    ): SearchSearchDomainModel {
-        return withContext(searchCoroutineDispatcher) {
-
-            val places = overpassRemoteDataSource.fetchPlacesByCity(
-                content = content,
-                city = city,
-                category = category
-            )
-
-            _searchState.update {
-
-                it.copy(
-
-                    search = it.search.addPlaces(places)
-                )
-            }
-            return@withContext _searchState.value.search
-        }
-    }*/
-
-    /*override suspend fun setSearchStartPlace(startPlace: PlaceSearchDomainModel) {
-
-        withContext(searchCoroutineDispatcher) {
-
-            _searchState.update {
-
-                it.copy(
-                    search = it.search.setStartPlace(
-                        startPlace = startPlace
-                    )
-                )
-            }
-        }
-    }*/
 
     override suspend fun  resetSearchDetails( all: Boolean) {
 
@@ -233,14 +85,6 @@ class SearchRepositoryImpl: SearchRepository  {
         }
     }
 
-    /*override suspend fun  resetRouteDetails() {
-
-        withContext(searchCoroutineDispatcher) {
-
-            clearPlacesAddedToRoute()
-        }
-    }*/
-
     override suspend fun initNewSearch(startPlace: PlaceSearchDomainModel) {
 
         withContext(searchCoroutineDispatcher) {
@@ -259,19 +103,6 @@ class SearchRepositoryImpl: SearchRepository  {
         }
     }
 
-    /*override suspend fun resetCurrentPlace(){
-
-        withContext(searchCoroutineDispatcher) {
-
-            _searchState.update {
-
-                it.copy(
-                    currentPlace = null
-                )
-            }
-        }
-    }*/
-
     override suspend fun getCurrentPlaceByUUID(uuid: String): PlaceSearchDomainModel?{
 
         return withContext(searchCoroutineDispatcher) {
@@ -282,87 +113,6 @@ class SearchRepositoryImpl: SearchRepository  {
     override fun getStartPlace(): PlaceSearchDomainModel? {
         return _searchState.value.search.getStartPlace()
     }
-
-    /*override fun getPlacesContainedByTrip(): List<PlaceSearchDomainModel> {
-
-        return _searchState.value.search.getPlacesContainedByTrip()
-    }*/
-
-    /*override suspend fun addRemovePlaceToTrip(uuid: String){
-
-        withContext(searchCoroutineDispatcher) {
-
-            _searchState.update {
-
-                it.copy(
-                    search = it.search.selectPlaceByUUIDForTrip(
-                        uuid = uuid
-                    ),
-                    currentPlace = it.currentPlace?.setContainedByTrip(
-                        contained = !it.currentPlace!!.isContainedByTrip()
-                    )
-                )
-            }
-        }
-    }
-
-    override suspend fun addRemovePlaceToRoute(uuid: String): PlaceSearchDomainModel {
-
-        return withContext(searchCoroutineDispatcher) {
-
-            val place = _searchState.value.search.getPlaceByUUID(
-                uuid = uuid
-            )!!
-
-
-            if (place.getUUID() == _searchState.value.currentPlace?.getUUID())
-                _searchState.update {
-
-                    it.copy(
-                        currentPlace = it.currentPlace?.setContainedByRoute(
-                            contained = !it.currentPlace!!.isContainedByRoute()
-                        )
-                    )
-                }
-
-            _searchState.update {
-
-                it.copy(
-                    search = it.search.selectPlaceByUUIDForRoute(
-                        uuid = uuid
-                    )
-                )
-            }
-            return@withContext place
-        }
-    }
-
-    override suspend fun clearPlacesAddedToTrip() {
-
-        withContext(searchCoroutineDispatcher) {
-
-            _searchState.update {
-
-                it.copy(
-                    search = it.search.clearPlacesAddedToTrip()
-                )
-            }
-        }
-
-    }
-    override suspend fun clearPlacesAddedToRoute() {
-
-        withContext(searchCoroutineDispatcher) {
-
-            _searchState.update {
-
-                it.copy(
-                    search = it.search.copy().clearPlacesAddedToRoute()
-                )
-            }
-        }
-
-    }*/
 
     override suspend fun removePlacesByCategory(category: String) {
 
@@ -378,7 +128,6 @@ class SearchRepositoryImpl: SearchRepository  {
             }
         }
     }
-
 
     override suspend fun fetchPlacesByCity(
         content: String,

@@ -388,25 +388,6 @@ class RouteRepositoryImpl constructor(
                 distanceMatrix = initialMatrix
             )
 
-            /*var newRoute = currentRoute.copy(
-                routeNodes = emptyList()
-            )
-
-            for(i in 1 until newRouteNodes.size-1) {
-
-                val plusRoute = routeNodeRepository.getRouteNode(
-                    stop1 = newRouteNodes[i-1].coordinate!!,
-                    stop2 =  newRouteNodes[i].coordinate!!
-                )
-
-                newRoute = newRoute.addRouteNode(
-                    routeNode = plusRoute.apply {
-                        placeUUID = newRouteNodes[i].placeUUID
-                        name = newRouteNodes[i].name
-                    }
-                )
-            }*/
-
             var newRoute = currentRoute.copy(
                 routeNodes = listOf(newRouteNodes[0])
             )

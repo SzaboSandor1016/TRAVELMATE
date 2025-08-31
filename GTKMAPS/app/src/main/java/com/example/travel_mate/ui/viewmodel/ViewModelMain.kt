@@ -68,7 +68,6 @@ class ViewModelMain(
     private val getFullSearchStartUseCase: GetFullSearchStartUseCase,
     private val getSearchOptionsUseCase: GetSearchOptionsUseCase,
     private val getNavigationCurrentLocationUseCase: GetNavigationCurrentLocationUseCase,
-    //private val getSelectedPlaceDataUseCase: GetSelectedPlaceDataUseCase,
     private val findPlaceByUUIDInSearchUseCase: FindPlaceByUUIDInSearchUseCase,
     private val findPlaceByUUIDInInspectUseCase: FindPlaceByUUIDInInspectUseCase,
     private val setSelectedPlaceUseCase: SetSelectedPlaceUseCase,
@@ -117,8 +116,6 @@ class ViewModelMain(
                 _mapState
             ) { searchStart, searchPlaces, searchOptions, customPlace, inspectedTrip, route, navigation, main ->
 
-                //TODO create an other, NavigationArrived data class in the map data sealed interface
-                // to handle the Arrived State
                 if (navigation is NavigationMapDataNavigationDomainModel.NavigationMapData) {
 
                     main.copy (
@@ -150,7 +147,7 @@ class ViewModelMain(
                             )
                         )
                 } else if(
-                    //TODO custom place sealed interface
+
                     customPlace is CustomPlaceMapDataCustomPlaceDomainModel.CustomPlace
                 ) {
                     main.copy(

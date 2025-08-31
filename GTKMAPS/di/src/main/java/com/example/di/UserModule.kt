@@ -19,12 +19,8 @@ val userModule = module {
         get(named("ApplicationScope"))
     ) }
 
-    //factory { UpdateUserUseCase(get()) }
-    //factory { CheckUserUseCase(get(), get()) }
     factory { DeleteUserUseCase(get()) }
     factory { GetCurrentUserDataUseCase(get()) }
-    //factory { GetNewContributorDataUseCase(get()) }
-    //factory { GetUsersByUIDsUseCase(get()) }
     factory { SignInUserUseCase(get()) }
     factory { SignOutUserUseCase(get()) }
     factory { SignUpUserUseCase(get()) }

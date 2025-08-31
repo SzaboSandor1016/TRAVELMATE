@@ -108,7 +108,6 @@ class FragmentSettings : Fragment() {
 
         val deletePassword: TextInputEditText = deleteView.findViewById(com.example.features.user.presentation.R.id.password)
 
-        // Building the Alert dialog using materialAlertDialogBuilder instance
         settingsMaterialAlertDialogBuilder.setView(deleteView)
             .setTitle(resources.getString(R.string.delete_account))
             .setPositiveButton(resources.getString(R.string.delete)) { dialog, _ ->
@@ -128,9 +127,6 @@ class FragmentSettings : Fragment() {
             .show()
     }
 
-    /** [launchPasswordChangeDialog]
-     *  create a dialog that allows changing the password of the user account
-     */
     private fun launchPasswordChangeDialog() {
 
         val currentPassword: TextInputEditText = changePasswordView.findViewById(com.example.features.user.presentation.R.id.current_password)
@@ -142,7 +138,6 @@ class FragmentSettings : Fragment() {
         val newPasswordAgain: TextInputEditText = changePasswordView.findViewById(com.example.features.user.presentation.R.id.change_password_again)
         val newPasswordAgainLayout: TextInputLayout = changePasswordView.findViewById(com.example.features.user.presentation.R.id.change_password_again_layout)
 
-        // Building the Alert dialog using materialAlertDialogBuilder instance
         settingsMaterialAlertDialogBuilder.setView(changePasswordView)
             .setTitle(resources.getString(R.string.change_password))
             .setPositiveButton(resources.getString(R.string.done)) { dialog, _ ->

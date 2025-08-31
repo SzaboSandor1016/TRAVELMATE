@@ -62,11 +62,9 @@ interface SaveTripRepository {
     suspend fun removeDayFromTrip(index: Int)
 
     suspend fun getNewContributorByUsername(username: String)
-    //suspend fun setSelectableContributors()
 
     suspend fun selectUnselectContributor(
-        uid: String,
-        //select: Boolean
+        uid: String
     )
 
     suspend fun setUserPermission(userUid: String,permissionToUpdate: Boolean)
@@ -74,11 +72,6 @@ interface SaveTripRepository {
     suspend fun addContributor(contributor: ContributorSaveTripDomainModel)
 
     suspend fun uploadTripToRemoteDatabase()
-
-    /*suspend fun uploadContributedTripToRemoteDatabase(
-        trip: TripTripsDomainModel.Remote,
-        tripIdentifier: TripIdentifierTripsDomainModel.Remote
-    )*/
 
     suspend fun uploadTripToLocalDatabase()
 }

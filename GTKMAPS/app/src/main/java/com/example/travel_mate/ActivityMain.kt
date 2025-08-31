@@ -27,21 +27,7 @@ private operator fun <E> Set<E>.get(i: Int): Any {
     return this[i]
 }
 
-// -------------------------------------------------------------------------------------------------------------
-// | MainActivity                                                                                              |
-// | Is for processing, and marking the coordinates coming from the MainActivity                               |
-// | Contains:                                                                                                 |
-// |                                                                                                           |
-// | code necessary for embedding the OSM                                                                      |
-// | menuBTN's OnClickListener                                                                                 |
-// | markCoordinatesOnMap                                                                                      |
-// -------------------------------------------------------------------------------------------------------------
-
-class ActivityMain : AppCompatActivity(), OuterNavigator/*, FragmentPlaceDetails.PlaceDetailsListener */{
-
-    interface BottomSheetStateListener {
-        fun onStateExpanded()
-    }
+class ActivityMain : AppCompatActivity(), OuterNavigator{
 
     //private static final String ARG_PARAM2 = "param2";
     // TODO: Rename and change types of parameters
@@ -138,89 +124,20 @@ class ActivityMain : AppCompatActivity(), OuterNavigator/*, FragmentPlaceDetails
                 PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
             )
         }
-
-        //fragmentsViewModel = ViewModelProvider(this).get(FragmentsViewModel::class.java)
-        //navigation = Navigation(Volley.newRequestQueue(applicationContext), applicationContext)
-        /*places = ArrayList()
-        isUpdatedFromActivity = false*/
-        //isNavi = false
-
-
-        /*selectedPlaces = ArrayList()
-        selectedCategories = ArrayList()
-        allCategories = ArrayList()
-        otherMarkers = ArrayList()
-        routePolys = ArrayList()
-        suggestedPlaces = ArrayList()
-        allMarkers = ArrayList()
-        routeMarkers = ArrayList()
-        nameMarkers = ArrayList()*/
-
-
-
-
-        /*mapAutoComplete = findViewById(R.id.map_autocomplete_text_field);
-        mapAutoComplete.setThreshold(2);*///mAuth = FirebaseAuth.getInstance()
-        /*appDatabase = databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "temporary_search"
-        ).build()
-        searchDao = appDatabase!!.searchDao()
-        fragmentsViewModel!!.searchDao = searchDao*/
-
     }
-
-    /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-            (data?.getParcelableExtra(ActivityUser.USER_ACTIVITY_BUNDLE_ID) as? ClassTrip)?.let {
-
-                val stringBuilder = StringBuilder()
-
-                stringBuilder.append(it.getStartPlace()?.getName() + " ")
-                stringBuilder.append(it.getStartPlace()?.getAddress()?.getFullAddress())
-
-                binding.placeSearch.setText(stringBuilder.toString())
-
-                viewModelMain.setupNewTrip(it)
-            }
-
-        }
-    }*/
 
     public override fun onResume() {
         super.onResume()
 
-        //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-
-        /*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
-        map.onResume();*/
-        //needed for compass, my location overlays, v6.0.0 and up
     }
 
     public override fun onPause() {
         super.onPause()
-        //binding.map.onPause() //needed for compass, my location overlays, v6.0.0 and up
+
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
-        /*viewModelMain.places.removeObservers(this)
-        viewModelMain.startPlace.removeObservers(this)
-        viewModelMain.transportMode.removeObservers(this)
-        viewModelMain.minute.removeObservers(this)*/
-        /*viewModelTrip.tripPlaces.removeObservers(this)
-        viewModelPhoton.autoCompleteResults.removeObservers(this)
-        viewModelPhoton.reverseGeoCodeResults.removeObservers(this)
-        viewModelOverpass.overpassResponse.removeObservers(this)
-        uiController?.clearDialog()
-        locationListener = null
-
-        resources!!.flushLayoutCache()*/
     }
 
     override fun navigateTo(destination: OuterDestination) {
@@ -230,6 +147,4 @@ class ActivityMain : AppCompatActivity(), OuterNavigator/*, FragmentPlaceDetails
             OuterDestination.User -> findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.action_FragmentMain_to_FragmentUser)
         }
     }
-
-
 }

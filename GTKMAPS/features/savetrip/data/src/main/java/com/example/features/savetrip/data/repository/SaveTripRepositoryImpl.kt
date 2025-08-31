@@ -389,7 +389,6 @@ class SaveTripRepositoryImpl(
             )
 
             if(user != null) {
-                //val contributors = userRepository.getCurrentContributors()
 
                 updateRecentContributorsOfUser(
                     newUserID = user.first
@@ -444,23 +443,8 @@ class SaveTripRepositoryImpl(
         }
     }
 
-    //TODO fix use-case
-    /*override suspend fun setSelectableContributors() {
-
-        withContext(saveTripCoroutineDispatcher) {
-
-            val uid = userID.last()
-
-            if (uid != null) {
-
-
-            }
-        }
-    }*/
-
     override suspend fun selectUnselectContributor(
-        uid: String,
-        //select: Boolean //TODo in theory this will not be needed
+        uid: String
     ) {
 
         val userParams: ContributorSaveTripDomainModel? = _selectableContributorsState.first().find { it.uid == uid }
@@ -519,15 +503,6 @@ class SaveTripRepositoryImpl(
                 selectUnselectContributor(
                     uid = userUid
                 )
-
-                /*val users = _selectableContributorsState.value.toMutableList()
-
-                val user = users.find { it.uid == userUid }!!
-                val index = users.indexOf(user)
-
-                users[index] = users[index].copy(
-                    selected = permissionToUpdate
-                )*/
             }
 
             val users = _saveTripState.value.saveTripData.selectedContributorsParameters.toMutableMap()
@@ -570,20 +545,6 @@ class SaveTripRepositoryImpl(
         }
     }
 
-
-    //todo reminder handle tripIdentifier null check in the UseCase
-    //when (tripIdentifier.creatorUID) {
-    //
-    //                null -> firebaseRemoteDataSource.uploadTrip(
-    //                    trip = trip,
-    //                    firebaseIdentifier = tripIdentifier.copy(
-    //                        creatorUID = firebaseUser!!.uid
-    //                    )
-    //                )
-    //else -> firebaseRemoteDataSource.uploadTrip(
-    //                    trip = trip,
-    //                    firebaseIdentifier = tripIdentifier
-    //                )
     override suspend fun uploadTripToRemoteDatabase() {
 
         withContext(saveTripCoroutineDispatcher) {
@@ -595,26 +556,8 @@ class SaveTripRepositoryImpl(
                 firebaseIdentifier = _saveTripState.value.saveTripData.toTripIdentifierRemoteEntityModel(creatorID = creatorUid)
             )
         }
-    }/*
+    }
 
-    override suspend fun uploadContributedTripToRemoteDatabase(
-        trip: TripTripsDomainModel.Remote,
-        tripIdentifier: TripIdentifierTripsDomainModel.Remote
-    ) {
-
-        withContext(saveTripCoroutineDispatcher) {
-
-            firebaseRemoteDataSource.uploadTrip(
-                trip = trip,
-                firebaseIdentifier = tripIdentifier
-            )
-        }
-    }*/
-
-    /** [uploadTripToLocalDatabase]
-     *  writes the list of [com.example.travel_mate.data.Trip]s passed as the [tripToUpload] parameter of this function to the device's
-     *  local storage
-     */
     override suspend fun uploadTripToLocalDatabase(){
 
         withContext(saveTripCoroutineDispatcher) {

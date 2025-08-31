@@ -1,20 +1,11 @@
-# PANNON-MAPS NOW TRAVELMATE
-Android application for planning road trips, free time activities, etc.
+# TRAVELMATE
 
-!!!!!!!!!!!!!!
-Important: On older devices setting the app into immersive mode is not possible with the solution used in this app
-If such error comes up while starting up please follow the instructions wrapped in 
-//TODO REMOVE FROM HERE
-//TODO TO HERE IF THE ERROR MENTIONED ABOVE OCCURS
-block
-in ActivityMain and ActivityLoading
+It is a mobile application for Android platform,
+that allows us to plan our road trips, holidays, weekends by
+providing features like finding nearby hospitality venues, accommodations, landmarks or museums etc. 
+to a start place selected by either finding it by searching based on its address, name or by using the device's current location.
 
-and please adjust the margin of 
-  android:id="@+id/main_title_layout"
-  in fragment_main.xml
-and the other elements on the top of the screen
-in every other one except fragment_place_details.xml
-for the sake of aesthetics
+We can also plan routes leading through multiple of the selected ones, view the estimated distance and duration needed to get to each of them.
+Also, it is possible to start a GPS based navigation that leads us to each of the seleced places in the route, handling those cases too when we miss a turn accidently.
 
-THANK YOU!
-!!!!!!!!!!!!!!!!
+The app also makes it possible to share our road trip plans with others and plan it together, or just simply keep it for yourself
